@@ -1,11 +1,13 @@
-﻿namespace eShop.Ordering.API.Application.IntegrationEvents;
+using MassTransit;
 
-public class OrderingIntegrationEventService(IEventBus eventBus,
+namespace eShop.Ordering.API.Application.IntegrationEvents;
+
+public class OrderingIntegrationEventService(IPublishEndpoint publishEndpoint,
     OrderingContext orderingContext,
     IIntegrationEventLogService integrationEventLogService,
     ILogger<OrderingIntegrationEventService> logger) : IOrderingIntegrationEventService
 {
-    private readonly IEventBus _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+    private readonly IPublishEndpoint _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
     private readonly OrderingContext _orderingContext = orderingContext ?? throw new ArgumentNullException(nameof(orderingContext));
     private readonly IIntegrationEventLogService _eventLogService = integrationEventLogService ?? throw new ArgumentNullException(nameof(integrationEventLogService));
     private readonly ILogger<OrderingIntegrationEventService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -21,7 +23,7 @@ public class OrderingIntegrationEventService(IEventBus eventBus,
             try
             {
                 await _eventLogService.MarkEventAsInProgressAsync(logEvt.EventId);
-                await _eventBus.PublishAsync(logEvt.IntegrationEvent);
+                await _publishEndpoint.Publish(logEvt.IntegrationEvent, logEvt.IntegrationEvent.GetType());
                 await _eventLogService.MarkEventAsPublishedAsync(logEvt.EventId);
             }
             catch (Exception ex)

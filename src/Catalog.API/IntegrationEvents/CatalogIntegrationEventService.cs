@@ -1,7 +1,9 @@
-﻿namespace eShop.Catalog.API.IntegrationEvents;
+using MassTransit;
+
+namespace eShop.Catalog.API.IntegrationEvents;
 
 public sealed class CatalogIntegrationEventService(ILogger<CatalogIntegrationEventService> logger,
-    IEventBus eventBus,
+    IPublishEndpoint publishEndpoint,
     CatalogContext catalogContext,
     IIntegrationEventLogService integrationEventLogService)
     : ICatalogIntegrationEventService, IDisposable
@@ -15,7 +17,7 @@ public sealed class CatalogIntegrationEventService(ILogger<CatalogIntegrationEve
             logger.LogInformation("Publishing integration event: {IntegrationEventId_published} - ({@IntegrationEvent})", evt.Id, evt);
 
             await integrationEventLogService.MarkEventAsInProgressAsync(evt.Id);
-            await eventBus.PublishAsync(evt);
+            await publishEndpoint.Publish(evt, evt.GetType());
             await integrationEventLogService.MarkEventAsPublishedAsync(evt.Id);
         }
         catch (Exception ex)

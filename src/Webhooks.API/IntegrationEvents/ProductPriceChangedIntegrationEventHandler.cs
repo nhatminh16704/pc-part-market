@@ -1,8 +1,11 @@
-﻿namespace Webhooks.API.IntegrationEvents;
+using MassTransit;
+using eShop.EventBus.Events;
 
-public class ProductPriceChangedIntegrationEventHandler : IIntegrationEventHandler<ProductPriceChangedIntegrationEvent>
+namespace Webhooks.API.IntegrationEvents;
+
+public class ProductPriceChangedIntegrationEventHandler : IConsumer<ProductPriceChangedIntegrationEvent>
 {
-    public Task Handle(ProductPriceChangedIntegrationEvent @event)
+    public Task Consume(ConsumeContext<ProductPriceChangedIntegrationEvent> context)
     {
         return Task.CompletedTask;
     }

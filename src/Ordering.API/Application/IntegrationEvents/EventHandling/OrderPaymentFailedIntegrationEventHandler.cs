@@ -1,12 +1,16 @@
-﻿namespace eShop.Ordering.API.Application.IntegrationEvents.EventHandling;
+using MassTransit;
+using eShop.EventBus.Events;
+
+namespace eShop.Ordering.API.Application.IntegrationEvents.EventHandling;
 
 public class OrderPaymentFailedIntegrationEventHandler(
     IMediator mediator,
     ILogger<OrderPaymentFailedIntegrationEventHandler> logger) :
-    IIntegrationEventHandler<OrderPaymentFailedIntegrationEvent>
+    IConsumer<OrderPaymentFailedIntegrationEvent>
 {
-    public async Task Handle(OrderPaymentFailedIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<OrderPaymentFailedIntegrationEvent> context)
     {
+        var @event = context.Message;
         logger.LogInformation("Handling integration event: {IntegrationEventId} - ({@IntegrationEvent})", @event.Id, @event);
 
         var command = new CancelOrderCommand(@event.OrderId);

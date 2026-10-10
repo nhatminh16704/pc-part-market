@@ -1,4 +1,4 @@
-﻿global using Asp.Versioning.Conventions;
+global using Asp.Versioning.Conventions;
 global using System.Runtime.Serialization;
 global using FluentValidation;
 global using MediatR;
@@ -12,8 +12,8 @@ global using eShop.Ordering.API.Application.Behaviors;
 global using eShop.Ordering.API.Application.Commands;
 global using eShop.Ordering.API.Application.IntegrationEvents;
 global using eShop.Ordering.API.Application.IntegrationEvents.EventHandling;
-global using eShop.Ordering.API.Application.IntegrationEvents.Events;
 global using eShop.Ordering.API.Application.Models;
+global using MassTransit;
 global using eShop.Ordering.API.Application.Queries;
 global using eShop.Ordering.API.Application.Validations;
 global using eShop.Ordering.API.Extensions;

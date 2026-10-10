@@ -1,3 +1,3 @@
-﻿namespace eShop.PaymentProcessor.IntegrationEvents.Events;
+namespace eShop.EventBus.Events;
 
 public record OrderPaymentSucceededIntegrationEvent(int OrderId) : IntegrationEvent;

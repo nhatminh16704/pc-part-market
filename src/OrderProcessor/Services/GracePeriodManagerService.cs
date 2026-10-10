@@ -1,13 +1,13 @@
-﻿using eShop.EventBus.Abstractions;
+using MassTransit;
 using Microsoft.Extensions.Options;
 using Npgsql;
-using eShop.OrderProcessor.Events;
+using eShop.EventBus.Events;
 
 namespace eShop.OrderProcessor.Services
 {
     public class GracePeriodManagerService(
         IOptions<BackgroundTaskOptions> options,
-        IEventBus eventBus,
+        IPublishEndpoint publishEndpoint,
         ILogger<GracePeriodManagerService> logger,
         NpgsqlDataSource dataSource) : BackgroundService
     {
@@ -56,7 +56,7 @@ namespace eShop.OrderProcessor.Services
 
                 logger.LogInformation("Publishing integration event: {IntegrationEventId} - ({@IntegrationEvent})", confirmGracePeriodEvent.Id, confirmGracePeriodEvent);
 
-                await eventBus.PublishAsync(confirmGracePeriodEvent);
+                await publishEndpoint.Publish(confirmGracePeriodEvent);
             }
         }
 

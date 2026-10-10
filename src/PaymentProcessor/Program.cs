@@ -1,9 +1,14 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+using eShop.PaymentProcessor.IntegrationEvents.EventHandling;
+using MassTransit;
+
+var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.AddRabbitMqEventBus("EventBus")
-    .AddSubscription<OrderStatusChangedToStockConfirmedIntegrationEvent, OrderStatusChangedToStockConfirmedIntegrationEventHandler>();
+builder.AddMassTransitEventBus("EventBus", x =>
+{
+    x.AddConsumer<OrderStatusChangedToStockConfirmedIntegrationEventHandler>();
+});
 
 builder.Services.AddOptions<PaymentOptions>()
     .BindConfiguration(nameof(PaymentOptions));

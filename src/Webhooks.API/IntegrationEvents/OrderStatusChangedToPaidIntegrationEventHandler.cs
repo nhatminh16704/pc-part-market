@@ -1,15 +1,19 @@
-﻿namespace Webhooks.API.IntegrationEvents;
+using MassTransit;
+using eShop.EventBus.Events;
+
+namespace Webhooks.API.IntegrationEvents;
 
 public class OrderStatusChangedToPaidIntegrationEventHandler(
     IWebhooksRetriever retriever, 
     IWebhooksSender sender, 
-    ILogger<OrderStatusChangedToShippedIntegrationEventHandler> logger) : IIntegrationEventHandler<OrderStatusChangedToPaidIntegrationEvent>
+    ILogger<OrderStatusChangedToPaidIntegrationEventHandler> logger) : IConsumer<OrderStatusChangedToPaidIntegrationEvent>
 {
-    public async Task Handle(OrderStatusChangedToPaidIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<OrderStatusChangedToPaidIntegrationEvent> context)
     {
+        var @event = context.Message;
         var subscriptions = await retriever.GetSubscriptionsOfType(WebhookType.OrderPaid);
 
-        logger.LogInformation("Received OrderStatusChangedToShippedIntegrationEvent and got {SubscriptionsCount} subscriptions to process", subscriptions.Count());
+        logger.LogInformation("Received OrderStatusChangedToPaidIntegrationEvent and got {SubscriptionsCount} subscriptions to process", subscriptions.Count());
 
         var whook = new WebhookData(WebhookType.OrderPaid, @event);
 

@@ -1,12 +1,16 @@
-﻿namespace Webhooks.API.IntegrationEvents;
+using MassTransit;
+using eShop.EventBus.Events;
+
+namespace Webhooks.API.IntegrationEvents;
 
 public class OrderStatusChangedToShippedIntegrationEventHandler(
     IWebhooksRetriever retriever,
     IWebhooksSender sender,
-    ILogger<OrderStatusChangedToShippedIntegrationEventHandler> logger) : IIntegrationEventHandler<OrderStatusChangedToShippedIntegrationEvent>
+    ILogger<OrderStatusChangedToShippedIntegrationEventHandler> logger) : IConsumer<OrderStatusChangedToShippedIntegrationEvent>
 {
-    public async Task Handle(OrderStatusChangedToShippedIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<OrderStatusChangedToShippedIntegrationEvent> context)
     {
+        var @event = context.Message;
         var subscriptions = await retriever.GetSubscriptionsOfType(WebhookType.OrderShipped);
 
         logger.LogInformation("Received OrderStatusChangedToShippedIntegrationEvent and got {SubscriptionCount} subscriptions to process", subscriptions.Count());

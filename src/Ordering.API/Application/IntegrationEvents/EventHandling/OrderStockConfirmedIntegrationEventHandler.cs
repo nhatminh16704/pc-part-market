@@ -1,12 +1,16 @@
-﻿namespace eShop.Ordering.API.Application.IntegrationEvents.EventHandling;
+using MassTransit;
+using eShop.EventBus.Events;
+
+namespace eShop.Ordering.API.Application.IntegrationEvents.EventHandling;
 
 public class OrderStockConfirmedIntegrationEventHandler(
     IMediator mediator,
     ILogger<OrderStockConfirmedIntegrationEventHandler> logger) :
-    IIntegrationEventHandler<OrderStockConfirmedIntegrationEvent>
+    IConsumer<OrderStockConfirmedIntegrationEvent>
 {
-    public async Task Handle(OrderStockConfirmedIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<OrderStockConfirmedIntegrationEvent> context)
     {
+        var @event = context.Message;
         logger.LogInformation("Handling integration event: {IntegrationEventId} - ({@IntegrationEvent})", @event.Id, @event);
 
         var command = new SetStockConfirmedOrderStatusCommand(@event.OrderId);

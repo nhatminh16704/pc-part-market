@@ -1,11 +1,18 @@
-﻿internal static class Extensions
+using MassTransit;
+using Webhooks.API.IntegrationEvents;
+
+internal static class Extensions
 {
     public static void AddApplicationServices(this IHostApplicationBuilder builder)
     {
         builder.AddDefaultAuthentication();
 
-        builder.AddRabbitMqEventBus("eventbus")
-               .AddEventBusSubscriptions();
+        builder.AddMassTransitEventBus("eventbus", x =>
+        {
+            x.AddConsumer<ProductPriceChangedIntegrationEventHandler>();
+            x.AddConsumer<OrderStatusChangedToShippedIntegrationEventHandler>();
+            x.AddConsumer<OrderStatusChangedToPaidIntegrationEventHandler>();
+        });
 
         builder.AddNpgsqlDbContext<WebhooksContext>("webhooksdb");
 
@@ -14,12 +21,5 @@
         builder.Services.AddTransient<IGrantUrlTesterService, GrantUrlTesterService>();
         builder.Services.AddTransient<IWebhooksRetriever, WebhooksRetriever>();
         builder.Services.AddTransient<IWebhooksSender, WebhooksSender>();
-    }
-
-    private static void AddEventBusSubscriptions(this IEventBusBuilder eventBus)
-    {
-        eventBus.AddSubscription<ProductPriceChangedIntegrationEvent, ProductPriceChangedIntegrationEventHandler>();
-        eventBus.AddSubscription<OrderStatusChangedToShippedIntegrationEvent, OrderStatusChangedToShippedIntegrationEventHandler>();
-        eventBus.AddSubscription<OrderStatusChangedToPaidIntegrationEvent, OrderStatusChangedToPaidIntegrationEventHandler>();
     }
 }

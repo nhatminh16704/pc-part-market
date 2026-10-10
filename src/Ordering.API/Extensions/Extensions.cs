@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 internal static class Extensions
 {
@@ -25,8 +25,14 @@ internal static class Extensions
 
         services.AddTransient<IOrderingIntegrationEventService, OrderingIntegrationEventService>();
 
-        builder.AddRabbitMqEventBus("eventbus")
-               .AddEventBusSubscriptions();
+        builder.AddMassTransitEventBus("eventbus", x =>
+        {
+            x.AddConsumer<GracePeriodConfirmedIntegrationEventHandler>();
+            x.AddConsumer<OrderStockConfirmedIntegrationEventHandler>();
+            x.AddConsumer<OrderStockRejectedIntegrationEventHandler>();
+            x.AddConsumer<OrderPaymentFailedIntegrationEventHandler>();
+            x.AddConsumer<OrderPaymentSucceededIntegrationEventHandler>();
+        });
 
         services.AddHttpContextAccessor();
         services.AddTransient<IIdentityService, IdentityService>();
@@ -48,14 +54,5 @@ internal static class Extensions
         services.AddScoped<IBuyerRepository, BuyerRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IRequestManager, RequestManager>();
-    }
-
-    private static void AddEventBusSubscriptions(this IEventBusBuilder eventBus)
-    {
-        eventBus.AddSubscription<GracePeriodConfirmedIntegrationEvent, GracePeriodConfirmedIntegrationEventHandler>();
-        eventBus.AddSubscription<OrderStockConfirmedIntegrationEvent, OrderStockConfirmedIntegrationEventHandler>();
-        eventBus.AddSubscription<OrderStockRejectedIntegrationEvent, OrderStockRejectedIntegrationEventHandler>();
-        eventBus.AddSubscription<OrderPaymentFailedIntegrationEvent, OrderPaymentFailedIntegrationEventHandler>();
-        eventBus.AddSubscription<OrderPaymentSucceededIntegrationEvent, OrderPaymentSucceededIntegrationEventHandler>();
     }
 }

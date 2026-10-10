@@ -1,10 +1,15 @@
-﻿namespace eShop.Ordering.API.Application.IntegrationEvents.EventHandling;
+using MassTransit;
+using eShop.EventBus.Events;
+
+namespace eShop.Ordering.API.Application.IntegrationEvents.EventHandling;
+
 public class OrderStockRejectedIntegrationEventHandler(
     IMediator mediator,
-    ILogger<OrderStockRejectedIntegrationEventHandler> logger) : IIntegrationEventHandler<OrderStockRejectedIntegrationEvent>
+    ILogger<OrderStockRejectedIntegrationEventHandler> logger) : IConsumer<OrderStockRejectedIntegrationEvent>
 {
-    public async Task Handle(OrderStockRejectedIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<OrderStockRejectedIntegrationEvent> context)
     {
+        var @event = context.Message;
         logger.LogInformation("Handling integration event: {IntegrationEventId} - ({@IntegrationEvent})", @event.Id, @event);
 
         var orderStockRejectedItems = @event.OrderStockItems

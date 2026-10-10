@@ -1,34 +1,26 @@
-﻿namespace eShop.PaymentProcessor.IntegrationEvents.EventHandling;
+using MassTransit;
+using Microsoft.Extensions.Options;
+using eShop.EventBus.Events;
+
+namespace eShop.PaymentProcessor.IntegrationEvents.EventHandling;
 
 public class OrderStatusChangedToStockConfirmedIntegrationEventHandler(
-    IEventBus eventBus,
+    IPublishEndpoint publishEndpoint,
     IOptionsMonitor<PaymentOptions> options,
     ILogger<OrderStatusChangedToStockConfirmedIntegrationEventHandler> logger) :
-    IIntegrationEventHandler<OrderStatusChangedToStockConfirmedIntegrationEvent>
+    IConsumer<OrderStatusChangedToStockConfirmedIntegrationEvent>
 {
-    public async Task Handle(OrderStatusChangedToStockConfirmedIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<OrderStatusChangedToStockConfirmedIntegrationEvent> context)
     {
+        var @event = context.Message;
         logger.LogInformation("Handling integration event: {IntegrationEventId} - ({@IntegrationEvent})", @event.Id, @event);
 
-        IntegrationEvent orderPaymentIntegrationEvent;
-
-        // Business feature comment:
-        // When OrderStatusChangedToStockConfirmed Integration Event is handled.
-        // Here we're simulating that we'd be performing the payment against any payment gateway
-        // Instead of a real payment we just take the env. var to simulate the payment 
-        // The payment can be successful or it can fail
-
-        if (options.CurrentValue.PaymentSucceeded)
-        {
-            orderPaymentIntegrationEvent = new OrderPaymentSucceededIntegrationEvent(@event.OrderId);
-        }
-        else
-        {
-            orderPaymentIntegrationEvent = new OrderPaymentFailedIntegrationEvent(@event.OrderId);
-        }
+        IntegrationEvent orderPaymentIntegrationEvent = options.CurrentValue.PaymentSucceeded
+            ? new OrderPaymentSucceededIntegrationEvent(@event.OrderId)
+            : new OrderPaymentFailedIntegrationEvent(@event.OrderId);
 
         logger.LogInformation("Publishing integration event: {IntegrationEventId} - ({@IntegrationEvent})", orderPaymentIntegrationEvent.Id, orderPaymentIntegrationEvent);
 
-        await eventBus.PublishAsync(orderPaymentIntegrationEvent);
+        await publishEndpoint.Publish(orderPaymentIntegrationEvent);
     }
 }

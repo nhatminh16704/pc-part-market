@@ -1,3 +1,3 @@
-﻿namespace eShop.Catalog.API.IntegrationEvents.Events;
+namespace eShop.EventBus.Events;
 
 public record OrderStockConfirmedIntegrationEvent(int OrderId) : IntegrationEvent;
