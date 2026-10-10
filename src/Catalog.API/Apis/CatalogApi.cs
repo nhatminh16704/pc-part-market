@@ -186,7 +186,7 @@ public static class CatalogApi
     // -------------------------------------------------------------
     // Product Handlers
     // -------------------------------------------------------------
-    public static async Task<Ok<PaginatedItems<Product>>> GetAllProducts(
+    public static async Task<Ok<ApiResponse<PaginatedItems<Product>>>> GetAllProducts(
         [AsParameters] PaginationRequest paginationRequest,
         CatalogContext context,
         [Description("Search term for product name")] string? name,
@@ -224,10 +224,11 @@ public static class CatalogApi
             .Take(pageSize)
             .ToListAsync();
 
-        return TypedResults.Ok(new PaginatedItems<Product>(pageIndex, pageSize, totalItems, itemsOnPage));
+        var pagedData = new PaginatedItems<Product>(pageIndex, pageSize, totalItems, itemsOnPage);
+        return TypedResults.Ok(ApiResponse<PaginatedItems<Product>>.Ok(pagedData));
     }
 
-    public static async Task<Results<Ok<Product>, NotFound>> GetProductById(
+    public static async Task<Results<Ok<ApiResponse<Product>>, NotFound<ApiResponse<Product>>>> GetProductById(
         CatalogContext context,
         Guid id)
     {
@@ -239,10 +240,12 @@ public static class CatalogApi
             .Include(p => p.Images)
             .SingleOrDefaultAsync(p => p.Id == id && p.Status != EntityStatus.Deleted);
 
-        return product is null ? TypedResults.NotFound() : TypedResults.Ok(product);
+        return product is null
+            ? TypedResults.NotFound(ApiResponse<Product>.Fail($"Product with id '{id}' was not found.", 404))
+            : TypedResults.Ok(ApiResponse<Product>.Ok(product));
     }
 
-    public static async Task<Results<Ok<Product>, NotFound>> GetProductBySeoName(
+    public static async Task<Results<Ok<ApiResponse<Product>>, NotFound<ApiResponse<Product>>>> GetProductBySeoName(
         CatalogContext context,
         string seoName)
     {
@@ -254,7 +257,9 @@ public static class CatalogApi
             .Include(p => p.Images)
             .SingleOrDefaultAsync(p => p.SeoName == seoName && p.Status != EntityStatus.Deleted);
 
-        return product is null ? TypedResults.NotFound() : TypedResults.Ok(product);
+        return product is null
+            ? TypedResults.NotFound(ApiResponse<Product>.Fail($"Product with seoName '{seoName}' was not found.", 404))
+            : TypedResults.Ok(ApiResponse<Product>.Ok(product));
     }
 
     public static async Task<Results<Created<Product>, BadRequest<string>>> CreateProduct(
@@ -423,7 +428,7 @@ public static class CatalogApi
     // -------------------------------------------------------------
     // Brand Handlers
     // -------------------------------------------------------------
-    public static async Task<Ok<List<Brand>>> GetAllBrands(CatalogContext context)
+    public static async Task<Ok<ApiResponse<List<Brand>>>> GetAllBrands(CatalogContext context)
     {
         var brands = await context.Brands
             .AsNoTracking()
@@ -431,16 +436,18 @@ public static class CatalogApi
             .OrderBy(b => b.Name)
             .ToListAsync();
 
-        return TypedResults.Ok(brands);
+        return TypedResults.Ok(ApiResponse<List<Brand>>.Ok(brands));
     }
 
-    public static async Task<Results<Ok<Brand>, NotFound>> GetBrandById(CatalogContext context, Guid id)
+    public static async Task<Results<Ok<ApiResponse<Brand>>, NotFound<ApiResponse<Brand>>>> GetBrandById(CatalogContext context, Guid id)
     {
         var brand = await context.Brands
             .AsNoTracking()
             .SingleOrDefaultAsync(b => b.Id == id && b.Status != EntityStatus.Deleted);
 
-        return brand is null ? TypedResults.NotFound() : TypedResults.Ok(brand);
+        return brand is null 
+            ? TypedResults.NotFound(ApiResponse<Brand>.Fail($"Brand with id '{id}' was not found.", 404)) 
+            : TypedResults.Ok(ApiResponse<Brand>.Ok(brand));
     }
 
     public static async Task<Results<Created<Brand>, BadRequest<string>>> CreateBrand(CatalogContext context, Brand brand)
@@ -495,7 +502,7 @@ public static class CatalogApi
     // -------------------------------------------------------------
     // Category Handlers
     // -------------------------------------------------------------
-    public static async Task<Ok<List<Category>>> GetAllCategories(CatalogContext context)
+    public static async Task<Ok<ApiResponse<List<Category>>>> GetAllCategories(CatalogContext context)
     {
         var categories = await context.Categories
             .AsNoTracking()
@@ -503,17 +510,19 @@ public static class CatalogApi
             .OrderBy(c => c.Name)
             .ToListAsync();
 
-        return TypedResults.Ok(categories);
+        return TypedResults.Ok(ApiResponse<List<Category>>.Ok(categories));
     }
 
-    public static async Task<Results<Ok<Category>, NotFound>> GetCategoryById(CatalogContext context, Guid id)
+    public static async Task<Results<Ok<ApiResponse<Category>>, NotFound<ApiResponse<Category>>>> GetCategoryById(CatalogContext context, Guid id)
     {
         var category = await context.Categories
             .AsNoTracking()
             .Include(c => c.SubCategories.Where(sc => sc.Status != EntityStatus.Deleted))
             .SingleOrDefaultAsync(c => c.Id == id && c.Status != EntityStatus.Deleted);
 
-        return category is null ? TypedResults.NotFound() : TypedResults.Ok(category);
+        return category is null 
+            ? TypedResults.NotFound(ApiResponse<Category>.Fail($"Category with id '{id}' was not found.", 404)) 
+            : TypedResults.Ok(ApiResponse<Category>.Ok(category));
     }
 
     public static async Task<Results<Created<Category>, BadRequest<string>>> CreateCategory(CatalogContext context, Category category)

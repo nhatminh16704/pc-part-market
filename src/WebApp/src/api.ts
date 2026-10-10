@@ -27,7 +27,8 @@ export const fetchProducts = async (
   try {
     const res = await fetch(`/api/catalog/products?${params.toString()}`);
     if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-    return await res.json();
+    const json = await res.json();
+    return json?.data ?? json;
   } catch (err) {
     console.warn('API error fetching products, using mock fallback:', err);
     return getFallbackProducts();
@@ -38,7 +39,8 @@ export const fetchBrands = async (): Promise<Brand[]> => {
   try {
     const res = await fetch('/api/catalog/brands');
     if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-    return await res.json();
+    const json = await res.json();
+    return json?.data ?? json;
   } catch (err) {
     console.warn('API error fetching brands, using mock fallback:', err);
     return [
@@ -56,7 +58,8 @@ export const fetchCategories = async (): Promise<Category[]> => {
   try {
     const res = await fetch('/api/catalog/categories');
     if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-    return await res.json();
+    const json = await res.json();
+    return json?.data ?? json;
   } catch (err) {
     console.warn('API error fetching categories, using mock fallback:', err);
     return [
