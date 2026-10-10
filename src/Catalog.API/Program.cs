@@ -14,6 +14,8 @@ var withApiVersioning = builder.Services.AddApiVersioning(options =>
 {
     // Include "api-supported-versions" and "api-deprecated-versions" headers in all responses
     options.ReportApiVersions = true;
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
 });
 
 builder.AddDefaultOpenApi(withApiVersioning);

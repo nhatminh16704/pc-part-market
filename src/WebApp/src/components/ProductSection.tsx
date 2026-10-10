@@ -9,9 +9,7 @@ import {
   X, 
   RotateCcw, 
   Tag, 
-  Layers, 
-  DollarSign, 
-  ArrowUpDown 
+  Layers 
 } from 'lucide-react';
 
 interface ProductSectionProps {
@@ -25,16 +23,12 @@ interface ProductSectionProps {
   selectedCategory: string | null;
   selectedBrand: string | null;
   searchQuery: string;
-  sortBy: string;
-  priceRange: string;
   onPageChange: (newPage: number) => void;
   onAddToCart: (product: Product) => void;
   onQuickView: (product: Product) => void;
   onSelectCategory: (id: string | null) => void;
   onSelectBrand: (id: string | null) => void;
   onSearchChange: (query: string) => void;
-  onSortChange: (sort: string) => void;
-  onPriceRangeChange: (range: string) => void;
   onClearAllFilters: () => void;
 }
 
@@ -49,16 +43,12 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   selectedCategory,
   selectedBrand,
   searchQuery,
-  sortBy,
-  priceRange,
   onPageChange,
   onAddToCart,
   onQuickView,
   onSelectCategory,
   onSelectBrand,
   onSearchChange,
-  onSortChange,
-  onPriceRangeChange,
   onClearAllFilters,
 }) => {
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
@@ -66,24 +56,10 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   const currentCategoryObj = categories.find((c) => c.id === selectedCategory);
   const currentBrandObj = brands.find((b) => b.id === selectedBrand);
 
-  const getPriceRangeLabel = (range: string) => {
-    switch (range) {
-      case 'under_10':
-        return 'Dưới 10 triệu';
-      case '10_25':
-        return '10 - 25 triệu';
-      case 'over_25':
-        return 'Trên 25 triệu';
-      default:
-        return '';
-    }
-  };
-
   const hasActiveFilters = Boolean(
     searchQuery.trim() ||
     selectedCategory ||
-    selectedBrand ||
-    (priceRange && priceRange !== 'all')
+    selectedBrand
   );
 
   return (
@@ -112,7 +88,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           </h2>
           <div style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '4px' }}>
             Hiển thị <strong style={{ color: 'var(--accent-sky)' }}>{products.length}</strong> trên{' '}
-            <strong style={{ color: '#fff' }}>{totalCount}</strong> sản phẩm sẵn sàng xuất kho
+            <strong style={{ color: '#fff' }}>{totalCount}</strong> sản phẩm từ API
           </div>
         </div>
 
@@ -131,12 +107,12 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             }}
           >
             <RotateCcw size={14} />
-            <span>Xóa tất cả lọc</span>
+            <span>Xóa bộ lọc</span>
           </button>
         )}
       </div>
 
-      {/* Advanced Filter Toolbar */}
+      {/* Filter Toolbar (Applied directly to API GET /api/catalog/products) */}
       <div
         className="glass-panel"
         style={{
@@ -151,12 +127,12 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
             gap: '12px',
             alignItems: 'center',
           }}
         >
-          {/* Search by Name */}
+          {/* API Filter 1: name */}
           <div
             style={{
               position: 'relative',
@@ -177,7 +153,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Tìm theo tên sản phẩm..."
+              placeholder="Tìm theo tên sản phẩm (API: ?name=)..."
               style={{
                 width: '100%',
                 padding: '10px 36px 10px 36px',
@@ -211,7 +187,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             )}
           </div>
 
-          {/* Category Filter */}
+          {/* API Filter 2: categoryId */}
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <Layers
               size={15}
@@ -237,7 +213,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                 cursor: 'pointer',
               }}
             >
-              <option value="">Tất cả danh mục ({categories.length})</option>
+              <option value="">Tất cả danh mục (API: ?categoryId=)</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -246,7 +222,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             </select>
           </div>
 
-          {/* Brand Filter */}
+          {/* API Filter 3: brandId */}
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <Tag
               size={15}
@@ -272,78 +248,12 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                 cursor: 'pointer',
               }}
             >
-              <option value="">Tất cả thương hiệu ({brands.length})</option>
+              <option value="">Tất cả thương hiệu (API: ?brandId=)</option>
               {brands.map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.name}
                 </option>
               ))}
-            </select>
-          </div>
-
-          {/* Price Range Filter */}
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <DollarSign
-              size={15}
-              style={{
-                position: 'absolute',
-                left: '12px',
-                color: 'var(--text-dim)',
-                pointerEvents: 'none',
-              }}
-            />
-            <select
-              value={priceRange}
-              onChange={(e) => onPriceRangeChange(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 14px 10px 36px',
-                background: 'rgba(15, 23, 42, 0.9)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-                color: priceRange !== 'all' ? 'var(--accent-sky)' : 'var(--text-main)',
-                fontSize: '0.88rem',
-                outline: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="all">Tất cả mức giá</option>
-              <option value="under_10">Dưới 10.000.000₫</option>
-              <option value="10_25">10.000.000₫ - 25.000.000₫</option>
-              <option value="over_25">Trên 25.000.000₫</option>
-            </select>
-          </div>
-
-          {/* Sort By */}
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <ArrowUpDown
-              size={15}
-              style={{
-                position: 'absolute',
-                left: '12px',
-                color: 'var(--text-dim)',
-                pointerEvents: 'none',
-              }}
-            />
-            <select
-              value={sortBy}
-              onChange={(e) => onSortChange(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 14px 10px 36px',
-                background: 'rgba(15, 23, 42, 0.9)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-                color: 'var(--text-main)',
-                fontSize: '0.88rem',
-                outline: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="name_asc">Tên: A → Z</option>
-              <option value="name_desc">Tên: Z → A</option>
-              <option value="price_asc">Giá: Thấp đến cao</option>
-              <option value="price_desc">Giá: Cao đến thấp</option>
             </select>
           </div>
         </div>
@@ -369,7 +279,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                 gap: '4px',
               }}
             >
-              <SlidersHorizontal size={13} /> Đang lọc theo:
+              <SlidersHorizontal size={13} /> Đang lọc API theo:
             </span>
 
             {searchQuery.trim() && (
@@ -386,7 +296,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                   fontSize: '0.82rem',
                 }}
               >
-                Từ khóa: &quot;{searchQuery.trim()}&quot;
+                Tên: &quot;{searchQuery.trim()}&quot;
                 <X
                   size={12}
                   style={{ cursor: 'pointer' }}
@@ -440,29 +350,6 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                 />
               </span>
             )}
-
-            {priceRange !== 'all' && (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: 'rgba(245, 158, 11, 0.12)',
-                  border: '1px solid rgba(245, 158, 11, 0.3)',
-                  color: 'var(--accent-amber)',
-                  padding: '4px 10px',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '0.82rem',
-                }}
-              >
-                Giá: {getPriceRangeLabel(priceRange)}
-                <X
-                  size={12}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => onPriceRangeChange('all')}
-                />
-              </span>
-            )}
           </div>
         )}
       </div>
@@ -504,9 +391,9 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           }}
         >
           <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
-          <h3 style={{ fontSize: '1.4rem', marginBottom: '8px' }}>Không tìm thấy linh kiện phù hợp</h3>
+          <h3 style={{ fontSize: '1.4rem', marginBottom: '8px' }}>Không tìm thấy sản phẩm nào</h3>
           <p style={{ color: 'var(--text-muted)', maxWidth: '440px', margin: '0 auto 20px' }}>
-            Không có sản phẩm nào khớp với các bộ lọc bạn đã chọn. Hãy thử tìm từ khóa khác hoặc xóa bớt tiêu chí lọc.
+            Không có kết quả trả về từ API Catalog với bộ lọc hiện tại.
           </p>
           {hasActiveFilters && (
             <button
@@ -515,7 +402,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
               <RotateCcw size={16} />
-              <span>Xóa toàn bộ bộ lọc</span>
+              <span>Xóa bộ lọc</span>
             </button>
           )}
         </div>
@@ -538,7 +425,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
         </div>
       )}
 
-      {/* Pagination Controls */}
+      {/* Pagination Controls (API: pageIndex, pageSize) */}
       {totalPages > 1 && (
         <div
           style={{
