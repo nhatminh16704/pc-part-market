@@ -1,12 +1,3 @@
-export interface ApiResponse<T> {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  traceId?: string;
-  data: T;
-  errors?: string[];
-}
-
 export interface ProductImage {
   id: string;
   imageUrl: string;
@@ -60,15 +51,10 @@ export interface Product {
   images: ProductImage[];
 }
 
-export interface PaginatedItems<T> {
-  pageIndex: number;
-  pageSize: number;
-  count: number;
-  data: T[];
-}
-
-export interface CartItem {
-  product: Product;
-  variant?: ProductVariant;
-  quantity: number;
+export interface ProductFilterParams {
+  pageIndex?: number;
+  pageSize?: number;
+  name?: string;
+  brandId?: string;
+  categoryId?: string;
 }

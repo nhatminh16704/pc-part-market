@@ -27,7 +27,6 @@ interface ProductSectionProps {
   selectedBrand: string | null;
   searchQuery: string;
   onPageChange: (newPage: number) => void;
-  onAddToCart: (product: Product) => void;
   onQuickView: (product: Product) => void;
   onSelectCategory: (id: string | null) => void;
   onSelectBrand: (id: string | null) => void;
@@ -47,7 +46,6 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   selectedBrand,
   searchQuery,
   onPageChange,
-  onAddToCart,
   onQuickView,
   onSelectCategory,
   onSelectBrand,
@@ -92,10 +90,10 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
         )}
       </div>
 
-      {/* Filter Toolbar with Tailwind & Shadcn UI */}
+      {/* Filter Toolbar */}
       <div className="glass-panel p-4 md:p-5 rounded-2xl mb-6 flex flex-col gap-3.5">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-center">
-          {/* API Filter 1: name */}
+          {/* Search by Name */}
           <div className="relative flex items-center">
             <Search className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
             <Input
@@ -115,7 +113,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             )}
           </div>
 
-          {/* API Filter 2: categoryId */}
+          {/* Category Select */}
           <div className="relative flex items-center">
             <Layers className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
             <select
@@ -132,7 +130,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             </select>
           </div>
 
-          {/* API Filter 3: brandId */}
+          {/* Brand Select */}
           <div className="relative flex items-center">
             <Tag className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
             <select
@@ -229,7 +227,6 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             <ProductCard
               key={prod.id}
               product={prod}
-              onAddToCart={onAddToCart}
               onQuickView={onQuickView}
             />
           ))}

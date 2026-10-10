@@ -1,21 +1,22 @@
 import React from 'react';
 import { ShoppingCart, Eye } from 'lucide-react';
 import type { Product } from '../types';
-import { formatVND } from '../api';
+import { formatVND } from '@/utils/format';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useCartStore } from '@/stores';
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: (product: Product) => void;
   onQuickView: (product: Product) => void;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
-  onAddToCart,
   onQuickView,
 }) => {
+  const addItem = useCartStore((state) => state.addItem);
+
   const mainImage = product.images?.find((img) => img.isMain)?.imageUrl 
     || product.images?.[0]?.imageUrl
     || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=600&q=80';
@@ -122,7 +123,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               className="h-9 w-9 rounded-lg p-0"
               onClick={(e) => {
                 e.stopPropagation();
-                onAddToCart(product);
+                addItem(product);
               }}
               title="Thêm vào giỏ hàng"
             >

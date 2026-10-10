@@ -1,76 +1,85 @@
-import { apiClient } from './apiClient';
-import type { Brand, Category, PaginatedItems, Product } from './types';
+import { apiClient } from '@/services/apiClient';
+import type { PaginatedItems } from '@/types/api';
+import type { Brand, Category, Product, ProductFilterParams } from '../types';
 
-export const formatVND = (amount: number): string => {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
+export const catalogApi = {
+  getProducts: async (params: ProductFilterParams = {}): Promise<PaginatedItems<Product>> => {
+    const queryParams: Record<string, string | number> = {
+      pageIndex: params.pageIndex ?? 0,
+      pageSize: params.pageSize ?? 12,
+    };
 
-export const fetchProducts = async (
-  pageIndex: number = 0,
-  pageSize: number = 12,
-  name?: string,
-  brandId?: string,
-  categoryId?: string
-): Promise<PaginatedItems<Product>> => {
-  const params: Record<string, string | number> = {
-    pageIndex,
-    pageSize,
-  };
+    if (params.name?.trim()) queryParams.name = params.name.trim();
+    if (params.brandId) queryParams.brandId = params.brandId;
+    if (params.categoryId) queryParams.categoryId = params.categoryId;
 
-  if (name?.trim()) params.name = name.trim();
-  if (brandId) params.brandId = brandId;
-  if (categoryId) params.categoryId = categoryId;
+    try {
+      const res = await apiClient.get('/catalog/products', { params: queryParams });
+      const json = res.data;
+      return json?.data ?? json;
+    } catch (err) {
+      console.warn('API error fetching products, using mock fallback:', err);
+      return getFallbackProducts();
+    }
+  },
 
-  try {
-    const res = await apiClient.get('/catalog/products', { params });
-    const json = res.data;
-    return json?.data ?? json;
-  } catch (err) {
-    console.warn('Axios error fetching products, using mock fallback:', err);
-    return getFallbackProducts();
-  }
-};
+  getProductById: async (id: string): Promise<Product | null> => {
+    try {
+      const res = await apiClient.get(`/catalog/products/${id}`);
+      return res.data?.data ?? res.data;
+    } catch (err) {
+      console.warn(`API error fetching product ${id}:`, err);
+      return null;
+    }
+  },
 
-export const fetchBrands = async (): Promise<Brand[]> => {
-  try {
-    const res = await apiClient.get('/catalog/brands');
-    const json = res.data;
-    return json?.data ?? json;
-  } catch (err) {
-    console.warn('Axios error fetching brands, using mock fallback:', err);
-    return [
-      { id: '1', name: 'ASUS', seoName: 'asus', status: 'ACTIVE' },
-      { id: '2', name: 'MSI', seoName: 'msi', status: 'ACTIVE' },
-      { id: '3', name: 'GIGABYTE', seoName: 'gigabyte', status: 'ACTIVE' },
-      { id: '4', name: 'Colorful', seoName: 'colorful', status: 'ACTIVE' },
-      { id: '5', name: 'ZOTAC', seoName: 'zotac', status: 'ACTIVE' },
-      { id: '6', name: 'ASRock', seoName: 'asrock', status: 'ACTIVE' },
-    ];
-  }
-};
+  getProductBySeoName: async (seoName: string): Promise<Product | null> => {
+    try {
+      const res = await apiClient.get(`/catalog/products/seo/${seoName}`);
+      return res.data?.data ?? res.data;
+    } catch (err) {
+      console.warn(`API error fetching product seo ${seoName}:`, err);
+      return null;
+    }
+  },
 
-export const fetchCategories = async (): Promise<Category[]> => {
-  try {
-    const res = await apiClient.get('/catalog/categories');
-    const json = res.data;
-    return json?.data ?? json;
-  } catch (err) {
-    console.warn('Axios error fetching categories, using mock fallback:', err);
-    return [
-      { id: 'cat-vga', name: 'Card Màn Hình (VGA)', seoName: 'vga', status: 'ACTIVE' },
-      { id: 'cat-cpu', name: 'Bộ Vi Xử Lý (CPU)', seoName: 'cpu', status: 'ACTIVE' },
-      { id: 'cat-main', name: 'Bo Mạch Chủ (Mainboard)', seoName: 'mainboard', status: 'ACTIVE' },
-      { id: 'cat-ram', name: 'Bộ Nhớ Trong (RAM)', seoName: 'ram', status: 'ACTIVE' },
-      { id: 'cat-ssd', name: 'Ổ Cứng SSD/HDD', seoName: 'storage', status: 'ACTIVE' },
-      { id: 'cat-psu', name: 'Nguồn Máy Tính (PSU)', seoName: 'psu', status: 'ACTIVE' },
-      { id: 'cat-cooler', name: 'Tản Nhiệt PC', seoName: 'cooling', status: 'ACTIVE' },
-      { id: 'cat-case', name: 'Vỏ Case', seoName: 'case', status: 'ACTIVE' },
-    ];
-  }
+  getBrands: async (): Promise<Brand[]> => {
+    try {
+      const res = await apiClient.get('/catalog/brands');
+      const json = res.data;
+      return json?.data ?? json;
+    } catch (err) {
+      console.warn('API error fetching brands, using mock fallback:', err);
+      return [
+        { id: '1', name: 'ASUS', seoName: 'asus', status: 'ACTIVE' },
+        { id: '2', name: 'MSI', seoName: 'msi', status: 'ACTIVE' },
+        { id: '3', name: 'GIGABYTE', seoName: 'gigabyte', status: 'ACTIVE' },
+        { id: '4', name: 'Colorful', seoName: 'colorful', status: 'ACTIVE' },
+        { id: '5', name: 'ZOTAC', seoName: 'zotac', status: 'ACTIVE' },
+        { id: '6', name: 'ASRock', seoName: 'asrock', status: 'ACTIVE' },
+      ];
+    }
+  },
+
+  getCategories: async (): Promise<Category[]> => {
+    try {
+      const res = await apiClient.get('/catalog/categories');
+      const json = res.data;
+      return json?.data ?? json;
+    } catch (err) {
+      console.warn('API error fetching categories, using mock fallback:', err);
+      return [
+        { id: 'cat-vga', name: 'Card Màn Hình (VGA)', seoName: 'vga', status: 'ACTIVE' },
+        { id: 'cat-cpu', name: 'Bộ Vi Xử Lý (CPU)', seoName: 'cpu', status: 'ACTIVE' },
+        { id: 'cat-main', name: 'Bo Mạch Chủ (Mainboard)', seoName: 'mainboard', status: 'ACTIVE' },
+        { id: 'cat-ram', name: 'Bộ Nhớ Trong (RAM)', seoName: 'ram', status: 'ACTIVE' },
+        { id: 'cat-ssd', name: 'Ổ Cứng SSD/HDD', seoName: 'storage', status: 'ACTIVE' },
+        { id: 'cat-psu', name: 'Nguồn Máy Tính (PSU)', seoName: 'psu', status: 'ACTIVE' },
+        { id: 'cat-cooler', name: 'Tản Nhiệt PC', seoName: 'cooling', status: 'ACTIVE' },
+        { id: 'cat-case', name: 'Vỏ Case', seoName: 'case', status: 'ACTIVE' },
+      ];
+    }
+  },
 };
 
 const getFallbackProducts = (): PaginatedItems<Product> => {

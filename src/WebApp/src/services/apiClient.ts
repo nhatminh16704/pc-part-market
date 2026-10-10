@@ -8,7 +8,6 @@ export const apiClient = axios.create({
   timeout: 10000,
 });
 
-// Response Interceptor for Error Handling & Trace Correlation
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
