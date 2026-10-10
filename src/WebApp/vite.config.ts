@@ -5,10 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 5173
 const apiTarget = process.env.services__gateway__http__0 || 
-                  process.env.services__gateway__https__0 || 
-                  process.env.services__catalog_api__http__0 || 
-                  process.env.services__catalog_api__https__0 || 
-                  'http://localhost:5222'
+                  process.env.services__gateway__https__0
 
 export default defineConfig({
   plugins: [tailwindcss(), react()],
