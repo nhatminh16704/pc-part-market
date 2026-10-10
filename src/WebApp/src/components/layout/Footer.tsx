@@ -1,6 +1,8 @@
 import React from 'react';
 import { Cpu, Mail, Phone, MapPin, Heart } from 'lucide-react';
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export const Footer: React.FC = () => {
   return (
     <footer className="mt-20 bg-[#05070d] border-t border-white/10 px-6 pt-14 pb-8">
@@ -86,7 +88,7 @@ export const Footer: React.FC = () => {
 
       <div className="border-t border-white/5 pt-6 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-[1360px] mx-auto">
         <div>
-          © {new Date().getFullYear()} PC Part Market Vietnam. Bản quyền thuộc về eShop Project.
+          © {CURRENT_YEAR} PC Part Market Vietnam. Bản quyền thuộc về eShop Project.
         </div>
         <div className="flex items-center gap-1">
           Thiết kế với <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> dành cho cộng đồng PC Master Race

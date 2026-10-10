@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/stores';
 
+import { parseSpecifications } from '@/utils/specs';
+
 interface ProductCardProps {
   product: Product;
   onQuickView: (product: Product) => void;
@@ -76,18 +78,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </h4>
 
           {/* Key Specs chips */}
-          {product.specifications && Object.keys(product.specifications).length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-3">
-              {Object.entries(product.specifications).slice(0, 2).map(([key, val]) => (
-                <span
-                  key={key}
-                  className="bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-[11px] text-slate-300"
-                >
-                  {key}: <strong className="text-white">{String(val)}</strong>
-                </span>
-              ))}
-            </div>
-          )}
+          {(() => {
+            const specs = parseSpecifications(product.specifications);
+            const entries = Object.entries(specs);
+            if (entries.length === 0) return null;
+            return (
+              <div className="flex flex-wrap gap-1 mb-3">
+                {entries.slice(0, 2).map(([key, val]) => (
+                  <Badge
+                    key={key}
+                    variant="outline"
+                    className="bg-white/5 border-white/10 text-[10px] font-normal px-1.5 py-0.5 rounded text-slate-300"
+                  >
+                    <span className="text-slate-400 mr-1">{key}:</span>
+                    <strong className="text-white font-medium">{val}</strong>
+                  </Badge>
+                ))}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Footer: Price & Add To Cart */}

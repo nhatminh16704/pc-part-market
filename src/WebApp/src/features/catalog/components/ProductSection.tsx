@@ -104,12 +104,14 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               className="pl-9 pr-8 bg-white/5 border-white/10 text-white placeholder:text-slate-400 focus-visible:ring-sky-400 focus-visible:border-sky-400"
             />
             {searchQuery && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => onSearchChange('')}
-                className="absolute right-2.5 text-slate-400 hover:text-white transition-colors"
+                className="absolute right-1.5 h-7 w-7 text-slate-400 hover:text-white"
               >
-                <X className="w-4 h-4" />
-              </button>
+                <X className="w-3.5 h-3.5" />
+              </Button>
             )}
           </div>
 

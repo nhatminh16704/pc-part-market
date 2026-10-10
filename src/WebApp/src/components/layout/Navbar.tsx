@@ -4,6 +4,7 @@ import { Cpu, Search, ShoppingCart, User, Sparkles } from 'lucide-react';
 import { useCartStore } from '@/stores';
 import { useCategories } from '@/features/catalog/hooks/useCatalog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface NavbarProps {
   searchQuery?: string;
@@ -68,27 +69,33 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Actions */}
         <div className="flex items-center gap-3">
           {/* Cart Button */}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={openCart}
-            className="relative flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-200 hover:text-white hover:bg-white/10 transition-colors"
+            className="relative gap-2 bg-white/5 border-white/10 hover:bg-white/10 text-slate-200"
           >
-            <ShoppingCart className="w-5 h-5 text-sky-400" />
+            <ShoppingCart className="w-4 h-4 text-sky-400" />
             <span className="text-xs font-semibold hidden sm:inline">Giỏ hàng</span>
             {totalCount > 0 && (
               <Badge variant="default" className="bg-sky-500 text-white text-[11px] h-5 min-w-[20px] px-1.5 flex items-center justify-center">
                 {totalCount}
               </Badge>
             )}
-          </button>
+          </Button>
 
           {/* User Account Link */}
-          <Link
-            to="/login"
-            className="flex items-center gap-2 p-2 sm:px-3 sm:py-2 rounded-xl bg-white/5 border border-white/10 text-slate-200 hover:text-white hover:bg-white/10 transition-colors"
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="gap-2 bg-white/5 border-white/10 hover:bg-white/10 text-slate-200"
           >
-            <User className="w-5 h-5 text-purple-400" />
-            <span className="text-xs font-semibold hidden sm:inline">Tài khoản</span>
-          </Link>
+            <Link to="/login">
+              <User className="w-4 h-4 text-purple-400" />
+              <span className="text-xs font-semibold hidden sm:inline">Tài khoản</span>
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -96,28 +103,32 @@ export const Navbar: React.FC<NavbarProps> = ({
       {categories.length > 0 && (
         <div className="border-t border-white/5 bg-slate-900/40 px-6 py-2">
           <div className="max-w-[1360px] mx-auto flex items-center gap-2 overflow-x-auto scrollbar-none text-xs">
-            <button
+            <Button
+              variant={selectedCategory === null ? 'default' : 'ghost'}
+              size="sm"
               onClick={() => onSelectCategory?.(null)}
-              className={`px-3 py-1 rounded-full whitespace-nowrap transition-colors ${
+              className={`h-7 px-3 text-xs rounded-full whitespace-nowrap transition-colors ${
                 selectedCategory === null
-                  ? 'bg-sky-500/20 text-sky-300 font-bold border border-sky-500/40'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-sky-500 text-white font-bold'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
               Tất cả linh kiện
-            </button>
+            </Button>
             {categories.slice(0, 10).map((cat) => (
-              <button
+              <Button
                 key={cat.id}
+                variant={selectedCategory === cat.id ? 'default' : 'ghost'}
+                size="sm"
                 onClick={() => onSelectCategory?.(cat.id)}
-                className={`px-3 py-1 rounded-full whitespace-nowrap transition-colors ${
+                className={`h-7 px-3 text-xs rounded-full whitespace-nowrap transition-colors ${
                   selectedCategory === cat.id
-                    ? 'bg-sky-500/20 text-sky-300 font-bold border border-sky-500/40'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-sky-500 text-white font-bold'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {cat.name}
-              </button>
+              </Button>
             ))}
           </div>
         </div>

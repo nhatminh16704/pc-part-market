@@ -4,6 +4,7 @@ import { useProduct, useProductBySeo } from '@/features/catalog/hooks/useCatalog
 import { formatVND } from '@/utils/format';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { parseSpecifications } from '@/utils/specs';
 import { useCartStore } from '@/stores';
 import { ArrowLeft, ShoppingCart, ShieldCheck, Truck, Wrench } from 'lucide-react';
 import type { ProductVariant } from '@/features/catalog/types';
@@ -122,38 +123,41 @@ export const ProductDetail: React.FC = () => {
               </label>
               <div className="flex flex-wrap gap-2">
                 {product.variants.map((v) => (
-                  <button
+                  <Button
                     key={v.id}
+                    variant={currentVariant?.id === v.id ? 'default' : 'outline'}
+                    size="sm"
                     onClick={() => setSelectedVariant(v)}
-                    className={`px-3.5 py-2 rounded-lg border text-xs font-semibold transition-all ${
-                      currentVariant?.id === v.id
-                        ? 'border-sky-400 bg-sky-500/20 text-sky-300'
-                        : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/20'
-                    }`}
+                    className={currentVariant?.id === v.id ? 'border-sky-400 bg-sky-500/20 text-sky-300' : 'text-slate-300'}
                   >
                     {v.sku || v.model || formatVND(v.price)}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
           )}
 
           {/* Specs */}
-          {product.specifications && Object.keys(product.specifications).length > 0 && (
-            <div>
-              <label className="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-2">
-                Thông số kỹ thuật:
-              </label>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {Object.entries(product.specifications).map(([key, val]) => (
-                  <div key={key} className="bg-white/5 rounded-lg p-2.5 border border-white/5">
-                    <span className="text-slate-400 block">{key}:</span>
-                    <strong className="text-white">{String(val)}</strong>
-                  </div>
-                ))}
+          {(() => {
+            const specs = parseSpecifications(product.specifications);
+            const entries = Object.entries(specs);
+            if (entries.length === 0) return null;
+            return (
+              <div>
+                <label className="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-2">
+                  Thông số kỹ thuật:
+                </label>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {entries.map(([key, val]) => (
+                    <div key={key} className="bg-white/5 rounded-lg p-2.5 border border-white/5">
+                      <span className="text-slate-400 block">{key}:</span>
+                      <strong className="text-white">{val}</strong>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Description */}
           {product.description && (

@@ -1,5 +1,8 @@
 import React from 'react';
 import type { Brand } from '../types';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
 
 interface BrandBarProps {
   brands: Brand[];
@@ -19,30 +22,39 @@ export const BrandBar: React.FC<BrandBarProps> = ({
           Thương Hiệu Hàng Đầu
         </div>
         {selectedBrand && (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => onSelectBrand(null)}
-            className="bg-transparent border-0 text-sky-400 text-xs font-semibold cursor-pointer hover:underline"
+            className="text-sky-400 text-xs h-7 hover:text-sky-300"
           >
-            Xóa lọc thương hiệu ✕
-          </button>
+            Xóa lọc thương hiệu <X className="w-3 h-3 ml-1" />
+          </Button>
         )}
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+      <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
         {brands.slice(0, 15).map((b) => {
           const isSelected = selectedBrand === b.id;
           return (
-            <button
+            <Button
               key={b.id}
+              variant={isSelected ? 'default' : 'outline'}
+              size="sm"
               onClick={() => onSelectBrand(isSelected ? null : b.id)}
-              className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all border cursor-pointer ${
+              className={`rounded-full text-xs whitespace-nowrap transition-all ${
                 isSelected
-                  ? 'bg-sky-500/20 border-sky-400 text-sky-300 font-bold shadow-sm shadow-sky-500/20'
-                  : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/25 hover:text-white'
+                  ? 'bg-sky-500 text-white font-bold shadow-md shadow-sky-500/25'
+                  : 'text-slate-300 border-white/10 hover:border-white/20'
               }`}
             >
               {b.name}
-            </button>
+              {isSelected && (
+                <Badge variant="secondary" className="ml-1.5 px-1 py-0 text-[10px] bg-sky-950 text-sky-200">
+                  ✓
+                </Badge>
+              )}
+            </Button>
           );
         })}
       </div>

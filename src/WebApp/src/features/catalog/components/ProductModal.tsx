@@ -3,6 +3,7 @@ import { X, ShoppingCart } from 'lucide-react';
 import type { Product, ProductVariant } from '../types';
 import { formatVND } from '@/utils/format';
 import { Button } from '@/components/ui/button';
+import { parseSpecifications } from '@/utils/specs';
 import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/stores';
 
@@ -15,16 +16,16 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   product,
   onClose,
 }) => {
-  if (!product) return null;
-
   const addItem = useCartStore((state) => state.addItem);
 
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(
-    product.variants?.[0]
+    product?.variants?.[0]
   );
   const [selectedImage, setSelectedImage] = useState<string>(
-    product.images?.[0]?.imageUrl || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80'
+    product?.images?.[0]?.imageUrl || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80'
   );
+
+  if (!product) return null;
 
   const price = selectedVariant?.price ?? (product.variants?.[0]?.price || 0);
 
@@ -38,12 +39,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onClose}
-          className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors"
+          className="absolute top-4 right-4 h-9 w-9 rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors"
         >
           <X className="w-5 h-5" />
-        </button>
+        </Button>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           {/* Left: Images */}
@@ -109,38 +112,41 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {product.variants.map((v) => (
-                    <button
+                    <Button
                       key={v.id}
+                      variant={selectedVariant?.id === v.id ? 'default' : 'outline'}
+                      size="sm"
                       onClick={() => setSelectedVariant(v)}
-                      className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
-                        selectedVariant?.id === v.id
-                          ? 'border-sky-400 bg-sky-500/20 text-sky-300'
-                          : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/20'
-                      }`}
+                      className={selectedVariant?.id === v.id ? 'border-sky-400 bg-sky-500/20 text-sky-300' : 'text-slate-300'}
                     >
                       {v.sku || v.model || formatVND(v.price)}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
             )}
 
             {/* Specifications */}
-            {product.specifications && Object.keys(product.specifications).length > 0 && (
-              <div>
-                <label className="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-2">
-                  Thông số nổi bật:
-                </label>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  {Object.entries(product.specifications).map(([key, val]) => (
-                    <div key={key} className="bg-white/5 rounded-lg p-2 border border-white/5">
-                      <span className="text-slate-400 block">{key}:</span>
-                      <strong className="text-white">{String(val)}</strong>
-                    </div>
-                  ))}
+            {(() => {
+              const specs = parseSpecifications(product.specifications);
+              const entries = Object.entries(specs);
+              if (entries.length === 0) return null;
+              return (
+                <div>
+                  <label className="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-2">
+                    Thông số nổi bật:
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    {entries.map(([key, val]) => (
+                      <div key={key} className="bg-white/5 rounded-lg p-2 border border-white/5">
+                        <span className="text-slate-400 block">{key}:</span>
+                        <strong className="text-white">{val}</strong>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Description */}
             {product.description && (

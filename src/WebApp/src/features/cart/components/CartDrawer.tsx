@@ -40,12 +40,14 @@ export const CartDrawer: React.FC = () => {
               </div>
             </div>
 
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={closeCart}
-              className="w-8 h-8 rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10"
             >
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
 
           {/* Cart Items List */}
@@ -91,30 +93,36 @@ export const CartDrawer: React.FC = () => {
                     {/* Quantity Modifier */}
                     <div className="flex items-center gap-2">
                       <div className="flex items-center rounded-lg border border-white/10 bg-black/40 overflow-hidden">
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => updateQuantity(item.product.id, item.variant?.id, -1)}
-                          className="px-2 py-0.5 text-xs text-slate-300 hover:bg-white/10 transition-colors"
+                          className="h-7 w-7 text-xs text-slate-300 hover:bg-white/10"
                         >
                           -
-                        </button>
+                        </Button>
                         <span className="px-2 text-xs font-bold text-white min-w-[20px] text-center">
                           {item.quantity}
                         </span>
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => updateQuantity(item.product.id, item.variant?.id, 1)}
-                          className="px-2 py-0.5 text-xs text-slate-300 hover:bg-white/10 transition-colors"
+                          className="h-7 w-7 text-xs text-slate-300 hover:bg-white/10"
                         >
                           +
-                        </button>
+                        </Button>
                       </div>
 
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => removeItem(item.product.id, item.variant?.id)}
-                        className="text-slate-400 hover:text-rose-400 p-1 transition-colors"
+                        className="h-8 w-8 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10"
                         title="Xóa khỏi giỏ"
                       >
                         <Trash2 className="w-4 h-4" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 );
