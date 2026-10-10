@@ -16,7 +16,7 @@ export const BrandBar: React.FC<BrandBarProps> = ({
   onSelectBrand,
 }) => {
   return (
-    <section className="max-w-[1360px] mx-auto mt-10 px-6">
+    <section className="max-w-[1360px] mx-auto mt-8 md:mt-10 px-4 sm:px-6 w-full min-w-0">
       <div className="flex items-center justify-between mb-4">
         <div className="text-xs uppercase text-slate-400 tracking-wider font-bold">
           Thương Hiệu Hàng Đầu
@@ -33,7 +33,7 @@ export const BrandBar: React.FC<BrandBarProps> = ({
         )}
       </div>
 
-      <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none w-full min-w-0">
         {brands.slice(0, 15).map((b) => {
           const isSelected = selectedBrand === b.id;
           return (

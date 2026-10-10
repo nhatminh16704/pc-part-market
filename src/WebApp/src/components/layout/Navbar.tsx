@@ -32,12 +32,12 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Main Nav Container */}
-      <div className="max-w-[1360px] mx-auto px-6 py-3.5 flex items-center justify-between gap-6">
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 sm:gap-6 w-full min-w-0">
         {/* Brand Logo */}
         <Link
           to="/"
           onClick={() => onSelectCategory?.(null)}
-          className="flex items-center gap-3 select-none"
+          className="flex items-center gap-3 select-none shrink-0"
         >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-sky-400 flex items-center justify-center shadow-lg shadow-sky-500/25">
             <Cpu className="w-6 h-6 text-white" />
@@ -53,7 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </Link>
 
         {/* Global Search Bar */}
-        <div className="flex-1 max-w-lg hidden md:block">
+        <div className="flex-1 min-w-0 max-w-md hidden md:block">
           <div className="relative flex items-center">
             <Search className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
             <input

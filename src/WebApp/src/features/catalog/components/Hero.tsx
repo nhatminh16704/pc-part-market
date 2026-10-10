@@ -8,23 +8,23 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
   return (
-    <section className="relative py-12 px-6 max-w-[1360px] mx-auto overflow-hidden">
+    <section className="relative py-8 md:py-12 px-4 sm:px-6 max-w-[1360px] mx-auto overflow-hidden w-full min-w-0">
       {/* Background Glow Blobs */}
       <div className="absolute -top-1/4 left-1/5 w-96 h-96 rounded-full bg-sky-500/15 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/6 w-96 h-96 rounded-full bg-purple-500/15 blur-3xl pointer-events-none" />
 
       {/* Grid Container */}
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 items-center gap-10">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-10 w-full min-w-0">
         {/* Left Column */}
-        <div>
-          <div className="inline-flex items-center gap-2 bg-sky-500/10 border border-sky-500/30 rounded-full px-3.5 py-1.5 mb-5">
-            <Zap className="w-4 h-4 text-sky-400" />
-            <span className="text-xs font-semibold text-sky-400">
+        <div className="min-w-0">
+          <div className="inline-flex items-center gap-2 bg-sky-500/10 border border-sky-500/30 rounded-full px-3.5 py-1.5 mb-5 max-w-full">
+            <Zap className="w-4 h-4 text-sky-400 shrink-0" />
+            <span className="text-xs font-semibold text-sky-400 truncate">
               1,625+ Linh Kiện Đã Sẵn Sàng Giao Ngay
             </span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-5 tracking-tight">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black leading-tight mb-5 tracking-tight">
             Xây Dựng Cỗ Máy <br />
             <span className="gradient-text">Gaming & Đồ Họa</span> <br />
             Trong Mơ Của Bạn

@@ -5,7 +5,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="mt-20 bg-[#05070d] border-t border-white/10 px-6 pt-14 pb-8">
+    <footer className="mt-16 md:mt-20 bg-[#05070d] border-t border-white/10 px-4 sm:px-6 pt-12 md:pt-14 pb-8 w-full min-w-0">
       <div className="max-w-[1360px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
         {/* Brand Col */}
         <div>

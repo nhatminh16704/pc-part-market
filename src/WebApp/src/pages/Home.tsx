@@ -61,7 +61,7 @@ export const Home: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="w-full min-w-0 max-w-full">
       {/* Hero Showcase */}
       <Hero
         onExploreClick={() => {
