@@ -2,6 +2,7 @@ export interface ApiResponse<T> {
   success: boolean;
   statusCode: number;
   message: string;
+  traceId?: string;
   data: T;
   errors?: string[];
 }
