@@ -1,3 +1,4 @@
+import { apiClient } from './apiClient';
 import type { Brand, Category, PaginatedItems, Product } from './types';
 
 export const formatVND = (amount: number): string => {
@@ -15,34 +16,32 @@ export const fetchProducts = async (
   brandId?: string,
   categoryId?: string
 ): Promise<PaginatedItems<Product>> => {
-  const params = new URLSearchParams({
-    pageIndex: pageIndex.toString(),
-    pageSize: pageSize.toString(),
-  });
+  const params: Record<string, string | number> = {
+    pageIndex,
+    pageSize,
+  };
 
-  if (name?.trim()) params.append('name', name.trim());
-  if (brandId) params.append('brandId', brandId);
-  if (categoryId) params.append('categoryId', categoryId);
+  if (name?.trim()) params.name = name.trim();
+  if (brandId) params.brandId = brandId;
+  if (categoryId) params.categoryId = categoryId;
 
   try {
-    const res = await fetch(`/api/catalog/products?${params.toString()}`);
-    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-    const json = await res.json();
+    const res = await apiClient.get('/catalog/products', { params });
+    const json = res.data;
     return json?.data ?? json;
   } catch (err) {
-    console.warn('API error fetching products, using mock fallback:', err);
+    console.warn('Axios error fetching products, using mock fallback:', err);
     return getFallbackProducts();
   }
 };
 
 export const fetchBrands = async (): Promise<Brand[]> => {
   try {
-    const res = await fetch('/api/catalog/brands');
-    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-    const json = await res.json();
+    const res = await apiClient.get('/catalog/brands');
+    const json = res.data;
     return json?.data ?? json;
   } catch (err) {
-    console.warn('API error fetching brands, using mock fallback:', err);
+    console.warn('Axios error fetching brands, using mock fallback:', err);
     return [
       { id: '1', name: 'ASUS', seoName: 'asus', status: 'ACTIVE' },
       { id: '2', name: 'MSI', seoName: 'msi', status: 'ACTIVE' },
@@ -56,12 +55,11 @@ export const fetchBrands = async (): Promise<Brand[]> => {
 
 export const fetchCategories = async (): Promise<Category[]> => {
   try {
-    const res = await fetch('/api/catalog/categories');
-    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-    const json = await res.json();
+    const res = await apiClient.get('/catalog/categories');
+    const json = res.data;
     return json?.data ?? json;
   } catch (err) {
-    console.warn('API error fetching categories, using mock fallback:', err);
+    console.warn('Axios error fetching categories, using mock fallback:', err);
     return [
       { id: 'cat-vga', name: 'Card Màn Hình (VGA)', seoName: 'vga', status: 'ACTIVE' },
       { id: 'cat-cpu', name: 'Bộ Vi Xử Lý (CPU)', seoName: 'cpu', status: 'ACTIVE' },

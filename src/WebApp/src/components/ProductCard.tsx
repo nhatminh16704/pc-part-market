@@ -2,6 +2,8 @@ import React from 'react';
 import { ShoppingCart, Eye } from 'lucide-react';
 import type { Product } from '../types';
 import { formatVND } from '../api';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface ProductCardProps {
   product: Product;
@@ -24,76 +26,35 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <div 
-      className="glass-panel hover-lift"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        borderRadius: 'var(--radius-lg)',
-        overflow: 'hidden',
-        position: 'relative',
-        cursor: 'pointer',
-      }}
+      className="glass-panel hover-lift flex flex-col justify-between rounded-2xl overflow-hidden relative cursor-pointer border border-white/10 hover:border-sky-400/30 transition-all duration-300"
       onClick={() => onQuickView(product)}
     >
       {/* Top Media Section */}
-      <div style={{
-        position: 'relative',
-        backgroundColor: '#0a0e1a',
-        padding: '16px',
-        height: '210px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
-      }}>
+      <div className="relative bg-[#0a0e1a] p-4 h-52 flex items-center justify-center overflow-hidden">
         {/* Brand Tag */}
         {product.brand && (
-          <div style={{
-            position: 'absolute',
-            top: '12px',
-            left: '12px',
-            background: 'rgba(15, 23, 42, 0.75)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: '6px',
-            padding: '3px 8px',
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            color: 'var(--accent-sky)',
-            zIndex: 2,
-          }}>
+          <Badge
+            variant="secondary"
+            className="absolute top-3 left-3 bg-slate-900/80 border-white/10 text-sky-400 font-bold text-[11px] px-2 py-0.5 z-10"
+          >
             {product.brand.name}
-          </div>
+          </Badge>
         )}
 
         {/* Stock Status Badge */}
-        <div style={{
-          position: 'absolute',
-          top: '12px',
-          right: '12px',
-          background: isAvailable ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)',
-          border: `1px solid ${isAvailable ? 'rgba(16, 185, 129, 0.3)' : 'rgba(244, 63, 94, 0.3)'}`,
-          borderRadius: '999px',
-          padding: '2px 8px',
-          fontSize: '0.7rem',
-          fontWeight: 600,
-          color: isAvailable ? 'var(--accent-emerald)' : 'var(--accent-rose)',
-          zIndex: 2,
-        }}>
+        <Badge
+          variant={isAvailable ? 'emerald' : 'destructive'}
+          className="absolute top-3 right-3 text-[10px] px-2 py-0.5 z-10"
+        >
           {isAvailable ? 'Sẵn hàng' : 'Liên hệ'}
-        </div>
+        </Badge>
 
         {/* Product Image */}
         <img
           src={mainImage}
           alt={product.name}
           loading="lazy"
-          style={{
-            maxWidth: '100%',
-            maxHeight: '100%',
-            objectFit: 'contain',
-            transition: 'transform 0.3s ease',
-          }}
+          className="max-w-full max-h-full object-contain transition-transform duration-300 hover:scale-105"
           onError={(e) => {
             (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=600&q=80';
           }}
@@ -101,61 +62,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </div>
 
       {/* Body Info Section */}
-      <div style={{
-        padding: '16px',
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
-        justifyContent: 'space-between',
-      }}>
+      <div className="p-4 flex flex-col flex-1 justify-between">
         <div>
           {/* Category Chip */}
-          <div style={{
-            fontSize: '0.75rem',
-            color: 'var(--text-dim)',
-            textTransform: 'uppercase',
-            marginBottom: '6px',
-            fontWeight: 600,
-          }}>
+          <div className="text-[11px] text-slate-400 uppercase mb-1.5 font-semibold tracking-wider">
             {product.category?.name || 'Linh Kiện PC'}
           </div>
 
           {/* Product Title */}
-          <h4 style={{
-            fontSize: '0.98rem',
-            fontWeight: 700,
-            lineHeight: 1.4,
-            marginBottom: '10px',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            minHeight: '2.8em',
-          }}>
+          <h4 className="text-[15px] font-bold leading-snug mb-2.5 line-clamp-2 min-h-[2.8em] text-slate-100">
             {product.name}
           </h4>
 
           {/* Key Specs chips */}
           {product.specifications && Object.keys(product.specifications).length > 0 && (
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '4px',
-              marginBottom: '12px',
-            }}>
+            <div className="flex flex-wrap gap-1 mb-3">
               {Object.entries(product.specifications).slice(0, 2).map(([key, val]) => (
                 <span
                   key={key}
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: '4px',
-                    padding: '2px 6px',
-                    fontSize: '0.72rem',
-                    color: 'var(--text-muted)',
-                  }}
+                  className="bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-[11px] text-slate-300"
                 >
-                  {key}: <strong style={{ color: '#fff' }}>{String(val)}</strong>
+                  {key}: <strong className="text-white">{String(val)}</strong>
                 </span>
               ))}
             </div>
@@ -163,69 +90,44 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         {/* Footer: Price & Add To Cart */}
-        <div style={{
-          paddingTop: '12px',
-          borderTop: '1px solid var(--border-subtle)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '8px',
-        }}>
+        <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
           <div>
-            <div style={{
-              fontSize: '1.15rem',
-              fontWeight: 800,
-              color: 'var(--accent-sky)',
-              fontFamily: 'var(--font-heading)',
-            }}>
+            <div className="text-lg font-extrabold text-sky-400 font-heading">
               {price > 0 ? formatVND(price) : 'Liên hệ báo giá'}
             </div>
             {firstVariant?.warrantyMonths && (
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>
+              <div className="text-[11px] text-slate-400">
                 BH {firstVariant.warrantyMonths} tháng
               </div>
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <button
+          <div className="flex gap-1.5">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 rounded-lg"
               onClick={(e) => {
                 e.stopPropagation();
                 onQuickView(product);
               }}
               title="Xem chi tiết"
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid var(--border-subtle)',
-                color: 'var(--text-main)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s ease',
-              }}
             >
-              <Eye size={16} />
-            </button>
+              <Eye className="w-4 h-4" />
+            </Button>
 
-            <button
+            <Button
+              variant="glow"
+              size="icon"
+              className="h-9 w-9 rounded-lg p-0"
               onClick={(e) => {
                 e.stopPropagation();
                 onAddToCart(product);
               }}
               title="Thêm vào giỏ hàng"
-              className="glow-btn"
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '8px',
-                padding: 0,
-              }}
             >
-              <ShoppingCart size={16} />
-            </button>
+              <ShoppingCart className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </div>
