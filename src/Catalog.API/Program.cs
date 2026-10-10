@@ -19,7 +19,17 @@ var withApiVersioning = builder.Services.AddApiVersioning(options =>
 
 builder.AddDefaultOpenApi(withApiVersioning);
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors();
 
 app.MapDefaultEndpoints();
 

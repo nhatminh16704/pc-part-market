@@ -1,4 +1,4 @@
-﻿using eShop.AppHost;
+using eShop.AppHost;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -56,49 +56,27 @@ var webHooksApi = builder.AddProject<Projects.Webhooks_API>("webhooks-api")
     .WithReference(webhooksDb)
     .WithEnvironment("Identity__Url", identityEndpoint);
 
-// Reverse proxies
-builder.AddYarp("mobile-bff")
-    .WithExternalHttpEndpoints()
-    .ConfigureMobileBffRoutes(catalogApi, orderingApi, identityApi);
-
 // Apps
 var webhooksClient = builder.AddProject<Projects.WebhookClient>("webhooksclient", launchProfileName)
     .WithReference(webHooksApi)
     .WithEnvironment("IdentityUrl", identityEndpoint);
 
-var webApp = builder.AddProject<Projects.WebApp>("webapp", launchProfileName)
+var webApp = builder.AddNpmApp("webapp", "../WebApp", "dev")
+    .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
-    .WithUrls(c => c.Urls.ForEach(u => u.DisplayText = $"Online Store ({u.Endpoint?.EndpointName})"))
-    .WithReference(basketApi)
     .WithReference(catalogApi)
-    .WithReference(orderingApi)
-    .WithReference(rabbitMq).WaitFor(rabbitMq)
-    .WaitFor(identityApi)
-    .WithEnvironment("IdentityUrl", identityEndpoint);
+    .WithReference(basketApi)
+    .WithReference(identityApi)
+    .PublishAsDockerFile();
 
-// set to true if you want to use OpenAI
-bool useOpenAI = false;
-if (useOpenAI)
-{
-    builder.AddOpenAI(catalogApi, webApp, OpenAITarget.OpenAI); // set to AzureOpenAI if you want to use Azure OpenAI
-}
-
-bool useOllama = false;
-if (useOllama)
-{
-    builder.AddOllama(catalogApi, webApp);
-}
-
-// Wire up the callback urls (self referencing)
-webApp.WithEnvironment("CallBackUrl", webApp.GetEndpoint(launchProfileName));
 webhooksClient.WithEnvironment("CallBackUrl", webhooksClient.GetEndpoint(launchProfileName));
 
-// Identity has a reference to all of the apps for callback urls, this is a cyclic reference
+// Identity has a reference to all of the apps for callback urls
 identityApi.WithEnvironment("BasketApiClient", basketApi.GetEndpoint("http"))
            .WithEnvironment("OrderingApiClient", orderingApi.GetEndpoint("http"))
            .WithEnvironment("WebhooksApiClient", webHooksApi.GetEndpoint("http"))
            .WithEnvironment("WebhooksWebClient", webhooksClient.GetEndpoint(launchProfileName))
-           .WithEnvironment("WebAppClient", webApp.GetEndpoint(launchProfileName));
+           .WithEnvironment("WebAppClient", webApp.GetEndpoint("http"));
 
 builder.Build().Run();
 
