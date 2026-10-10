@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace eShop.Catalog.API.Infrastructure.Migrations
+namespace Catalog.API.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class NewCatalogSchema : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,10 +26,6 @@ namespace eShop.Catalog.API.Infrastructure.Migrations
                     RETURN encode(uuid_bytes, 'hex')::uuid;
                 END;
                 $$ LANGUAGE plpgsql VOLATILE;
-
-                DROP TABLE IF EXISTS ""Catalog"" CASCADE;
-                DROP TABLE IF EXISTS ""CatalogBrand"" CASCADE;
-                DROP TABLE IF EXISTS ""CatalogType"" CASCADE;
             ");
 
             migrationBuilder.CreateTable(
@@ -75,6 +71,23 @@ namespace eShop.Catalog.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "IntegrationEventLog",
+                columns: table => new
+                {
+                    EventId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EventTypeName = table.Column<string>(type: "text", nullable: false),
+                    State = table.Column<int>(type: "integer", nullable: false),
+                    TimesSent = table.Column<int>(type: "integer", nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    TransactionId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IntegrationEventLog", x => x.EventId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "products",
                 columns: table => new
                 {
@@ -110,6 +123,27 @@ namespace eShop.Catalog.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "product_images",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuidv7()"),
+                    product_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    image_url = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    is_main = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_product_images", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_product_images_products_product_id",
+                        column: x => x.product_id,
+                        principalTable: "products",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "product_variants",
                 columns: table => new
                 {
@@ -135,8 +169,8 @@ namespace eShop.Catalog.API.Infrastructure.Migrations
                     table.PrimaryKey("PK_product_variants", x => x.id);
                     table.CheckConstraint("ck_product_variants_price", "price >= 0");
                     table.CheckConstraint("ck_product_variants_quantity", "quantity >= 0");
-                    table.CheckConstraint("ck_product_variants_warranty_months", "warranty_months > 0");
                     table.CheckConstraint("ck_product_variants_status", "status IN ('ACTIVE', 'INACTIVE', 'DELETED')");
+                    table.CheckConstraint("ck_product_variants_warranty_months", "warranty_months > 0");
                     table.ForeignKey(
                         name: "FK_product_variants_products_product_id",
                         column: x => x.product_id,
@@ -145,28 +179,6 @@ namespace eShop.Catalog.API.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "product_images",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuidv7()"),
-                    product_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    image_url = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
-                    is_main = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_product_images", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_product_images_products_product_id",
-                        column: x => x.product_id,
-                        principalTable: "products",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            // Brands indexes
             migrationBuilder.CreateIndex(
                 name: "uk_brands_name",
                 table: "brands",
@@ -181,7 +193,6 @@ namespace eShop.Catalog.API.Infrastructure.Migrations
                 unique: true,
                 filter: "status <> 'DELETED'");
 
-            // Categories indexes
             migrationBuilder.CreateIndex(
                 name: "idx_categories_parent_id",
                 table: "categories",
@@ -201,7 +212,38 @@ namespace eShop.Catalog.API.Infrastructure.Migrations
                 unique: true,
                 filter: "status <> 'DELETED'");
 
-            // Products indexes
+            migrationBuilder.CreateIndex(
+                name: "IX_product_images_product_id_image_url",
+                table: "product_images",
+                columns: new[] { "product_id", "image_url" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "uk_product_images_main",
+                table: "product_images",
+                column: "product_id",
+                unique: true,
+                filter: "is_main = true");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_product_variants_product_id",
+                table: "product_variants",
+                column: "product_id");
+
+            migrationBuilder.CreateIndex(
+                name: "uk_product_variants_barcode",
+                table: "product_variants",
+                column: "barcode",
+                unique: true,
+                filter: "status <> 'DELETED'");
+
+            migrationBuilder.CreateIndex(
+                name: "uk_product_variants_sku",
+                table: "product_variants",
+                column: "sku",
+                unique: true,
+                filter: "status <> 'DELETED'");
+
             migrationBuilder.CreateIndex(
                 name: "idx_products_brand_id",
                 table: "products",
@@ -218,50 +260,28 @@ namespace eShop.Catalog.API.Infrastructure.Migrations
                 column: "seo_name",
                 unique: true,
                 filter: "status <> 'DELETED'");
-
-            // Product variants indexes
-            migrationBuilder.CreateIndex(
-                name: "idx_product_variants_product_id",
-                table: "product_variants",
-                column: "product_id");
-
-            migrationBuilder.CreateIndex(
-                name: "uk_product_variants_sku",
-                table: "product_variants",
-                column: "sku",
-                unique: true,
-                filter: "status <> 'DELETED'");
-
-            migrationBuilder.CreateIndex(
-                name: "uk_product_variants_barcode",
-                table: "product_variants",
-                column: "barcode",
-                unique: true,
-                filter: "status <> 'DELETED'");
-
-            // Product images indexes
-            migrationBuilder.CreateIndex(
-                name: "IX_product_images_product_id_image_url",
-                table: "product_images",
-                columns: new[] { "product_id", "image_url" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "uk_product_images_main",
-                table: "product_images",
-                column: "product_id",
-                unique: true,
-                filter: "is_main = true");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(name: "product_images");
-            migrationBuilder.DropTable(name: "product_variants");
-            migrationBuilder.DropTable(name: "products");
-            migrationBuilder.DropTable(name: "categories");
-            migrationBuilder.DropTable(name: "brands");
+            migrationBuilder.DropTable(
+                name: "IntegrationEventLog");
+
+            migrationBuilder.DropTable(
+                name: "product_images");
+
+            migrationBuilder.DropTable(
+                name: "product_variants");
+
+            migrationBuilder.DropTable(
+                name: "products");
+
+            migrationBuilder.DropTable(
+                name: "brands");
+
+            migrationBuilder.DropTable(
+                name: "categories");
         }
     }
 }
