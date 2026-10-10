@@ -61,9 +61,15 @@ var webhooksClient = builder.AddProject<Projects.WebhookClient>("webhooksclient"
     .WithReference(webHooksApi)
     .WithEnvironment("IdentityUrl", identityEndpoint);
 
+// API Gateway (YARP Reverse Proxy)
+var gateway = builder.AddYarp("gateway")
+    .WithExternalHttpEndpoints()
+    .ConfigureApiGatewayRoutes(catalogApi, basketApi, orderingApi, identityApi);
+
 var webApp = builder.AddNpmApp("webapp", "../WebApp", "dev")
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
+    .WithReference(gateway)
     .WithReference(catalogApi)
     .WithReference(basketApi)
     .WithReference(identityApi)

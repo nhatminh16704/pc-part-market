@@ -1,4 +1,4 @@
-﻿using Aspire.Hosting.Eventing;
+using Aspire.Hosting.Eventing;
 using Aspire.Hosting.Lifecycle;
 using Aspire.Hosting.Yarp;
 using Aspire.Hosting.Yarp.Transforms;
@@ -180,6 +180,41 @@ internal static class Extensions
             .WaitFor(chat);
 
         return builder;
+    }
+
+    public static IResourceBuilder<YarpResource> ConfigureApiGatewayRoutes(this IResourceBuilder<YarpResource> builder,
+        IResourceBuilder<ProjectResource> catalogApi,
+        IResourceBuilder<ProjectResource> basketApi,
+        IResourceBuilder<ProjectResource> orderingApi,
+        IResourceBuilder<ProjectResource> identityApi)
+    {
+        return builder.WithConfiguration(yarp =>
+        {
+            var catalogCluster = yarp.AddCluster(catalogApi);
+            var basketCluster = yarp.AddCluster(basketApi);
+            var orderingCluster = yarp.AddCluster(orderingApi);
+            var identityCluster = yarp.AddCluster(identityApi);
+
+            // Catalog API routes
+            yarp.AddRoute("/api/catalog/{*any}", catalogCluster);
+
+            // Basket API routes
+            yarp.AddRoute("/api/basket/{*any}", basketCluster);
+            yarp.AddRoute("/api/v1/basket/{*any}", basketCluster);
+
+            // Ordering API routes
+            yarp.AddRoute("/api/orders/{*any}", orderingCluster);
+            yarp.AddRoute("/api/v1/orders/{*any}", orderingCluster);
+
+            // Identity API routes
+            yarp.AddRoute("/identity/{*any}", identityCluster)
+                .WithTransformPathRemovePrefix("/identity");
+            yarp.AddRoute("/api/auth/{*any}", identityCluster);
+
+            // Mobile / Legacy compatibility routes
+            yarp.AddRoute("/catalog-api/{*any}", catalogCluster)
+                .WithTransformPathRemovePrefix("/catalog-api");
+        });
     }
 
     public static IResourceBuilder<YarpResource> ConfigureMobileBffRoutes(this IResourceBuilder<YarpResource> builder,
