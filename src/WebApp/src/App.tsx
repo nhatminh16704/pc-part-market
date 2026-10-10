@@ -22,6 +22,8 @@ export const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sortBy, setSortBy] = useState<string>('name_asc');
+  const [priceRange, setPriceRange] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState<number>(0);
   const pageSize = 12;
 
@@ -123,6 +125,45 @@ export const App: React.FC = () => {
     setCurrentPage(0);
   };
 
+  const handleClearAllFilters = () => {
+    setSelectedCategory(null);
+    setSelectedBrand(null);
+    setSearchQuery('');
+    setPriceRange('all');
+    setSortBy('name_asc');
+    setCurrentPage(0);
+  };
+
+  const displayedProducts = React.useMemo(() => {
+    let list = [...products];
+
+    // Client-side Price Range Filter
+    if (priceRange !== 'all') {
+      list = list.filter((p) => {
+        const minPrice = p.variants?.length
+          ? Math.min(...p.variants.map((v) => v.price))
+          : 0;
+        if (priceRange === 'under_10') return minPrice < 10000000;
+        if (priceRange === '10_25') return minPrice >= 10000000 && minPrice <= 25000000;
+        if (priceRange === 'over_25') return minPrice > 25000000;
+        return true;
+      });
+    }
+
+    // Client-side Sorting
+    list.sort((a, b) => {
+      const priceA = a.variants?.[0]?.price ?? 0;
+      const priceB = b.variants?.[0]?.price ?? 0;
+      if (sortBy === 'name_asc') return a.name.localeCompare(b.name);
+      if (sortBy === 'name_desc') return b.name.localeCompare(a.name);
+      if (sortBy === 'price_asc') return priceA - priceB;
+      if (sortBy === 'price_desc') return priceB - priceA;
+      return 0;
+    });
+
+    return list;
+  }, [products, priceRange, sortBy]);
+
   const handleAddToCart = (product: Product, variant?: ProductVariant) => {
     const targetVariant = variant || product.variants?.[0];
     setCartItems((prev) => {
@@ -205,14 +246,27 @@ export const App: React.FC = () => {
 
         {/* Live Catalog Products Grid */}
         <ProductSection
-          products={products}
+          products={displayedProducts}
           totalCount={totalCount}
           currentPage={currentPage}
           pageSize={pageSize}
           isLoading={isLoading}
+          categories={categories}
+          brands={brands}
+          selectedCategory={selectedCategory}
+          selectedBrand={selectedBrand}
+          searchQuery={searchQuery}
+          sortBy={sortBy}
+          priceRange={priceRange}
           onPageChange={setCurrentPage}
           onAddToCart={handleAddToCart}
           onQuickView={(p) => setQuickViewProduct(p)}
+          onSelectCategory={handleSelectCategory}
+          onSelectBrand={handleSelectBrand}
+          onSearchChange={handleSearchChange}
+          onSortChange={setSortBy}
+          onPriceRangeChange={setPriceRange}
+          onClearAllFilters={handleClearAllFilters}
         />
       </main>
 
