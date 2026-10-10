@@ -1,5 +1,5 @@
 using MassTransit;
-using eShop.EventBus.Events;
+using eShop.Contracts;
 
 namespace eShop.Ordering.API.Application.IntegrationEvents.EventHandling;
 

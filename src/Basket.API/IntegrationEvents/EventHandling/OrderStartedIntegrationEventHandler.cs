@@ -1,6 +1,6 @@
 using MassTransit;
 using eShop.Basket.API.Repositories;
-using eShop.EventBus.Events;
+using eShop.Contracts;
 
 namespace eShop.Basket.API.IntegrationEvents.EventHandling;
 

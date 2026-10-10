@@ -1,3 +1,3 @@
-namespace eShop.EventBus.Events;
+namespace eShop.Contracts;
 
 public record GracePeriodConfirmedIntegrationEvent(int OrderId) : IntegrationEvent;

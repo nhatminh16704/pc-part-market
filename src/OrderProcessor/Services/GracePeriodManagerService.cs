@@ -1,7 +1,7 @@
 using MassTransit;
 using Microsoft.Extensions.Options;
 using Npgsql;
-using eShop.EventBus.Events;
+using eShop.Contracts;
 
 namespace eShop.OrderProcessor.Services
 {

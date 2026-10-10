@@ -1,4 +1,6 @@
-﻿namespace eShop.EventBus.Events;
+using System.Text.Json.Serialization;
+
+namespace eShop.Contracts;
 
 public record IntegrationEvent
 {

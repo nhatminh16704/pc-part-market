@@ -1,4 +1,4 @@
-namespace eShop.EventBus.Events;
+namespace eShop.Contracts;
 
 public record OrderStatusChangedToStockConfirmedIntegrationEvent(
     int OrderId,

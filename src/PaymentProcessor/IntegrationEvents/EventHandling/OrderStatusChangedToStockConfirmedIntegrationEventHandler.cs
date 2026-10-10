@@ -1,6 +1,6 @@
 using MassTransit;
 using Microsoft.Extensions.Options;
-using eShop.EventBus.Events;
+using eShop.Contracts;
 
 namespace eShop.PaymentProcessor.IntegrationEvents.EventHandling;
 

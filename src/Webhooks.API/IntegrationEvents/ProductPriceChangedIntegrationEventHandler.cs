@@ -1,5 +1,5 @@
 using MassTransit;
-using eShop.EventBus.Events;
+using eShop.Contracts;
 
 namespace Webhooks.API.IntegrationEvents;
 

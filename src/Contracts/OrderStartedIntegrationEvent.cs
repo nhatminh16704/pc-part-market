@@ -1,3 +1,3 @@
-namespace eShop.EventBus.Events;
+namespace eShop.Contracts;
 
 public record OrderStartedIntegrationEvent(string UserId) : IntegrationEvent;

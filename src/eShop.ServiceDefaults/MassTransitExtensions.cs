@@ -1,6 +1,4 @@
 using MassTransit;
-using eShop.EventBus;
-using eShop.EventBus.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -43,8 +41,6 @@ public static class MassTransitExtensions
                 cfg.ConfigureEndpoints(context);
             });
         });
-
-        builder.Services.AddScoped<IEventBus, MassTransitEventBus>();
 
         return builder;
     }
