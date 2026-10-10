@@ -8,7 +8,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
   return (
-    <section className="relative py-8 md:py-12 px-4 sm:px-6 max-w-[1360px] mx-auto overflow-hidden w-full min-w-0">
+    <section className="container-custom relative py-8 md:py-12 overflow-hidden min-w-0">
       {/* Background Glow Blobs */}
       <div className="absolute -top-1/4 left-1/5 w-96 h-96 rounded-full bg-sky-500/15 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/6 w-96 h-96 rounded-full bg-purple-500/15 blur-3xl pointer-events-none" />

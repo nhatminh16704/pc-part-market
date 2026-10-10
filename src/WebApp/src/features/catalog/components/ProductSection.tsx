@@ -64,7 +64,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   );
 
   return (
-    <section id="products-section" className="max-w-[1360px] mx-auto mt-10 md:mt-12 px-4 sm:px-6 w-full min-w-0">
+    <section id="products-section" className="container-custom mt-10 md:mt-12 min-w-0">
       {/* Section Header */}
       <div className="flex flex-wrap items-end justify-between gap-4 mb-5">
         <div>

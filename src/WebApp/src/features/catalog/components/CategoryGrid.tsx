@@ -46,7 +46,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
   };
 
   return (
-    <section className="max-w-[1360px] mx-auto mt-10 px-4 sm:px-6 w-full min-w-0">
+    <section className="container-custom mt-10 min-w-0">
       <div className="flex justify-between items-end mb-5">
         <div>
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">

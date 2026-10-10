@@ -32,7 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Main Nav Container */}
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 sm:gap-6 w-full min-w-0">
+      <div className="container-custom py-3.5 flex items-center justify-between gap-3 sm:gap-6 min-w-0">
         {/* Brand Logo */}
         <Link
           to="/"
@@ -101,8 +101,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Sub-Header Category Pills */}
       {categories.length > 0 && (
-        <div className="border-t border-white/5 bg-slate-900/40 px-6 py-2">
-          <div className="max-w-[1360px] mx-auto flex items-center gap-2 overflow-x-auto scrollbar-none text-xs">
+        <div className="border-t border-white/5 bg-slate-900/40 py-2">
+          <div className="container-custom flex items-center gap-2 overflow-x-auto scrollbar-none text-xs min-w-0">
             <Button
               variant={selectedCategory === null ? 'default' : 'ghost'}
               size="sm"

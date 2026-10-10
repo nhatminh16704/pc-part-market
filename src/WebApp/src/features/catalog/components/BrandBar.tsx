@@ -16,7 +16,7 @@ export const BrandBar: React.FC<BrandBarProps> = ({
   onSelectBrand,
 }) => {
   return (
-    <section className="max-w-[1360px] mx-auto mt-8 md:mt-10 px-4 sm:px-6 w-full min-w-0">
+    <section className="container-custom mt-8 md:mt-10 min-w-0">
       <div className="flex items-center justify-between mb-4">
         <div className="text-xs uppercase text-slate-400 tracking-wider font-bold">
           Thương Hiệu Hàng Đầu

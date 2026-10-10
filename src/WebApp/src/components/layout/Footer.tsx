@@ -5,8 +5,8 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="mt-16 md:mt-20 bg-[#05070d] border-t border-white/10 px-4 sm:px-6 pt-12 md:pt-14 pb-8 w-full min-w-0">
-      <div className="max-w-[1360px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
+    <footer className="mt-16 md:mt-20 bg-[#05070d] border-t border-white/10 pt-12 md:pt-14 pb-8 w-full min-w-0">
+      <div className="container-custom grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
         {/* Brand Col */}
         <div>
           <div className="flex items-center gap-2.5 mb-4">
@@ -86,7 +86,7 @@ export const Footer: React.FC = () => {
         </div>
       </div>
 
-      <div className="border-t border-white/5 pt-6 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-[1360px] mx-auto">
+      <div className="container-custom border-t border-white/5 pt-6 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
         <div>
           © {CURRENT_YEAR} PC Part Market Vietnam. Bản quyền thuộc về eShop Project.
         </div>
