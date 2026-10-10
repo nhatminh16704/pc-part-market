@@ -1,4 +1,4 @@
-import { apiClient } from '@/services/apiClient';
+import { apiClient } from '@/lib/axios';
 import type { PaginatedItems } from '@/types/api';
 import type { Brand, Category, Product, ProductFilterParams } from '../types';
 

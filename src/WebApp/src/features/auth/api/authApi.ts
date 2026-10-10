@@ -1,4 +1,4 @@
-import { apiClient } from '@/services/apiClient';
+import { apiClient } from '@/lib/axios';
 import type { LoginFormData, AuthResponse } from '../types';
 
 export const authApi = {
