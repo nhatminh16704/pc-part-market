@@ -4,7 +4,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 builder.AddApplicationServices();
-builder.Services.AddProblemDetails();
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -31,9 +30,10 @@ var app = builder.Build();
 
 app.UseCors();
 
-app.MapDefaultEndpoints();
-
+app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+app.MapDefaultEndpoints();
 
 app.MapCatalogApi();
 

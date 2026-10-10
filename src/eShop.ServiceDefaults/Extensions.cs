@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
@@ -43,6 +45,24 @@ public static partial class Extensions
         builder.AddDefaultHealthChecks();
 
         builder.ConfigureOpenTelemetry();
+
+        builder.AddStandardProblemDetails();
+
+        return builder;
+    }
+
+    public static IHostApplicationBuilder AddStandardProblemDetails(this IHostApplicationBuilder builder)
+    {
+        builder.Services.AddProblemDetails(options =>
+        {
+            options.CustomizeProblemDetails = context =>
+            {
+                context.ProblemDetails.Extensions["traceId"] = 
+                    Activity.Current?.TraceId.ToString() ?? context.HttpContext.TraceIdentifier;
+            };
+        });
+
+        builder.Services.Insert(0, ServiceDescriptor.Singleton<IProblemDetailsWriter, ApiResponseProblemDetailsWriter>());
 
         return builder;
     }
