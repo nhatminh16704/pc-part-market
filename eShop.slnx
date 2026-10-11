@@ -16,6 +16,7 @@
     <Project Path="src/Webhooks.API/Webhooks.API.csproj" />
   </Folder>
   <Folder Name="/src/Shared/">
+    <Project Path="src/Shared/Common/eShop.Shared.Common.csproj" />
     <Project Path="src/Shared/Migration/eShop.Shared.Migration.csproj" />
   </Folder>
   <Folder Name="/tests/">

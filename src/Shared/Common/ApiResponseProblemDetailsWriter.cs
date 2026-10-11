@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 
-namespace eShop.ServiceDefaults;
+namespace eShop.Shared.Common;
 
 public class ApiResponseProblemDetailsWriter : IProblemDetailsWriter
 {

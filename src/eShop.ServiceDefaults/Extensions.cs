@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using eShop.Shared.Common;
 
 namespace eShop.ServiceDefaults;
 
