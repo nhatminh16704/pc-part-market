@@ -1,8 +1,13 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using OpenTelemetry.Trace;
 
 namespace Microsoft.AspNetCore.Hosting;
 
-internal static class MigrateDbContextExtensions
+public static class MigrateDbContextExtensions
 {
     private static readonly string ActivitySourceName = "DbMigrations";
     private static readonly ActivitySource ActivitySource = new(ActivitySourceName);
@@ -87,6 +92,7 @@ internal static class MigrateDbContextExtensions
         }
     }
 }
+
 public interface IDbSeeder<in TContext> where TContext : DbContext
 {
     Task SeedAsync(TContext context);

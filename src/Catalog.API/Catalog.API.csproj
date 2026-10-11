@@ -6,10 +6,6 @@
     <UserSecretsId>d1b521ec-3411-4d39-98c6-8509466ed471</UserSecretsId>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="..\Shared\ActivityExtensions.cs" Link="Extensions\ActivityExtensions.cs" />
-    <Compile Include="..\Shared\MigrateDbContextExtensions.cs" Link="Extensions\MigrateDbContextExtensions.cs" />
-  </ItemGroup>
 
   <PropertyGroup>
     <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)</OpenApiDocumentsDirectory>
@@ -39,6 +35,7 @@
   <ItemGroup>
     <ProjectReference Include="..\IntegrationEventLogEF\IntegrationEventLogEF.csproj" />
     <ProjectReference Include="..\eShop.ServiceDefaults\eShop.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Shared\Migration\eShop.Shared.Migration.csproj" />
   </ItemGroup>
 
   <ItemGroup>

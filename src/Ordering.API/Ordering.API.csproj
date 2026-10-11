@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\ActivityExtensions.cs" Link="Extensions\ActivityExtensions.cs" />
-    <Compile Include="..\Shared\MigrateDbContextExtensions.cs" Link="Extensions\MigrateDbContextExtensions.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <InternalsVisibleTo Include="Ordering.FunctionalTests" />
   </ItemGroup>
 
@@ -20,6 +15,7 @@
     <ProjectReference Include="..\eShop.ServiceDefaults\eShop.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
     <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
+    <ProjectReference Include="..\Shared\Migration\eShop.Shared.Migration.csproj" />
   </ItemGroup>
 
   <ItemGroup>

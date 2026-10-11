@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
+
+namespace Microsoft.AspNetCore.Hosting;
 
 internal static class ActivityExtensions
 {
