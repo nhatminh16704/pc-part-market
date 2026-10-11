@@ -16,6 +16,7 @@
     <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
     <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
     <ProjectReference Include="..\Shared\Migration\eShop.Shared.Migration.csproj" />
+    <ProjectReference Include="..\Shared\Messaging\eShop.Shared.Messaging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

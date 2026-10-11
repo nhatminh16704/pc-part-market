@@ -17,6 +17,7 @@
   <Folder Name="/src/Shared/">
     <Project Path="src/Shared/Common/eShop.Shared.Common.csproj" />
     <Project Path="src/Shared/Contracts/Contracts.csproj" />
+    <Project Path="src/Shared/Messaging/eShop.Shared.Messaging.csproj" />
     <Project Path="src/Shared/Migration/eShop.Shared.Migration.csproj" />
   </Folder>
   <Folder Name="/tests/">
