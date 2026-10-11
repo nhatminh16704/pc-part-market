@@ -21,6 +21,21 @@ public partial class CatalogContextSeed(
 
         if (!await context.Products.AnyAsync())
         {
+            var sqlFile = Path.Combine(contentRootPath, "insert_seed_data.sql");
+            if (!File.Exists(sqlFile))
+            {
+                sqlFile = Path.Combine(AppContext.BaseDirectory, "insert_seed_data.sql");
+            }
+
+            if (File.Exists(sqlFile))
+            {
+                logger.LogInformation("Seeding PC part catalog from {SqlFile}", sqlFile);
+                var sql = await File.ReadAllTextAsync(sqlFile);
+                await context.Database.ExecuteSqlRawAsync(sql);
+                logger.LogInformation("Successfully seeded PC part catalog.");
+                return;
+            }
+
             var sourcePath = Path.Combine(contentRootPath, "Setup", "catalog.json");
             var sourceJson = await File.ReadAllTextAsync(sourcePath);
             var sourceItems = JsonSerializer.Deserialize<CatalogSourceEntry[]>(sourceJson) ?? Array.Empty<CatalogSourceEntry>();
