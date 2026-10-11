@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Shared\Contracts\Contracts.csproj" />
     <ProjectReference Include="..\Shared\Common\eShop.Shared.Common.csproj" />
   </ItemGroup>
 </Project>
