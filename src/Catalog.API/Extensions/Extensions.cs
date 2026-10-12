@@ -19,6 +19,7 @@ public static class Extensions
             {
                 builder.UseVector();
             });
+            dbContextOptionsBuilder.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         });
 
         // REVIEW: This is done for development ease but shouldn't be here in production

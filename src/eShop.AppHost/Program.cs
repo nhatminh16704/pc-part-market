@@ -62,6 +62,17 @@ var webhooksClient = builder.AddProject<Projects.WebhookClient>("webhooksclient"
     .WithReference(webHooksApi)
     .WithEnvironment("IdentityUrl", identityEndpoint);
 
+// AI Service (FastAPI / PydanticAI Chatbot)
+var aiServiceDir = Path.Combine(builder.AppHostDirectory, "../AIService");
+var venvPython = Path.Combine(aiServiceDir, ".venv", OperatingSystem.IsWindows() ? "Scripts/python.exe" : "bin/python");
+var pythonExecutable = File.Exists(venvPython) ? venvPython : "python";
+
+var aiService = builder.AddExecutable("ai-service", pythonExecutable, "../AIService", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000")
+    .WithHttpEndpoint(port: 8000, targetPort: 8000, name: "http", isProxied: false)
+    .WithExternalHttpEndpoints()
+    .WithReference(catalogApi)
+    .WithEnvironment("CATALOG_API_BASE_URL", catalogApi.GetEndpoint("http"));
+
 // API Gateway (YARP Reverse Proxy)
 var gateway = builder.AddYarp("gateway")
     .WithExternalHttpEndpoints()
