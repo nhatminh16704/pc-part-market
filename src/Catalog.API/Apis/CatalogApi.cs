@@ -311,22 +311,21 @@ public static class CatalogApi
                     var jsonNum = $"{{\"{specKey}\":{intVal}}}";
                     query = query.Where(p =>
                         (p.SpecsNormalized != null && EF.Functions.JsonContains(p.SpecsNormalized, jsonNum)) ||
-                        EF.Functions.ILike(p.Name, $"%{specVal}%"));
+                        (p.SpecsNormalized == null && EF.Functions.ILike(p.Name, $"%{specVal}%")));
                 }
                 else if (bool.TryParse(specVal, out var boolVal))
                 {
                     var jsonBool = $"{{\"{specKey}\":{(boolVal ? "true" : "false")}}}";
                     query = query.Where(p =>
                         (p.SpecsNormalized != null && EF.Functions.JsonContains(p.SpecsNormalized, jsonBool)) ||
-                        EF.Functions.ILike(p.Name, $"%{specVal}%"));
+                        (p.SpecsNormalized == null && EF.Functions.ILike(p.Name, $"%{specVal}%")));
                 }
                 else
                 {
                     var jsonStr = $"{{\"{specKey}\":\"{specVal}\"}}";
                     query = query.Where(p =>
                         (p.SpecsNormalized != null && EF.Functions.JsonContains(p.SpecsNormalized, jsonStr)) ||
-                        EF.Functions.ILike(p.Name, $"%{specVal}%") ||
-                        (p.Description != null && EF.Functions.ILike(p.Description, $"%{specVal}%")));
+                        (p.SpecsNormalized == null && (EF.Functions.ILike(p.Name, $"%{specVal}%") || (p.Description != null && EF.Functions.ILike(p.Description, $"%{specVal}%")))));
                 }
             }
         }
