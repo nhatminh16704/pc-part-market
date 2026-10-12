@@ -103,25 +103,95 @@ export const ChatWidget: React.FC = () => {
   const renderFormattedText = (text: string) => {
     const lines = text.split('\n');
     return lines.map((line, idx) => {
-      if (line.trim().startsWith('### ')) {
+      const trimmed = line.trim();
+
+      // Heading 2 (e.g. ## 🔹 Core i5 thế hệ 10)
+      if (trimmed.startsWith('## ')) {
         return (
-          <h4 key={idx} className="font-bold text-sky-300 text-sm mt-2 mb-1 flex items-center gap-1.5">
-            <Cpu className="w-3.5 h-3.5 text-sky-400" />
-            {line.replace('### ', '')}
+          <h3 key={idx} className="font-bold text-sky-200 text-sm mt-3 mb-1.5 flex items-center gap-1.5 border-b border-white/10 pb-1">
+            <Cpu className="w-4 h-4 text-sky-400 shrink-0" />
+            <span>{trimmed.replace(/^##\s+/, '')}</span>
+          </h3>
+        );
+      }
+
+      // Heading 3 / 4
+      if (trimmed.startsWith('### ')) {
+        return (
+          <h4 key={idx} className="font-bold text-sky-300 text-xs mt-2 mb-1 flex items-center gap-1.5">
+            <Cpu className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+            <span>{trimmed.replace(/^###\s+/, '')}</span>
           </h4>
         );
       }
-      if (line.trim().startsWith('---')) {
+
+      // Divider line
+      if (trimmed.startsWith('---')) {
         return <hr key={idx} className="border-white/10 my-2" />;
       }
-      if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) {
-        const bulletText = line.trim().substring(2);
+
+      // Markdown Table Rows (e.g. | Model | Giá | or |---|---|)
+      if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+        // Skip table separator line |---|---|
+        if (/^\|[\s\-:|]+\|$/.test(trimmed)) {
+          return null;
+        }
+
+        const cells = trimmed
+          .split('|')
+          .map((c) => c.trim())
+          .filter(Boolean);
+
+        // Skip generic table header row (Model, Giá, Thông số...)
+        const isHeaderRow = cells.some((c) =>
+          ['model', 'tên', 'giá', 'nhân/luồng', 'xung nhịp', 'cache', 'thông số'].includes(c.toLowerCase())
+        );
+        if (isHeaderRow) {
+          return null;
+        }
+
+        // Render table row as clean, compact item
+        const [firstCell, ...otherCells] = cells;
+        return (
+          <div
+            key={idx}
+            className="my-1 p-2 rounded-lg bg-slate-900/90 border border-white/10 flex flex-wrap items-center justify-between gap-1.5 text-xs text-slate-200"
+          >
+            <div className="font-semibold text-white flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400 inline-block"></span>
+              {parseInlineMarkdown(firstCell)}
+            </div>
+            {otherCells.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-300">
+                {otherCells.map((cell, cIdx) => (
+                  <span
+                    key={cIdx}
+                    className="bg-white/5 px-1.5 py-0.5 rounded text-slate-300"
+                  >
+                    {parseInlineMarkdown(cell)}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // Bullet points
+      if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+        const bulletText = trimmed.substring(2);
         return (
           <li key={idx} className="ml-4 list-disc text-slate-200 text-xs my-0.5 leading-relaxed">
             {parseInlineMarkdown(bulletText)}
           </li>
         );
       }
+
+      // Blank line
+      if (!trimmed) {
+        return null;
+      }
+
       return (
         <p key={idx} className="text-xs text-slate-200 my-1 leading-relaxed">
           {parseInlineMarkdown(line)}
