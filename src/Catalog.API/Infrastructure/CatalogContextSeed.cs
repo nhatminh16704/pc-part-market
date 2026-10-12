@@ -21,10 +21,14 @@ public partial class CatalogContextSeed(
 
         if (!await context.Products.AnyAsync())
         {
-            var sqlFile = Path.Combine(contentRootPath, "insert_seed_data.sql");
+            var sqlFile = Path.Combine(contentRootPath, "Setup", "insert_seed_data.sql");
             if (!File.Exists(sqlFile))
             {
-                sqlFile = Path.Combine(AppContext.BaseDirectory, "insert_seed_data.sql");
+                sqlFile = Path.Combine(AppContext.BaseDirectory, "Setup", "insert_seed_data.sql");
+            }
+            if (!File.Exists(sqlFile))
+            {
+                sqlFile = Path.Combine(contentRootPath, "insert_seed_data.sql");
             }
 
             if (File.Exists(sqlFile))
@@ -34,10 +38,14 @@ public partial class CatalogContextSeed(
                 await context.Database.ExecuteSqlRawAsync(sql);
                 logger.LogInformation("Successfully seeded PC part catalog.");
 
-                var normFile = Path.Combine(contentRootPath, "specs_normalized.sql");
+                var normFile = Path.Combine(contentRootPath, "Setup", "specs_normalized.sql");
                 if (!File.Exists(normFile))
                 {
-                    normFile = Path.Combine(AppContext.BaseDirectory, "specs_normalized.sql");
+                    normFile = Path.Combine(AppContext.BaseDirectory, "Setup", "specs_normalized.sql");
+                }
+                if (!File.Exists(normFile))
+                {
+                    normFile = Path.Combine(contentRootPath, "specs_normalized.sql");
                 }
                 if (File.Exists(normFile))
                 {

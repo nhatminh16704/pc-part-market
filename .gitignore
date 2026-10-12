@@ -495,5 +495,4 @@ $RECYCLE.BIN/
 # Seed data SQL
 insert_seed_data.sql
 *.sql
-!src/Catalog.API/insert_seed_data.sql
-!src/Catalog.API/specs_normalized.sql
+
