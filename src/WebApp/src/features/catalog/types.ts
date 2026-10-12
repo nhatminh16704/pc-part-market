@@ -45,6 +45,7 @@ export interface Product {
   categoryId: string;
   category?: Category;
   specifications?: Record<string, string | number | boolean>;
+  specsNormalized?: Record<string, any>;
   description?: string;
   status: string;
   variants: ProductVariant[];

@@ -36,6 +36,10 @@ public class ProductEntityTypeConfiguration : IEntityTypeConfiguration<Product>
             .HasColumnName("specifications")
             .HasColumnType("jsonb");
 
+        builder.Property(p => p.SpecsNormalized)
+            .HasColumnName("specs_normalized")
+            .HasColumnType("jsonb");
+
         builder.Property(p => p.Description)
             .HasColumnName("description")
             .HasColumnType("text");

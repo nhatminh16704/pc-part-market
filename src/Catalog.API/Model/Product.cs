@@ -10,6 +10,7 @@ public class Product
     public Guid CategoryId { get; set; }
     public Category Category { get; set; } = null!;
     public string? Specifications { get; set; } // JSONB
+    public string? SpecsNormalized { get; set; } // JSONB
     public string? Description { get; set; }
     public string Status { get; set; } = EntityStatus.Active;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

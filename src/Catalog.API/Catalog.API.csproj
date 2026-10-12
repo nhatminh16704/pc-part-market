@@ -42,6 +42,7 @@
   <ItemGroup>
     <Content Include="Pics\*.webp" CopyToOutputDirectory="PreserveNewest" />
     <None Update="insert_seed_data.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="specs_normalized.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

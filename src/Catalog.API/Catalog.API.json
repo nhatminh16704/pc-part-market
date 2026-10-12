@@ -1770,6 +1770,12 @@
               "string"
             ]
           },
+          "specsNormalized": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "description": {
             "type": [
               "null",

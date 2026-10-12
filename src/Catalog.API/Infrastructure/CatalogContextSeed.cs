@@ -33,6 +33,20 @@ public partial class CatalogContextSeed(
                 var sql = await File.ReadAllTextAsync(sqlFile);
                 await context.Database.ExecuteSqlRawAsync(sql);
                 logger.LogInformation("Successfully seeded PC part catalog.");
+
+                var normFile = Path.Combine(contentRootPath, "specs_normalized.sql");
+                if (!File.Exists(normFile))
+                {
+                    normFile = Path.Combine(AppContext.BaseDirectory, "specs_normalized.sql");
+                }
+                if (File.Exists(normFile))
+                {
+                    logger.LogInformation("Applying normalized specs from {NormFile}", normFile);
+                    var normSql = await File.ReadAllTextAsync(normFile);
+                    await context.Database.ExecuteSqlRawAsync(normSql);
+                    logger.LogInformation("Successfully applied normalized specs.");
+                }
+
                 return;
             }
 
