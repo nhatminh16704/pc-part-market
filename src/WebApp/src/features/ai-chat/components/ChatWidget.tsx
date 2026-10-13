@@ -348,7 +348,6 @@ export const ChatWidget: React.FC = () => {
                                   <Link
                                     key={p.id}
                                     to={`/products/${p.id}`}
-                                    onClick={() => setIsOpen(false)}
                                     className="group/card flex items-center gap-2.5 p-2 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 border border-white/10 hover:border-sky-500/40 transition-all duration-200"
                                   >
                                     <div className="w-12 h-12 rounded-lg bg-slate-900 border border-white/5 overflow-hidden shrink-0 flex items-center justify-center p-1">
@@ -443,7 +442,7 @@ export const ChatWidget: React.FC = () => {
                   </button>
                 </form>
                 <div className="text-[10px] text-center text-slate-500 mt-1.5">
-                  Được hỗ trợ bởi DeepSeek V4.1-Flash & Database eShop
+                  Được hỗ trợ bởi AI & Database eShop
                 </div>
               </div>
             </>

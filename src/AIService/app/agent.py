@@ -29,7 +29,7 @@ def resolve_model():
 
     name = settings.gemini_model
     if not name:
-        return "google:gemini-3.6-flash"
+        return "google:gemini-flash-latest"
     if name.startswith("google-gla:"):
         return f"google:{name.removeprefix('google-gla:')}"
     if name.startswith("gemini-"):
