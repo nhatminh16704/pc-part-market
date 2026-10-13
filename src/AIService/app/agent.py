@@ -119,45 +119,11 @@ async def execute_product_search(query: ProductSearchQuery) -> Dict[str, Any]:
 @support_agent.tool
 async def search_products(
     ctx: RunContext[ChatDeps],
-    keyword: Optional[str] = None,
-    category: Optional[str] = None,
-    brand: Optional[str] = None,
-    min_price: Optional[int] = None,
-    max_price: Optional[int] = None,
-    specs: Optional[Dict[str, Any]] = None,
-    page_size: int = 8,
+    query: ProductSearchQuery,
 ) -> Dict[str, Any]:
     """
-    Tìm kiếm và tra cứu sản phẩm linh kiện máy tính trong cơ sở dữ liệu eShop Catalog.
-
-    Args:
-        keyword: Từ khoá hoặc tên sản phẩm cần tìm (VD: 'RTX 4070', 'Core i5 13600K', 'B760')
-        category: Danh mục sản phẩm ('VGA - Card màn hình', 'CPU - Bộ vi xử lý', 'Mainboard - Bo mạch chủ', 'RAM - Bộ nhớ trong', 'Ổ cứng SSD', 'Nguồn máy tính - PSU', 'Vỏ máy tính - Case', 'Tản nhiệt - Cooling', 'Màn hình máy tính')
-        brand: Thương hiệu sản phẩm (VD: 'ASUS', 'MSI', 'GIGABYTE', 'Intel', 'AMD', 'Colorful', 'Corsair', 'Kingston')
-        min_price: Giá tối thiểu bằng VNĐ (VD: 5000000)
-        max_price: Giá tối đa bằng VNĐ (VD: 25000000)
-        specs: Bộ lọc thông số chuẩn hóa (specs_normalized) theo danh mục:
-            - VGA: gpu_chip ('RTX 4060', 'RTX 3060'), vram_gb (8, 12, 16), recommended_psu_w (550, 650, 750)
-            - CPU: cpu_vendor ('Intel', 'AMD'), series ('Core i5', 'Ryzen 7'), socket ('LGA1700', 'AM5'), cores (6, 8, 14), has_igpu (true/false)
-            - Mainboard: socket ('LGA1700', 'AM5'), chipset ('B760', 'B650', 'Z790'), ram_type ('DDR4', 'DDR5'), form_factor ('ATX', 'mATX'), wifi (true/false)
-            - RAM: ram_type ('DDR4', 'DDR5'), capacity_gb (8, 16, 32), speed_mhz (3200, 5600, 6000)
-            - SSD: capacity_gb (500, 1000, 2000), form_factor ('M.2 2280'), interface ('PCIe 4.0')
-            - PSU: wattage_w (550, 650, 750, 850), efficiency ('80 Plus Bronze', '80 Plus Gold'), modular ('Full-Modular')
-            - Monitor: screen_inch (24, 27, 32), resolution ('FHD', '2K', '4K'), refresh_hz (144, 165, 240), panel ('IPS', 'VA', 'OLED')
-            - Case: case_type ('Mid Tower'), color ('Đen', 'Trắng'), supported_forms ('ATX', 'mATX')
-            - Cooler: cooler_type ('Tản nhiệt nước AIO', 'Tản nhiệt khí'), radiator_mm (240, 360), supported_sockets ('LGA1700', 'AM5')
-        page_size: Số lượng kết quả cần lấy (mặc định 8)
+    Tìm kiếm và tra cứu sản phẩm linh kiện máy tính trong kho eShop Catalog.
     """
-    query = ProductSearchQuery(
-        keyword=keyword,
-        category=category,
-        brand=brand,
-        min_price=min_price,
-        max_price=max_price,
-        specs=specs,
-        page_size=page_size,
-        page_index=0,
-    )
     result = await execute_product_search(query)
 
     # Collect retrieved products into deps for the UI to display rich product cards
