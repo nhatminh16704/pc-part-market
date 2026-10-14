@@ -1,4 +1,5 @@
 using eShop.Catalog.API.Services;
+using FluentValidation;
 using MassTransit;
 
 public static class Extensions
@@ -51,5 +52,6 @@ public static class Extensions
         }
 
         builder.Services.AddScoped<ICatalogAI, CatalogAI>();
+        builder.Services.AddValidatorsFromAssemblyContaining<Program>();
     }
 }

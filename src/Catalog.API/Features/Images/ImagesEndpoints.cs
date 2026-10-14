@@ -1,11 +1,8 @@
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+namespace eShop.Catalog.API.Features.Images;
 
-namespace eShop.Catalog.API;
-
-public static class ImagesApi
+public static class ImagesEndpoints
 {
-    public static IEndpointRouteBuilder MapImagesApi(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapImagesEndpoints(this IEndpointRouteBuilder app)
     {
         var vApi = app.NewVersionedApi("Catalog");
         var api = vApi.MapGroup("api/catalog").HasApiVersion(1, 0).HasApiVersion(2, 0);

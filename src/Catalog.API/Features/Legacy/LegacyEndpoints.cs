@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using eShop.Shared.Common;
 
-namespace eShop.Catalog.API;
+namespace eShop.Catalog.API.Features.Legacy;
 
-public static class LegacyCatalogApi
+public static class LegacyEndpoints
 {
-    public static IEndpointRouteBuilder MapLegacyCatalogApi(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapLegacyEndpoints(this IEndpointRouteBuilder app)
     {
         var vApi = app.NewVersionedApi("Catalog");
         var api = vApi.MapGroup("api/catalog").HasApiVersion(1, 0).HasApiVersion(2, 0);
