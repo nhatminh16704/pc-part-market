@@ -226,51 +226,12 @@ internal static class Extensions
         {
             var catalogCluster = yarp.AddCluster(catalogApi);
 
-            yarp.AddRoute("/catalog-api/api/catalog/items", catalogCluster)
+            // Catalog routes with /catalog-api prefix
+            yarp.AddRoute("/catalog-api/api/catalog/{*any}", catalogCluster)
                 .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1", "2.0"], Mode = QueryParameterMatchMode.Exact }])
                 .WithTransformPathRemovePrefix("/catalog-api");
 
-            yarp.AddRoute("/catalog-api/api/catalog/items/by", catalogCluster)
-                .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1", "2.0"], Mode = QueryParameterMatchMode.Exact }])
-                .WithTransformPathRemovePrefix("/catalog-api");
-
-            yarp.AddRoute("/catalog-api/api/catalog/items/{id}", catalogCluster)
-                .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1", "2.0"], Mode = QueryParameterMatchMode.Exact }])
-                .WithTransformPathRemovePrefix("/catalog-api");
-
-            yarp.AddRoute("/catalog-api/api/catalog/items/by/{name}", catalogCluster)
-                .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1"], Mode = QueryParameterMatchMode.Exact }])
-                .WithTransformPathRemovePrefix("/catalog-api");
-
-            yarp.AddRoute("/catalog-api/api/catalog/items/withsemanticrelevance/{text}", catalogCluster)
-                .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1"], Mode = QueryParameterMatchMode.Exact }])
-                .WithTransformPathRemovePrefix("/catalog-api");
-
-            yarp.AddRoute("/catalog-api/api/catalog/items/withsemanticrelevance", catalogCluster)
-                .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["2.0"], Mode = QueryParameterMatchMode.Exact }])
-                .WithTransformPathRemovePrefix("/catalog-api");
-
-            yarp.AddRoute("/catalog-api/api/catalog/items/type/{typeId}/brand/{brandId?}", catalogCluster)
-                .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1"], Mode = QueryParameterMatchMode.Exact }])
-                .WithTransformPathRemovePrefix("/catalog-api");
-
-            yarp.AddRoute("/catalog-api/api/catalog/items/type/all/brand/{brandId?}", catalogCluster)
-                .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1"], Mode = QueryParameterMatchMode.Exact }])
-                .WithTransformPathRemovePrefix("/catalog-api");
-
-            yarp.AddRoute("/catalog-api/api/catalog/catalogTypes", catalogCluster)
-                .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1", "2.0"], Mode = QueryParameterMatchMode.Exact }])
-                .WithTransformPathRemovePrefix("/catalog-api");
-
-            yarp.AddRoute("/catalog-api/api/catalog/catalogBrands", catalogCluster)
-                .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1", "2.0"], Mode = QueryParameterMatchMode.Exact }])
-                .WithTransformPathRemovePrefix("/catalog-api");
-
-            yarp.AddRoute("/catalog-api/api/catalog/items/{id}/pic", catalogCluster)
-                .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1", "2.0"], Mode = QueryParameterMatchMode.Exact }])
-                .WithTransformPathRemovePrefix("/catalog-api");
-
-            // Generic catalog catch-all route
+            // Generic catalog direct route
             yarp.AddRoute("/api/catalog/{*any}", catalogCluster)
                 .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1", "2.0"], Mode = QueryParameterMatchMode.Exact }]);
 

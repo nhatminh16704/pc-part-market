@@ -1,7 +1,6 @@
 using eShop.Catalog.API.Features.Brands;
 using eShop.Catalog.API.Features.Categories;
 using eShop.Catalog.API.Features.Images;
-using eShop.Catalog.API.Features.Legacy;
 using eShop.Catalog.API.Features.Products;
 using eShop.Catalog.API.Features.Variants;
 
@@ -15,8 +14,7 @@ public static class CatalogEndpoints
            .MapVariantsEndpoints()
            .MapBrandsEndpoints()
            .MapCategoriesEndpoints()
-           .MapImagesEndpoints()
-           .MapLegacyEndpoints();
+           .MapImagesEndpoints();
 
         return app;
     }
