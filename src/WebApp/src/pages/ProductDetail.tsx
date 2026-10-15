@@ -27,7 +27,7 @@ export const ProductDetail: React.FC = () => {
   if (isLoading) {
     return (
       <div className="max-w-[1360px] mx-auto px-6 py-16">
-        <div className="glass-panel p-8 flex flex-col md:flex-row gap-8 rounded-2xl">
+        <div className="bg-white border border-slate-200 p-8 flex flex-col md:flex-row gap-8 rounded-2xl shadow-sm">
           <div className="skeleton h-96 w-full md:w-1/2" />
           <div className="flex-1 flex flex-col gap-4">
             <div className="skeleton h-8 w-1/3" />
@@ -44,10 +44,10 @@ export const ProductDetail: React.FC = () => {
     return (
       <div className="max-w-[1360px] mx-auto px-6 py-20 text-center">
         <div className="text-5xl mb-4">🔍</div>
-        <h2 className="text-2xl font-bold mb-2">Không tìm thấy linh kiện</h2>
-        <p className="text-slate-400 mb-6">Sản phẩm này có thể đã ngừng kinh doanh hoặc đường dẫn không đúng.</p>
+        <h2 className="text-2xl font-bold mb-2 text-slate-900">Không tìm thấy linh kiện</h2>
+        <p className="text-slate-500 mb-6">Sản phẩm này có thể đã ngừng kinh doanh hoặc đường dẫn không đúng.</p>
         <Link to="/">
-          <Button variant="glow">
+          <Button variant="default" className="bg-[#ff5636] hover:bg-[#e63e1c]">
             <ArrowLeft className="w-4 h-4 mr-2" />
             <span>Quay lại trang chủ</span>
           </Button>
@@ -61,16 +61,16 @@ export const ProductDetail: React.FC = () => {
   const price = currentVariant?.price ?? 0;
 
   return (
-    <div className="max-w-[1360px] mx-auto px-6 py-10">
-      <Link to="/" className="inline-flex items-center text-xs font-semibold text-slate-400 hover:text-white mb-6 transition-colors">
+    <div className="max-w-[1360px] mx-auto px-6 py-8">
+      <Link to="/" className="inline-flex items-center text-xs font-semibold text-slate-500 hover:text-[#ff5636] mb-5 transition-colors">
         <ArrowLeft className="w-4 h-4 mr-1.5" />
         <span>Quay lại danh mục</span>
       </Link>
 
-      <div className="glass-panel p-6 md:p-10 rounded-2xl border border-white/10 grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="bg-white border border-slate-200 p-6 md:p-10 rounded-2xl shadow-sm grid grid-cols-1 md:grid-cols-2 gap-10">
         {/* Left: Product Images */}
         <div>
-          <div className="h-80 md:h-96 bg-[#0a0e1a] rounded-xl border border-white/10 p-6 flex items-center justify-center overflow-hidden mb-4">
+          <div className="h-80 md:h-96 bg-slate-50 rounded-xl border border-slate-200 p-6 flex items-center justify-center overflow-hidden mb-4">
             <img src={currentImage} alt={product.name} className="max-w-full max-h-full object-contain" />
           </div>
 
@@ -80,8 +80,8 @@ export const ProductDetail: React.FC = () => {
                 <button
                   key={img.id}
                   onClick={() => setSelectedImage(img.imageUrl)}
-                  className={`w-16 h-16 rounded-xl border p-1 overflow-hidden transition-all ${
-                    currentImage === img.imageUrl ? 'border-sky-400 bg-sky-500/10' : 'border-white/10 bg-white/5'
+                  className={`w-16 h-16 rounded-xl border p-1 overflow-hidden transition-all cursor-pointer ${
+                    currentImage === img.imageUrl ? 'border-[#ff5636] bg-orange-50/50 ring-2 ring-[#ff5636]/20' : 'border-slate-200 bg-slate-50 hover:border-slate-300'
                   }`}
                 >
                   <img src={img.imageUrl} alt="" className="w-full h-full object-contain" />
@@ -95,22 +95,22 @@ export const ProductDetail: React.FC = () => {
         <div className="flex flex-col gap-5">
           <div>
             {product.brand && (
-              <Badge variant="sky" className="mb-2">
+              <Badge variant="secondary" className="mb-2 bg-slate-100 text-slate-700 font-bold border-slate-200">
                 {product.brand.name}
               </Badge>
             )}
-            <h1 className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 leading-tight">
               {product.name}
             </h1>
           </div>
 
-          <div className="p-5 rounded-xl bg-white/5 border border-white/10">
-            <div className="text-3xl font-extrabold text-sky-400 font-heading">
+          <div className="p-5 rounded-xl bg-orange-50/60 border border-orange-200/80">
+            <div className="text-3xl font-extrabold text-[#ff5636] font-heading">
               {price > 0 ? formatVND(price) : 'Liên hệ báo giá'}
             </div>
             {currentVariant?.warrantyMonths && (
-              <div className="text-xs text-slate-400 mt-1">
-                Bảo hành chính hãng: <strong className="text-white">{currentVariant.warrantyMonths} tháng</strong>
+              <div className="text-xs text-slate-600 mt-1">
+                Bảo hành chính hãng: <strong className="text-slate-900">{currentVariant.warrantyMonths} tháng</strong>
               </div>
             )}
           </div>
@@ -118,7 +118,7 @@ export const ProductDetail: React.FC = () => {
           {/* Variants */}
           {product.variants && product.variants.length > 1 && (
             <div>
-              <label className="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-2">
+              <label className="text-xs uppercase tracking-wider text-slate-500 font-bold block mb-2">
                 Chọn phiên bản cấu hình:
               </label>
               <div className="flex flex-wrap gap-2">
@@ -128,7 +128,11 @@ export const ProductDetail: React.FC = () => {
                     variant={currentVariant?.id === v.id ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setSelectedVariant(v)}
-                    className={currentVariant?.id === v.id ? 'border-sky-400 bg-sky-500/20 text-sky-300' : 'text-slate-300'}
+                    className={
+                      currentVariant?.id === v.id 
+                        ? 'bg-[#ff5636] text-white font-bold' 
+                        : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                    }
                   >
                     {v.sku || v.model || formatVND(v.price)}
                   </Button>
@@ -144,14 +148,14 @@ export const ProductDetail: React.FC = () => {
             if (entries.length === 0) return null;
             return (
               <div>
-                <label className="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-2">
+                <label className="text-xs uppercase tracking-wider text-slate-500 font-bold block mb-2">
                   Thông số kỹ thuật:
                 </label>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   {entries.map(([key, val]) => (
-                    <div key={key} className="bg-white/5 rounded-lg p-2.5 border border-white/5">
-                      <span className="text-slate-400 block">{key}:</span>
-                      <strong className="text-white">{val}</strong>
+                    <div key={key} className="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
+                      <span className="text-slate-500 block mb-0.5">{key}:</span>
+                      <strong className="text-slate-900 font-semibold">{val}</strong>
                     </div>
                   ))}
                 </div>
@@ -162,10 +166,10 @@ export const ProductDetail: React.FC = () => {
           {/* Description */}
           {product.description && (
             <div>
-              <label className="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-1">
+              <label className="text-xs uppercase tracking-wider text-slate-500 font-bold block mb-1">
                 Mô tả sản phẩm:
               </label>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed">
                 {product.description}
               </p>
             </div>
@@ -173,9 +177,9 @@ export const ProductDetail: React.FC = () => {
 
           {/* Add to Cart CTA */}
           <Button
-            variant="glow"
+            variant="default"
             size="lg"
-            className="w-full mt-2"
+            className="w-full mt-2 bg-[#ff5636] hover:bg-[#e63e1c] text-white font-bold shadow-md shadow-orange-500/20"
             onClick={() => addItem(product, currentVariant)}
           >
             <ShoppingCart className="w-5 h-5 mr-2" />
@@ -183,17 +187,17 @@ export const ProductDetail: React.FC = () => {
           </Button>
 
           {/* Trust badges */}
-          <div className="grid grid-cols-3 gap-2 pt-4 border-t border-white/10 text-center text-xs text-slate-400">
+          <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100 text-center text-xs text-slate-600">
             <div className="flex flex-col items-center gap-1">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>Chính hãng 100%</span>
             </div>
             <div className="flex flex-col items-center gap-1">
-              <Truck className="w-4 h-4 text-sky-400" />
+              <Truck className="w-4 h-4 text-[#ff5636]" />
               <span>Giao hàng 2H</span>
             </div>
             <div className="flex flex-col items-center gap-1">
-              <Wrench className="w-4 h-4 text-purple-400" />
+              <Wrench className="w-4 h-4 text-[#004147]" />
               <span>Hỗ trợ lắp ráp</span>
             </div>
           </div>

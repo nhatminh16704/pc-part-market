@@ -66,14 +66,14 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   return (
     <section id="products-section" className="container-custom mt-10 md:mt-12 min-w-0">
       {/* Section Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4 mb-5">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-4">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight">
-            Kho Linh Kiện <span className="gradient-text">Chính Hãng</span>
+          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
+            Kho Linh Kiện <span className="text-[#ff5636]">Chính Hãng</span>
           </h2>
-          <div className="text-slate-400 text-sm mt-1">
-            Hiển thị <strong className="text-sky-400">{products.length}</strong> trên{' '}
-            <strong className="text-white">{totalCount}</strong> sản phẩm từ API Catalog
+          <div className="text-slate-500 text-sm mt-1">
+            Hiển thị <strong className="text-[#ff5636]">{products.length}</strong> trên{' '}
+            <strong className="text-slate-900">{totalCount}</strong> sản phẩm từ kho linh kiện
           </div>
         </div>
 
@@ -82,7 +82,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             variant="outline"
             size="sm"
             onClick={onClearAllFilters}
-            className="text-rose-400 border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-300"
+            className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700 bg-white shadow-xs"
           >
             <RotateCcw className="w-3.5 h-3.5 mr-1" />
             <span>Xóa bộ lọc</span>
@@ -90,8 +90,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
         )}
       </div>
 
-      {/* Filter Toolbar */}
-      <div className="glass-panel p-4 md:p-5 rounded-2xl mb-6 flex flex-col gap-3.5">
+      {/* Filter Toolbar (Clean Light Panel) */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-5 mb-6 shadow-sm flex flex-col gap-3.5">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-center">
           {/* Search by Name */}
           <div className="relative flex items-center">
@@ -100,15 +100,15 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Tìm theo tên sản phẩm (API: ?name=)..."
-              className="pl-9 pr-8 bg-white/5 border-white/10 text-white placeholder:text-slate-400 focus-visible:ring-sky-400 focus-visible:border-sky-400"
+              placeholder="Tìm theo tên sản phẩm..."
+              className="pl-9 pr-8 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#ff5636] focus-visible:border-[#ff5636]"
             />
             {searchQuery && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => onSearchChange('')}
-                className="absolute right-1.5 h-7 w-7 text-slate-400 hover:text-white"
+                className="absolute right-1.5 h-7 w-7 text-slate-400 hover:text-slate-600"
               >
                 <X className="w-3.5 h-3.5" />
               </Button>
@@ -121,9 +121,9 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             <select
               value={selectedCategory || ''}
               onChange={(e) => onSelectCategory(e.target.value || null)}
-              className="w-full h-10 pl-9 pr-4 bg-slate-900/90 border border-white/10 rounded-md text-sm text-slate-200 outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 cursor-pointer transition-colors"
+              className="w-full h-10 pl-9 pr-4 bg-slate-50 border border-slate-200 rounded-md text-sm text-slate-800 outline-none focus:ring-2 focus:ring-[#ff5636] focus:border-[#ff5636] cursor-pointer transition-colors"
             >
-              <option value="">Tất cả danh mục (API: ?categoryId=)</option>
+              <option value="">Tất cả danh mục linh kiện</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -138,9 +138,9 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             <select
               value={selectedBrand || ''}
               onChange={(e) => onSelectBrand(e.target.value || null)}
-              className="w-full h-10 pl-9 pr-4 bg-slate-900/90 border border-white/10 rounded-md text-sm text-slate-200 outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 cursor-pointer transition-colors"
+              className="w-full h-10 pl-9 pr-4 bg-slate-50 border border-slate-200 rounded-md text-sm text-slate-800 outline-none focus:ring-2 focus:ring-[#ff5636] focus:border-[#ff5636] cursor-pointer transition-colors"
             >
-              <option value="">Tất cả thương hiệu (API: ?brandId=)</option>
+              <option value="">Tất cả thương hiệu</option>
               {brands.map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.name}
@@ -152,36 +152,36 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
 
         {/* Active Filter Badges */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
-            <span className="text-xs text-slate-400 flex items-center gap-1.5 mr-1">
-              <SlidersHorizontal className="w-3 h-3" /> Đang lọc theo:
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+            <span className="text-xs text-slate-500 flex items-center gap-1.5 mr-1 font-medium">
+              <SlidersHorizontal className="w-3 h-3 text-[#ff5636]" /> Đang lọc theo:
             </span>
 
             {searchQuery.trim() && (
-              <Badge variant="sky" className="flex items-center gap-1.5 py-1 px-3">
+              <Badge variant="secondary" className="flex items-center gap-1.5 py-1 px-3 bg-orange-50 border-orange-200 text-[#ff5636]">
                 <span>Tên: &quot;{searchQuery.trim()}&quot;</span>
                 <X
-                  className="w-3 h-3 cursor-pointer hover:text-white"
+                  className="w-3 h-3 cursor-pointer hover:opacity-75"
                   onClick={() => onSearchChange('')}
                 />
               </Badge>
             )}
 
             {currentCategoryObj && (
-              <Badge variant="purple" className="flex items-center gap-1.5 py-1 px-3">
+              <Badge variant="secondary" className="flex items-center gap-1.5 py-1 px-3 bg-blue-50 border-blue-200 text-blue-700">
                 <span>Danh mục: {currentCategoryObj.name}</span>
                 <X
-                  className="w-3 h-3 cursor-pointer hover:text-white"
+                  className="w-3 h-3 cursor-pointer hover:opacity-75"
                   onClick={() => onSelectCategory(null)}
                 />
               </Badge>
             )}
 
             {currentBrandObj && (
-              <Badge variant="emerald" className="flex items-center gap-1.5 py-1 px-3">
+              <Badge variant="secondary" className="flex items-center gap-1.5 py-1 px-3 bg-emerald-50 border-emerald-200 text-emerald-700">
                 <span>Thương hiệu: {currentBrandObj.name}</span>
                 <X
-                  className="w-3 h-3 cursor-pointer hover:text-white"
+                  className="w-3 h-3 cursor-pointer hover:opacity-75"
                   onClick={() => onSelectBrand(null)}
                 />
               </Badge>
@@ -196,7 +196,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           {Array.from({ length: 8 }).map((_, idx) => (
             <div
               key={idx}
-              className="glass-panel h-96 p-4 flex flex-col gap-4"
+              className="bg-white border border-slate-200 rounded-2xl h-96 p-4 flex flex-col gap-4 shadow-xs"
             >
               <div className="skeleton h-44 w-full" />
               <div className="skeleton h-5 w-3/5" />
@@ -206,11 +206,11 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="glass-panel py-16 px-6 text-center rounded-2xl">
+        <div className="bg-white border border-slate-200 py-16 px-6 text-center rounded-2xl shadow-sm">
           <div className="text-5xl mb-4">🔍</div>
-          <h3 className="text-xl font-bold mb-2">Không tìm thấy sản phẩm nào</h3>
-          <p className="text-slate-400 max-w-md mx-auto mb-5 text-sm">
-            Không có kết quả trả về từ API Catalog với bộ lọc hiện tại. Hãy thử chọn tiêu chí khác hoặc xóa bộ lọc.
+          <h3 className="text-xl font-bold mb-2 text-slate-900">Không tìm thấy sản phẩm nào</h3>
+          <p className="text-slate-500 max-w-md mx-auto mb-5 text-sm">
+            Không có kết quả với bộ lọc hiện tại. Hãy thử chọn tiêu chí khác hoặc xóa bộ lọc.
           </p>
           {hasActiveFilters && (
             <Button
@@ -243,14 +243,14 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             size="sm"
             disabled={currentPage <= 0 || isLoading}
             onClick={() => onPageChange(currentPage - 1)}
-            className="disabled:opacity-40"
+            className="disabled:opacity-40 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             <span>Trang trước</span>
           </Button>
 
-          <div className="text-sm text-slate-400 font-medium px-2">
-            Trang <strong className="text-white">{currentPage + 1}</strong> / {totalPages}
+          <div className="text-sm text-slate-600 font-medium px-2">
+            Trang <strong className="text-slate-900">{currentPage + 1}</strong> / {totalPages}
           </div>
 
           <Button
@@ -258,7 +258,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             size="sm"
             disabled={currentPage >= totalPages - 1 || isLoading}
             onClick={() => onPageChange(currentPage + 1)}
-            className="disabled:opacity-40"
+            className="disabled:opacity-40 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs"
           >
             <span>Trang sau</span>
             <ChevronRight className="w-4 h-4 ml-1" />

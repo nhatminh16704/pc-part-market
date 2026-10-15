@@ -3,20 +3,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2",
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff5636] focus:ring-offset-2",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-sky-500 text-white shadow hover:bg-sky-600",
+          "border-transparent bg-[#ff5636] text-white shadow-sm hover:bg-[#e63e1c]",
         secondary:
-          "border-white/10 bg-slate-800 text-slate-200 hover:bg-slate-700",
+          "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200",
         destructive:
-          "border-transparent bg-rose-500 text-white shadow hover:bg-rose-600",
-        outline: "text-slate-200 border-white/15",
-        sky: "border-sky-500/30 bg-sky-500/15 text-sky-400",
-        purple: "border-purple-500/30 bg-purple-500/15 text-purple-400",
-        emerald: "border-emerald-500/30 bg-emerald-500/15 text-emerald-400",
+          "border-rose-200 bg-rose-50 text-rose-700",
+        outline: "text-slate-700 border-slate-200 bg-white",
+        orange: "border-orange-200 bg-orange-50 text-orange-700",
+        purple: "border-purple-200 bg-purple-50 text-purple-700",
+        emerald: "border-emerald-200 bg-emerald-50 text-emerald-700",
       },
     },
     defaultVariants: {

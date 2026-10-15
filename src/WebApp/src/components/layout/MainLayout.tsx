@@ -19,7 +19,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   onSelectCategory,
 }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-[#070a12] text-slate-100 w-full max-w-full overflow-x-clip">
+    <div className="min-h-screen flex flex-col bg-[#f5f5f7] text-slate-900 w-full max-w-full overflow-x-clip">
       <Navbar
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
