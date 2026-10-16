@@ -2,6 +2,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using eShop.Shared.Common;
 using eShop.Catalog.API.Common.Validation;
+using Microsoft.Extensions.Caching.Hybrid;
+using eShop.Catalog.API.Common;
 
 namespace eShop.Catalog.API.Features.Brands;
 
@@ -94,29 +96,50 @@ public static class BrandsEndpoints
         return app;
     }
 
-    public static async Task<Ok<ApiResponse<List<Brand>>>> GetAllBrands(CatalogContext context)
+    public static async Task<Ok<ApiResponse<List<Brand>>>> GetAllBrands(
+        CatalogContext context,
+        HybridCache cache,
+        CancellationToken cancellationToken)
     {
-        var brands = await context.Brands
-            .AsNoTracking()
-            .Where(b => b.Status != EntityStatus.Deleted)
-            .OrderBy(b => b.Name)
-            .ToListAsync();
+        var brands = await cache.GetOrCreateAsync(
+            CatalogCachePolicies.AllBrandsKey,
+            async cancel => await context.Brands
+                .AsNoTracking()
+                .Where(b => b.Status != EntityStatus.Deleted)
+                .OrderBy(b => b.Name)
+                .ToListAsync(cancel),
+            options: CatalogCachePolicies.StaticMetadata,
+            tags: [CatalogCachePolicies.BrandsTag],
+            cancellationToken: cancellationToken);
 
         return TypedResults.Ok(ApiResponse<List<Brand>>.Ok(brands));
     }
 
-    public static async Task<Results<Ok<ApiResponse<Brand>>, NotFound<ApiResponse<Brand>>>> GetBrandById(CatalogContext context, Guid id)
+    public static async Task<Results<Ok<ApiResponse<Brand>>, NotFound<ApiResponse<Brand>>>> GetBrandById(
+        CatalogContext context,
+        HybridCache cache,
+        Guid id,
+        CancellationToken cancellationToken)
     {
-        var brand = await context.Brands
-            .AsNoTracking()
-            .SingleOrDefaultAsync(b => b.Id == id && b.Status != EntityStatus.Deleted);
+        var brand = await cache.GetOrCreateAsync(
+            CatalogCachePolicies.BrandKey(id),
+            async cancel => await context.Brands
+                .AsNoTracking()
+                .SingleOrDefaultAsync(b => b.Id == id && b.Status != EntityStatus.Deleted, cancel),
+            options: CatalogCachePolicies.StaticMetadata,
+            tags: [CatalogCachePolicies.BrandsTag, CatalogCachePolicies.BrandKey(id)],
+            cancellationToken: cancellationToken);
 
         return brand is null 
             ? TypedResults.NotFound(ApiResponse<Brand>.Fail($"Brand with id '{id}' was not found.", 404)) 
             : TypedResults.Ok(ApiResponse<Brand>.Ok(brand));
     }
 
-    public static async Task<Results<Created<Brand>, ValidationProblem>> CreateBrand(CatalogContext context, CreateBrandRequest request)
+    public static async Task<Results<Created<Brand>, ValidationProblem>> CreateBrand(
+        CatalogContext context,
+        HybridCache cache,
+        CreateBrandRequest request,
+        CancellationToken cancellationToken)
     {
         var brand = new Brand
         {
@@ -130,20 +153,27 @@ public static class BrandsEndpoints
         };
 
         context.Brands.Add(brand);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
+
+        await cache.RemoveByTagAsync(CatalogCachePolicies.BrandsTag, cancellationToken);
 
         return TypedResults.Created($"/api/catalog/brands/{brand.Id}", brand);
     }
 
-    public static async Task<Results<Ok<Brand>, NotFound, ValidationProblem>> UpdateBrand(CatalogContext context, Guid id, UpdateBrandRequest request)
+    public static async Task<Results<Ok<Brand>, NotFound, ValidationProblem>> UpdateBrand(
+        CatalogContext context,
+        HybridCache cache,
+        Guid id,
+        UpdateBrandRequest request,
+        CancellationToken cancellationToken)
     {
-        var existing = await context.Brands.SingleOrDefaultAsync(b => b.Id == id && b.Status != EntityStatus.Deleted);
+        var existing = await context.Brands.SingleOrDefaultAsync(b => b.Id == id && b.Status != EntityStatus.Deleted, cancellationToken);
         if (existing is null)
         {
             return TypedResults.NotFound();
         }
 
-        var seoNameTaken = await context.Brands.AnyAsync(b => b.Id != id && b.SeoName == request.SeoName && b.Status != EntityStatus.Deleted);
+        var seoNameTaken = await context.Brands.AnyAsync(b => b.Id != id && b.SeoName == request.SeoName && b.Status != EntityStatus.Deleted, cancellationToken);
         if (seoNameTaken)
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>
@@ -158,20 +188,31 @@ public static class BrandsEndpoints
         existing.ImageUrl = request.ImageUrl;
         existing.Status = string.IsNullOrWhiteSpace(request.Status) ? existing.Status : request.Status;
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
+
+        await cache.RemoveByTagAsync(CatalogCachePolicies.BrandsTag, cancellationToken);
+        await cache.RemoveAsync(CatalogCachePolicies.BrandKey(id), cancellationToken);
+
         return TypedResults.Ok(existing);
     }
 
-    public static async Task<Results<NoContent, NotFound>> DeleteBrand(CatalogContext context, Guid id)
+    public static async Task<Results<NoContent, NotFound>> DeleteBrand(
+        CatalogContext context,
+        HybridCache cache,
+        Guid id,
+        CancellationToken cancellationToken)
     {
-        var existing = await context.Brands.SingleOrDefaultAsync(b => b.Id == id && b.Status != EntityStatus.Deleted);
+        var existing = await context.Brands.SingleOrDefaultAsync(b => b.Id == id && b.Status != EntityStatus.Deleted, cancellationToken);
         if (existing is null)
         {
             return TypedResults.NotFound();
         }
 
         existing.Status = EntityStatus.Deleted;
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
+
+        await cache.RemoveByTagAsync(CatalogCachePolicies.BrandsTag, cancellationToken);
+        await cache.RemoveAsync(CatalogCachePolicies.BrandKey(id), cancellationToken);
 
         return TypedResults.NoContent();
     }

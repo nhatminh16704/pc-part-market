@@ -2,6 +2,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using eShop.Shared.Common;
 using eShop.Catalog.API.Common.Validation;
+using Microsoft.Extensions.Caching.Hybrid;
+using eShop.Catalog.API.Common;
 
 namespace eShop.Catalog.API.Features.Categories;
 
@@ -101,30 +103,51 @@ public static class CategoriesEndpoints
         return app;
     }
 
-    public static async Task<Ok<ApiResponse<List<Category>>>> GetAllCategories(CatalogContext context)
+    public static async Task<Ok<ApiResponse<List<Category>>>> GetAllCategories(
+        CatalogContext context,
+        HybridCache cache,
+        CancellationToken cancellationToken)
     {
-        var categories = await context.Categories
-            .AsNoTracking()
-            .Where(c => c.Status != EntityStatus.Deleted)
-            .OrderBy(c => c.Name)
-            .ToListAsync();
+        var categories = await cache.GetOrCreateAsync(
+            CatalogCachePolicies.AllCategoriesKey,
+            async cancel => await context.Categories
+                .AsNoTracking()
+                .Where(c => c.Status != EntityStatus.Deleted)
+                .OrderBy(c => c.Name)
+                .ToListAsync(cancel),
+            options: CatalogCachePolicies.StaticMetadata,
+            tags: [CatalogCachePolicies.CategoriesTag],
+            cancellationToken: cancellationToken);
 
         return TypedResults.Ok(ApiResponse<List<Category>>.Ok(categories));
     }
 
-    public static async Task<Results<Ok<ApiResponse<Category>>, NotFound<ApiResponse<Category>>>> GetCategoryById(CatalogContext context, Guid id)
+    public static async Task<Results<Ok<ApiResponse<Category>>, NotFound<ApiResponse<Category>>>> GetCategoryById(
+        CatalogContext context,
+        HybridCache cache,
+        Guid id,
+        CancellationToken cancellationToken)
     {
-        var category = await context.Categories
-            .AsNoTracking()
-            .Include(c => c.SubCategories.Where(sc => sc.Status != EntityStatus.Deleted))
-            .SingleOrDefaultAsync(c => c.Id == id && c.Status != EntityStatus.Deleted);
+        var category = await cache.GetOrCreateAsync(
+            CatalogCachePolicies.CategoryKey(id),
+            async cancel => await context.Categories
+                .AsNoTracking()
+                .Include(c => c.SubCategories.Where(sc => sc.Status != EntityStatus.Deleted))
+                .SingleOrDefaultAsync(c => c.Id == id && c.Status != EntityStatus.Deleted, cancel),
+            options: CatalogCachePolicies.StaticMetadata,
+            tags: [CatalogCachePolicies.CategoriesTag, CatalogCachePolicies.CategoryKey(id)],
+            cancellationToken: cancellationToken);
 
         return category is null 
             ? TypedResults.NotFound(ApiResponse<Category>.Fail($"Category with id '{id}' was not found.", 404)) 
             : TypedResults.Ok(ApiResponse<Category>.Ok(category));
     }
 
-    public static async Task<Results<Created<Category>, ValidationProblem>> CreateCategory(CatalogContext context, CreateCategoryRequest request)
+    public static async Task<Results<Created<Category>, ValidationProblem>> CreateCategory(
+        CatalogContext context,
+        HybridCache cache,
+        CreateCategoryRequest request,
+        CancellationToken cancellationToken)
     {
         var category = new Category
         {
@@ -138,14 +161,21 @@ public static class CategoriesEndpoints
         };
 
         context.Categories.Add(category);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
+
+        await cache.RemoveByTagAsync(CatalogCachePolicies.CategoriesTag, cancellationToken);
 
         return TypedResults.Created($"/api/catalog/categories/{category.Id}", category);
     }
 
-    public static async Task<Results<Ok<Category>, NotFound, ValidationProblem>> UpdateCategory(CatalogContext context, Guid id, UpdateCategoryRequest request)
+    public static async Task<Results<Ok<Category>, NotFound, ValidationProblem>> UpdateCategory(
+        CatalogContext context,
+        HybridCache cache,
+        Guid id,
+        UpdateCategoryRequest request,
+        CancellationToken cancellationToken)
     {
-        var existing = await context.Categories.SingleOrDefaultAsync(c => c.Id == id && c.Status != EntityStatus.Deleted);
+        var existing = await context.Categories.SingleOrDefaultAsync(c => c.Id == id && c.Status != EntityStatus.Deleted, cancellationToken);
         if (existing is null)
         {
             return TypedResults.NotFound();
@@ -159,7 +189,7 @@ public static class CategoriesEndpoints
             });
         }
 
-        var seoNameTaken = await context.Categories.AnyAsync(c => c.Id != id && c.SeoName == request.SeoName && c.Status != EntityStatus.Deleted);
+        var seoNameTaken = await context.Categories.AnyAsync(c => c.Id != id && c.SeoName == request.SeoName && c.Status != EntityStatus.Deleted, cancellationToken);
         if (seoNameTaken)
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>
@@ -170,7 +200,7 @@ public static class CategoriesEndpoints
 
         if (request.ParentId.HasValue)
         {
-            var parentExists = await context.Categories.AnyAsync(c => c.Id == request.ParentId.Value && c.Status != EntityStatus.Deleted);
+            var parentExists = await context.Categories.AnyAsync(c => c.Id == request.ParentId.Value && c.Status != EntityStatus.Deleted, cancellationToken);
             if (!parentExists)
             {
                 return TypedResults.ValidationProblem(new Dictionary<string, string[]>
@@ -186,20 +216,31 @@ public static class CategoriesEndpoints
         existing.ParentId = request.ParentId;
         existing.Status = string.IsNullOrWhiteSpace(request.Status) ? existing.Status : request.Status;
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
+
+        await cache.RemoveByTagAsync(CatalogCachePolicies.CategoriesTag, cancellationToken);
+        await cache.RemoveAsync(CatalogCachePolicies.CategoryKey(id), cancellationToken);
+
         return TypedResults.Ok(existing);
     }
 
-    public static async Task<Results<NoContent, NotFound>> DeleteCategory(CatalogContext context, Guid id)
+    public static async Task<Results<NoContent, NotFound>> DeleteCategory(
+        CatalogContext context,
+        HybridCache cache,
+        Guid id,
+        CancellationToken cancellationToken)
     {
-        var existing = await context.Categories.SingleOrDefaultAsync(c => c.Id == id && c.Status != EntityStatus.Deleted);
+        var existing = await context.Categories.SingleOrDefaultAsync(c => c.Id == id && c.Status != EntityStatus.Deleted, cancellationToken);
         if (existing is null)
         {
             return TypedResults.NotFound();
         }
 
         existing.Status = EntityStatus.Deleted;
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
+
+        await cache.RemoveByTagAsync(CatalogCachePolicies.CategoriesTag, cancellationToken);
+        await cache.RemoveAsync(CatalogCachePolicies.CategoryKey(id), cancellationToken);
 
         return TypedResults.NoContent();
     }

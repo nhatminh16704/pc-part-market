@@ -11,6 +11,9 @@ public static class Extensions
         if (builder.Environment.IsBuild())
         {
             builder.Services.AddDbContext<CatalogContext>();
+#pragma warning disable EXTEXP0018
+            builder.Services.AddHybridCache();
+#pragma warning restore EXTEXP0018
             return;
         }
 
@@ -53,5 +56,18 @@ public static class Extensions
 
         builder.Services.AddScoped<ICatalogAI, CatalogAI>();
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+        builder.AddRedisDistributedCache("redis");
+
+#pragma warning disable EXTEXP0018
+        builder.Services.AddHybridCache(options =>
+        {
+            options.DefaultEntryOptions = new Microsoft.Extensions.Caching.Hybrid.HybridCacheEntryOptions
+            {
+                LocalCacheExpiration = TimeSpan.FromMinutes(5),
+                Expiration = TimeSpan.FromMinutes(30)
+            };
+        });
+#pragma warning restore EXTEXP0018
     }
 }
