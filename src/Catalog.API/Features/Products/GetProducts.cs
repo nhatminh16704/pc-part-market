@@ -11,42 +11,54 @@ public static class GetProductsHandler
     public static async Task<Ok<ApiResponse<PaginatedItems<Product>>>> GetAll(
         [AsParameters] PaginationRequest paginationRequest,
         CatalogContext context,
+        HybridCache cache,
         [Description("Search term for product name")] string? name,
         [Description("Filter by brand UUID")] Guid? brandId,
-        [Description("Filter by category UUID")] Guid? categoryId)
+        [Description("Filter by category UUID")] Guid? categoryId,
+        CancellationToken cancellationToken)
     {
         var pageSize = paginationRequest.PageSize;
         var pageIndex = paginationRequest.PageIndex;
+        var cacheKey = CatalogCachePolicies.ProductListKey(pageIndex, pageSize, brandId, categoryId, name);
 
-        var query = context.Products
-            .AsNoTracking()
-            .Include(p => p.Brand)
-            .Include(p => p.Category)
-            .Include(p => p.Variants.Where(v => v.Status != EntityStatus.Deleted))
-            .Include(p => p.Images)
-            .Where(p => p.Status != EntityStatus.Deleted);
+        var pagedData = await cache.GetOrCreateAsync(
+            cacheKey,
+            async cancel =>
+            {
+                var query = context.Products
+                    .AsNoTracking()
+                    .Include(p => p.Brand)
+                    .Include(p => p.Category)
+                    .Include(p => p.Variants.Where(v => v.Status != EntityStatus.Deleted))
+                    .Include(p => p.Images)
+                    .Where(p => p.Status != EntityStatus.Deleted);
 
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            query = query.Where(p => EF.Functions.ILike(p.Name, $"%{name}%"));
-        }
-        if (brandId.HasValue)
-        {
-            query = query.Where(p => p.BrandId == brandId.Value);
-        }
-        if (categoryId.HasValue)
-        {
-            query = query.Where(p => p.CategoryId == categoryId.Value);
-        }
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    query = query.Where(p => EF.Functions.ILike(p.Name, $"%{name}%"));
+                }
+                if (brandId.HasValue)
+                {
+                    query = query.Where(p => p.BrandId == brandId.Value);
+                }
+                if (categoryId.HasValue)
+                {
+                    query = query.Where(p => p.CategoryId == categoryId.Value);
+                }
 
-        var totalItems = await query.LongCountAsync();
-        var itemsOnPage = await query
-            .OrderBy(p => p.Name)
-            .Skip(pageSize * pageIndex)
-            .Take(pageSize)
-            .ToListAsync();
+                var totalItems = await query.LongCountAsync(cancel);
+                var itemsOnPage = await query
+                    .OrderBy(p => p.Name)
+                    .Skip(pageSize * pageIndex)
+                    .Take(pageSize)
+                    .ToListAsync(cancel);
 
-        var pagedData = new PaginatedItems<Product>(pageIndex, pageSize, totalItems, itemsOnPage);
+                return new PaginatedItems<Product>(pageIndex, pageSize, totalItems, itemsOnPage);
+            },
+            options: CatalogCachePolicies.ProductList,
+            tags: [CatalogCachePolicies.ProductsTag, CatalogCachePolicies.ProductsListTag],
+            cancellationToken: cancellationToken);
+
         return TypedResults.Ok(ApiResponse<PaginatedItems<Product>>.Ok(pagedData));
     }
 
