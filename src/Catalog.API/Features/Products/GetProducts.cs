@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using Microsoft.AspNetCore.Http.HttpResults;
 using eShop.Shared.Common;
+using Microsoft.Extensions.Caching.Hybrid;
+using eShop.Catalog.API.Common;
 
 namespace eShop.Catalog.API.Features.Products;
 
@@ -50,15 +52,22 @@ public static class GetProductsHandler
 
     public static async Task<Results<Ok<ApiResponse<Product>>, NotFound<ApiResponse<Product>>>> ById(
         CatalogContext context,
-        Guid id)
+        HybridCache cache,
+        Guid id,
+        CancellationToken cancellationToken)
     {
-        var product = await context.Products
-            .AsNoTracking()
-            .Include(p => p.Brand)
-            .Include(p => p.Category)
-            .Include(p => p.Variants.Where(v => v.Status != EntityStatus.Deleted))
-            .Include(p => p.Images)
-            .SingleOrDefaultAsync(p => p.Id == id && p.Status != EntityStatus.Deleted);
+        var product = await cache.GetOrCreateAsync(
+            CatalogCachePolicies.ProductKey(id),
+            async cancel => await context.Products
+                .AsNoTracking()
+                .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .Include(p => p.Variants.Where(v => v.Status != EntityStatus.Deleted))
+                .Include(p => p.Images)
+                .SingleOrDefaultAsync(p => p.Id == id && p.Status != EntityStatus.Deleted, cancel),
+            options: CatalogCachePolicies.ProductDetail,
+            tags: [CatalogCachePolicies.ProductsTag, CatalogCachePolicies.ProductTag(id)],
+            cancellationToken: cancellationToken);
 
         return product is null
             ? TypedResults.NotFound(ApiResponse<Product>.Fail($"Product with id '{id}' was not found.", 404))
@@ -67,15 +76,23 @@ public static class GetProductsHandler
 
     public static async Task<Results<Ok<ApiResponse<Product>>, NotFound<ApiResponse<Product>>>> BySeoName(
         CatalogContext context,
-        string seoName)
+        HybridCache cache,
+        string seoName,
+        CancellationToken cancellationToken)
     {
-        var product = await context.Products
-            .AsNoTracking()
-            .Include(p => p.Brand)
-            .Include(p => p.Category)
-            .Include(p => p.Variants.Where(v => v.Status != EntityStatus.Deleted))
-            .Include(p => p.Images)
-            .SingleOrDefaultAsync(p => p.SeoName == seoName && p.Status != EntityStatus.Deleted);
+        var normalizedSeo = seoName.Trim().ToLowerInvariant();
+        var product = await cache.GetOrCreateAsync(
+            CatalogCachePolicies.ProductSeoKey(normalizedSeo),
+            async cancel => await context.Products
+                .AsNoTracking()
+                .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .Include(p => p.Variants.Where(v => v.Status != EntityStatus.Deleted))
+                .Include(p => p.Images)
+                .SingleOrDefaultAsync(p => p.SeoName == normalizedSeo && p.Status != EntityStatus.Deleted, cancel),
+            options: CatalogCachePolicies.ProductDetail,
+            tags: [CatalogCachePolicies.ProductsTag, $"product:seo:{normalizedSeo}"],
+            cancellationToken: cancellationToken);
 
         return product is null
             ? TypedResults.NotFound(ApiResponse<Product>.Fail($"Product with seoName '{seoName}' was not found.", 404))
