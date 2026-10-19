@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
+using eShop.Catalog.API.Common;
 
 namespace eShop.Catalog.API.Features.Products;
 
@@ -45,16 +46,20 @@ public static class UpdateProductHandler
 {
     public static async Task<Results<Ok<Product>, NotFound, ValidationProblem>> Handle(
         CatalogContext context,
+        ICacheInvalidator invalidator,
         Guid id,
-        UpdateProductRequest request)
+        UpdateProductRequest request,
+        CancellationToken cancellationToken)
     {
-        var existing = await context.Products.SingleOrDefaultAsync(p => p.Id == id && p.Status != EntityStatus.Deleted);
+        var existing = await context.Products.SingleOrDefaultAsync(p => p.Id == id && p.Status != EntityStatus.Deleted, cancellationToken);
         if (existing is null)
         {
             return TypedResults.NotFound();
         }
 
-        var seoNameTaken = await context.Products.AnyAsync(p => p.Id != id && p.SeoName == request.SeoName && p.Status != EntityStatus.Deleted);
+        var oldSeoName = existing.SeoName;
+
+        var seoNameTaken = await context.Products.AnyAsync(p => p.Id != id && p.SeoName == request.SeoName && p.Status != EntityStatus.Deleted, cancellationToken);
         if (seoNameTaken)
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>
@@ -72,7 +77,24 @@ public static class UpdateProductHandler
         existing.Status = string.IsNullOrWhiteSpace(request.Status) ? existing.Status : request.Status;
         existing.UpdatedAt = DateTime.UtcNow;
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
+
+        // Invalidate specific product detail cache across all instances
+        await invalidator.EvictTagAsync(CatalogCachePolicies.ProductTag(id), cancellationToken);
+        await invalidator.EvictKeyAsync(CatalogCachePolicies.ProductKey(id), cancellationToken);
+        if (!string.IsNullOrWhiteSpace(oldSeoName))
+        {
+            await invalidator.EvictKeyAsync(CatalogCachePolicies.ProductSeoKey(oldSeoName), cancellationToken);
+        }
+        if (!string.IsNullOrWhiteSpace(existing.SeoName) && !string.Equals(oldSeoName, existing.SeoName, StringComparison.OrdinalIgnoreCase))
+        {
+            await invalidator.EvictKeyAsync(CatalogCachePolicies.ProductSeoKey(existing.SeoName), cancellationToken);
+        }
+
+        // Invalidate listing and search cache across all instances
+        await invalidator.EvictTagAsync(CatalogCachePolicies.ProductsListTag, cancellationToken);
+        await invalidator.EvictTagAsync(CatalogCachePolicies.ProductsSearchTag, cancellationToken);
+
         return TypedResults.Ok(existing);
     }
 }

@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
+using eShop.Catalog.API.Common;
 
 namespace eShop.Catalog.API.Features.Variants;
 
@@ -42,10 +43,12 @@ public static class CreateVariantHandler
 {
     public static async Task<Results<Created<ProductVariant>, NotFound, ValidationProblem>> Handle(
         CatalogContext context,
+        ICacheInvalidator invalidator,
         Guid productId,
-        CreateVariantRequest request)
+        CreateVariantRequest request,
+        CancellationToken cancellationToken)
     {
-        var productExists = await context.Products.AnyAsync(p => p.Id == productId && p.Status != EntityStatus.Deleted);
+        var productExists = await context.Products.AnyAsync(p => p.Id == productId && p.Status != EntityStatus.Deleted, cancellationToken);
         if (!productExists)
         {
             return TypedResults.NotFound();
@@ -69,7 +72,14 @@ public static class CreateVariantHandler
         };
 
         context.ProductVariants.Add(variant);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
+
+        // Invalidate parent product detail, variant list, and catalog listings
+        await invalidator.EvictTagAsync(CatalogCachePolicies.ProductTag(productId), cancellationToken);
+        await invalidator.EvictKeyAsync(CatalogCachePolicies.ProductKey(productId), cancellationToken);
+        await invalidator.EvictKeyAsync($"variants:product:{productId}", cancellationToken);
+        await invalidator.EvictTagAsync(CatalogCachePolicies.ProductsListTag, cancellationToken);
+        await invalidator.EvictTagAsync(CatalogCachePolicies.ProductsSearchTag, cancellationToken);
 
         return TypedResults.Created($"/api/catalog/variants/{variant.Id}", variant);
     }

@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
+using eShop.Catalog.API.Common;
 
 namespace eShop.Catalog.API.Features.Variants;
 
@@ -40,16 +41,18 @@ public static class UpdateVariantHandler
 {
     public static async Task<Results<Ok<ProductVariant>, NotFound, ValidationProblem>> Handle(
         CatalogContext context,
+        ICacheInvalidator invalidator,
         Guid id,
-        UpdateVariantRequest request)
+        UpdateVariantRequest request,
+        CancellationToken cancellationToken)
     {
-        var existing = await context.ProductVariants.SingleOrDefaultAsync(v => v.Id == id && v.Status != EntityStatus.Deleted);
+        var existing = await context.ProductVariants.SingleOrDefaultAsync(v => v.Id == id && v.Status != EntityStatus.Deleted, cancellationToken);
         if (existing is null)
         {
             return TypedResults.NotFound();
         }
 
-        var skuTaken = await context.ProductVariants.AnyAsync(v => v.Id != id && v.Sku == request.Sku && v.Status != EntityStatus.Deleted);
+        var skuTaken = await context.ProductVariants.AnyAsync(v => v.Id != id && v.Sku == request.Sku && v.Status != EntityStatus.Deleted, cancellationToken);
         if (skuTaken)
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>
@@ -70,7 +73,17 @@ public static class UpdateVariantHandler
         existing.Status = string.IsNullOrWhiteSpace(request.Status) ? existing.Status : request.Status;
         existing.UpdatedAt = DateTime.UtcNow;
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
+
+        // Invalidate parent product detail, variant list, and catalog listings
+        var productId = existing.ProductId;
+        await invalidator.EvictTagAsync(CatalogCachePolicies.ProductTag(productId), cancellationToken);
+        await invalidator.EvictKeyAsync(CatalogCachePolicies.ProductKey(productId), cancellationToken);
+        await invalidator.EvictKeyAsync($"variants:product:{productId}", cancellationToken);
+        await invalidator.EvictKeyAsync($"variant:{id}", cancellationToken);
+        await invalidator.EvictTagAsync(CatalogCachePolicies.ProductsListTag, cancellationToken);
+        await invalidator.EvictTagAsync(CatalogCachePolicies.ProductsSearchTag, cancellationToken);
+
         return TypedResults.Ok(existing);
     }
 }

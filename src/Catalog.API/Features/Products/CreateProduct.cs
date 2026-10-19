@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
+using eShop.Catalog.API.Common;
 
 namespace eShop.Catalog.API.Features.Products;
 
@@ -47,7 +48,9 @@ public static class CreateProductHandler
 {
     public static async Task<Results<Created<Product>, ValidationProblem>> Handle(
         CatalogContext context,
-        CreateProductRequest request)
+        ICacheInvalidator invalidator,
+        CreateProductRequest request,
+        CancellationToken cancellationToken)
     {
         var product = new Product
         {
@@ -63,7 +66,10 @@ public static class CreateProductHandler
         };
 
         context.Products.Add(product);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
+
+        await invalidator.EvictTagAsync(CatalogCachePolicies.ProductsListTag, cancellationToken);
+        await invalidator.EvictTagAsync(CatalogCachePolicies.ProductsSearchTag, cancellationToken);
 
         return TypedResults.Created($"/api/catalog/products/{product.Id}", product);
     }
