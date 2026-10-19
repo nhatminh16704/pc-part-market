@@ -137,7 +137,7 @@ public static class BrandsEndpoints
 
     public static async Task<Results<Created<Brand>, ValidationProblem>> CreateBrand(
         CatalogContext context,
-        HybridCache cache,
+        ICacheInvalidator invalidator,
         CreateBrandRequest request,
         CancellationToken cancellationToken)
     {
@@ -155,14 +155,14 @@ public static class BrandsEndpoints
         context.Brands.Add(brand);
         await context.SaveChangesAsync(cancellationToken);
 
-        await cache.RemoveByTagAsync(CatalogCachePolicies.BrandsTag, cancellationToken);
+        await invalidator.EvictTagAsync(CatalogCachePolicies.BrandsTag, cancellationToken);
 
         return TypedResults.Created($"/api/catalog/brands/{brand.Id}", brand);
     }
 
     public static async Task<Results<Ok<Brand>, NotFound, ValidationProblem>> UpdateBrand(
         CatalogContext context,
-        HybridCache cache,
+        ICacheInvalidator invalidator,
         Guid id,
         UpdateBrandRequest request,
         CancellationToken cancellationToken)
@@ -190,15 +190,15 @@ public static class BrandsEndpoints
 
         await context.SaveChangesAsync(cancellationToken);
 
-        await cache.RemoveByTagAsync(CatalogCachePolicies.BrandsTag, cancellationToken);
-        await cache.RemoveAsync(CatalogCachePolicies.BrandKey(id), cancellationToken);
+        await invalidator.EvictTagAsync(CatalogCachePolicies.BrandsTag, cancellationToken);
+        await invalidator.EvictKeyAsync(CatalogCachePolicies.BrandKey(id), cancellationToken);
 
         return TypedResults.Ok(existing);
     }
 
     public static async Task<Results<NoContent, NotFound>> DeleteBrand(
         CatalogContext context,
-        HybridCache cache,
+        ICacheInvalidator invalidator,
         Guid id,
         CancellationToken cancellationToken)
     {
@@ -211,8 +211,8 @@ public static class BrandsEndpoints
         existing.Status = EntityStatus.Deleted;
         await context.SaveChangesAsync(cancellationToken);
 
-        await cache.RemoveByTagAsync(CatalogCachePolicies.BrandsTag, cancellationToken);
-        await cache.RemoveAsync(CatalogCachePolicies.BrandKey(id), cancellationToken);
+        await invalidator.EvictTagAsync(CatalogCachePolicies.BrandsTag, cancellationToken);
+        await invalidator.EvictKeyAsync(CatalogCachePolicies.BrandKey(id), cancellationToken);
 
         return TypedResults.NoContent();
     }

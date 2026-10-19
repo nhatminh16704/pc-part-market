@@ -1,3 +1,4 @@
+using eShop.Catalog.API.Common;
 using eShop.Catalog.API.Services;
 using FluentValidation;
 using MassTransit;
@@ -14,6 +15,7 @@ public static class Extensions
 #pragma warning disable EXTEXP0018
             builder.Services.AddHybridCache();
 #pragma warning restore EXTEXP0018
+            builder.Services.AddSingleton<ICacheInvalidator, RedisCacheInvalidator>();
             return;
         }
 
@@ -69,5 +71,9 @@ public static class Extensions
             };
         });
 #pragma warning restore EXTEXP0018
+
+        builder.Services.AddSingleton<RedisCacheInvalidator>();
+        builder.Services.AddSingleton<ICacheInvalidator>(sp => sp.GetRequiredService<RedisCacheInvalidator>());
+        builder.Services.AddHostedService(sp => sp.GetRequiredService<RedisCacheInvalidator>());
     }
 }

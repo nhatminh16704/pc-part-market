@@ -145,7 +145,7 @@ public static class CategoriesEndpoints
 
     public static async Task<Results<Created<Category>, ValidationProblem>> CreateCategory(
         CatalogContext context,
-        HybridCache cache,
+        ICacheInvalidator invalidator,
         CreateCategoryRequest request,
         CancellationToken cancellationToken)
     {
@@ -163,14 +163,14 @@ public static class CategoriesEndpoints
         context.Categories.Add(category);
         await context.SaveChangesAsync(cancellationToken);
 
-        await cache.RemoveByTagAsync(CatalogCachePolicies.CategoriesTag, cancellationToken);
+        await invalidator.EvictTagAsync(CatalogCachePolicies.CategoriesTag, cancellationToken);
 
         return TypedResults.Created($"/api/catalog/categories/{category.Id}", category);
     }
 
     public static async Task<Results<Ok<Category>, NotFound, ValidationProblem>> UpdateCategory(
         CatalogContext context,
-        HybridCache cache,
+        ICacheInvalidator invalidator,
         Guid id,
         UpdateCategoryRequest request,
         CancellationToken cancellationToken)
@@ -218,15 +218,15 @@ public static class CategoriesEndpoints
 
         await context.SaveChangesAsync(cancellationToken);
 
-        await cache.RemoveByTagAsync(CatalogCachePolicies.CategoriesTag, cancellationToken);
-        await cache.RemoveAsync(CatalogCachePolicies.CategoryKey(id), cancellationToken);
+        await invalidator.EvictTagAsync(CatalogCachePolicies.CategoriesTag, cancellationToken);
+        await invalidator.EvictKeyAsync(CatalogCachePolicies.CategoryKey(id), cancellationToken);
 
         return TypedResults.Ok(existing);
     }
 
     public static async Task<Results<NoContent, NotFound>> DeleteCategory(
         CatalogContext context,
-        HybridCache cache,
+        ICacheInvalidator invalidator,
         Guid id,
         CancellationToken cancellationToken)
     {
@@ -239,8 +239,8 @@ public static class CategoriesEndpoints
         existing.Status = EntityStatus.Deleted;
         await context.SaveChangesAsync(cancellationToken);
 
-        await cache.RemoveByTagAsync(CatalogCachePolicies.CategoriesTag, cancellationToken);
-        await cache.RemoveAsync(CatalogCachePolicies.CategoryKey(id), cancellationToken);
+        await invalidator.EvictTagAsync(CatalogCachePolicies.CategoriesTag, cancellationToken);
+        await invalidator.EvictKeyAsync(CatalogCachePolicies.CategoryKey(id), cancellationToken);
 
         return TypedResults.NoContent();
     }
