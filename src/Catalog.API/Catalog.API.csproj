@@ -44,8 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Pics\*.webp" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="Setup\insert_seed_data.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Setup\seed_data.sql" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Setup\specs_normalized.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
