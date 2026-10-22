@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using eShop.Basket.API.Repositories;
 using eShop.Basket.API.Extensions;
 using eShop.Basket.API.Model;
@@ -82,8 +82,11 @@ public class BasketService(
         {
             response.Items.Add(new BasketItem()
             {
-                ProductId = item.ProductId,
+                ProductId = item.ProductId.ToString(),
+                VariantId = item.VariantId.ToString(),
                 Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice,
+                OldUnitPrice = item.OldUnitPrice,
             });
         }
 
@@ -99,11 +102,17 @@ public class BasketService(
 
         foreach (var item in customerBasketRequest.Items)
         {
-            response.Items.Add(new()
+            if (Guid.TryParse(item.ProductId, out var productId) && Guid.TryParse(item.VariantId, out var variantId))
             {
-                ProductId = item.ProductId,
-                Quantity = item.Quantity,
-            });
+                response.Items.Add(new()
+                {
+                    ProductId = productId,
+                    VariantId = variantId,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.UnitPrice,
+                    OldUnitPrice = item.OldUnitPrice,
+                });
+            }
         }
 
         return response;
