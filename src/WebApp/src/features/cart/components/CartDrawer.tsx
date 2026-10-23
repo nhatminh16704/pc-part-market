@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { X, Trash2, ShoppingBag, ArrowRight, AlertTriangle, TrendingDown } from 'lucide-react';
 import { formatVND } from '@/utils/format';
 import { Button } from '@/components/ui/button';
 import { useCartStore } from '@/stores';
@@ -11,8 +11,15 @@ export const CartDrawer: React.FC = () => {
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clearCart);
+  const fetchBasket = useCartStore((state) => state.fetchBasket);
+  const hasPriceChanges = useCartStore((state) => state.hasPriceChanges);
   const totalAmount = useCartStore((state) => state.getTotalAmount)();
   const totalCount = useCartStore((state) => state.getTotalCount)();
+
+  // Đồng bộ giỏ hàng từ Redis khi app khởi động
+  useEffect(() => {
+    fetchBasket();
+  }, [fetchBasket]);
 
   if (!isOpen) return null;
 
@@ -50,8 +57,18 @@ export const CartDrawer: React.FC = () => {
             </Button>
           </div>
 
+          {/* Price Change Notification Banner */}
+          {hasPriceChanges && (
+            <div className="mt-3 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2 shadow-2xs">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                Một số linh kiện trong giỏ vừa được cập nhật giá mới nhất từ Catalog. Vui lòng kiểm tra lại trước khi đặt hàng.
+              </span>
+            </div>
+          )}
+
           {/* Cart Items List */}
-          <div className="mt-4 overflow-y-auto max-h-[calc(100vh-250px)] pr-1 flex flex-col gap-3">
+          <div className="mt-4 overflow-y-auto max-h-[calc(100vh-270px)] pr-1 flex flex-col gap-3">
             {items.length === 0 ? (
               <div className="py-20 text-center">
                 <div className="text-4xl mb-3 opacity-60">🛒</div>
@@ -64,8 +81,15 @@ export const CartDrawer: React.FC = () => {
               </div>
             ) : (
               items.map((item, idx) => {
-                const img = item.product.images?.[0]?.imageUrl || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=400&q=80';
-                const itemPrice = item.variant?.price ?? item.product.variants?.[0]?.price ?? 0;
+                const img =
+                  item.product.images?.[0]?.imageUrl ||
+                  item.variant?.imageUrl ||
+                  'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=400&q=80';
+
+                const itemPrice = item.unitPrice ?? item.variant?.price ?? item.product.variants?.[0]?.price ?? 0;
+                const oldPrice = item.oldUnitPrice ?? itemPrice;
+                const isPriceDrop = oldPrice > itemPrice;
+                const isPriceRise = oldPrice < itemPrice && oldPrice > 0;
 
                 return (
                   <div
@@ -85,8 +109,30 @@ export const CartDrawer: React.FC = () => {
                           {item.variant.sku}
                         </div>
                       )}
-                      <div className="text-xs font-extrabold text-[#ff5636] mt-0.5 font-heading">
-                        {formatVND(itemPrice)}
+
+                      {/* Giá & Cảnh báo biến động giá */}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                        <span className="text-xs font-extrabold text-[#ff5636] font-heading">
+                          {formatVND(itemPrice)}
+                        </span>
+
+                        {isPriceDrop && (
+                          <>
+                            <span className="text-[10px] text-slate-400 line-through">
+                              {formatVND(oldPrice)}
+                            </span>
+                            <span className="inline-flex items-center text-[9px] font-semibold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200">
+                              <TrendingDown className="w-2.5 h-2.5 mr-0.5" />
+                              -{formatVND(oldPrice - itemPrice)}
+                            </span>
+                          </>
+                        )}
+
+                        {isPriceRise && (
+                          <span className="text-[9px] font-semibold text-amber-700 bg-amber-50 px-1 py-0.5 rounded border border-amber-200">
+                            +{formatVND(itemPrice - oldPrice)}
+                          </span>
+                        )}
                       </div>
                     </div>
 

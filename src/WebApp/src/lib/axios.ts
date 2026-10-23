@@ -8,13 +8,32 @@ export const apiClient = axios.create({
   timeout: 10000,
 });
 
-// Request Interceptor: Tự động đính kèm Authorization Bearer token
+function getOrCreateBuyerId(): string {
+  try {
+    let buyerId = localStorage.getItem('eshop_buyer_id');
+    if (!buyerId) {
+      buyerId = typeof crypto !== 'undefined' && crypto.randomUUID 
+        ? crypto.randomUUID() 
+        : 'guest-' + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('eshop_buyer_id', buyerId);
+    }
+    return buyerId;
+  } catch {
+    return 'guest-anonymous';
+  }
+}
+
+// Request Interceptor: Tự động đính kèm Authorization Bearer token & X-Buyer-Id
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    const buyerId = getOrCreateBuyerId();
+    config.headers['X-Buyer-Id'] = buyerId;
+
     return config;
   },
   (error) => Promise.reject(error)
