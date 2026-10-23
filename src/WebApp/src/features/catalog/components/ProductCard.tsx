@@ -4,7 +4,7 @@ import type { Product } from '../types';
 import { formatVND } from '@/utils/format';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useCartStore } from '@/stores';
+import { useCart } from '@/features/cart/hooks/useCart';
 import { parseSpecifications } from '@/utils/specs';
 
 interface ProductCardProps {
@@ -16,7 +16,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onQuickView,
 }) => {
-  const addItem = useCartStore((state) => state.addItem);
+  const { addItem } = useCart();
 
   const mainImage = product.images?.find((img) => img.isMain)?.imageUrl 
     || product.images?.[0]?.imageUrl

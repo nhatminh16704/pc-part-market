@@ -1,25 +1,22 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { X, Trash2, ShoppingBag, ArrowRight, AlertTriangle, TrendingDown } from 'lucide-react';
 import { formatVND } from '@/utils/format';
 import { Button } from '@/components/ui/button';
-import { useCartStore } from '@/stores';
+import { useCart } from '../hooks/useCart';
 
 export const CartDrawer: React.FC = () => {
-  const isOpen = useCartStore((state) => state.isOpen);
-  const closeCart = useCartStore((state) => state.closeCart);
-  const items = useCartStore((state) => state.items);
-  const updateQuantity = useCartStore((state) => state.updateQuantity);
-  const removeItem = useCartStore((state) => state.removeItem);
-  const clearCart = useCartStore((state) => state.clearCart);
-  const fetchBasket = useCartStore((state) => state.fetchBasket);
-  const hasPriceChanges = useCartStore((state) => state.hasPriceChanges);
-  const totalAmount = useCartStore((state) => state.getTotalAmount)();
-  const totalCount = useCartStore((state) => state.getTotalCount)();
-
-  // Đồng bộ giỏ hàng từ Redis khi app khởi động
-  useEffect(() => {
-    fetchBasket();
-  }, [fetchBasket]);
+  const {
+    isOpen,
+    closeCart,
+    items,
+    updateQuantity,
+    removeItem,
+    clearCart,
+    totalAmount,
+    totalCount,
+    hasPriceChanges,
+    isLoading,
+  } = useCart();
 
   if (!isOpen) return null;
 
@@ -80,20 +77,19 @@ export const CartDrawer: React.FC = () => {
                 </div>
               </div>
             ) : (
-              items.map((item, idx) => {
+              items.map((item) => {
                 const img =
-                  item.product.images?.[0]?.imageUrl ||
-                  item.variant?.imageUrl ||
+                  item.pictureUrl ||
                   'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=400&q=80';
 
-                const itemPrice = item.unitPrice ?? item.variant?.price ?? item.product.variants?.[0]?.price ?? 0;
-                const oldPrice = item.oldUnitPrice ?? itemPrice;
+                const itemPrice = item.unitPrice;
+                const oldPrice = item.oldUnitPrice || itemPrice;
                 const isPriceDrop = oldPrice > itemPrice;
                 const isPriceRise = oldPrice < itemPrice && oldPrice > 0;
 
                 return (
                   <div
-                    key={`${item.product.id}-${item.variant?.id || idx}`}
+                    key={`${item.productId}-${item.variantId}`}
                     className="flex gap-3.5 p-3 rounded-xl bg-slate-50 border border-slate-200 items-center justify-between"
                   >
                     <div className="w-14 h-14 bg-white rounded-lg p-1 shrink-0 border border-slate-200 flex items-center justify-center overflow-hidden">
@@ -102,11 +98,11 @@ export const CartDrawer: React.FC = () => {
 
                     <div className="flex-1 min-w-0">
                       <h4 className="text-xs font-bold truncate text-slate-900">
-                        {item.product.name}
+                        {item.productName}
                       </h4>
-                      {item.variant?.sku && (
+                      {item.sku && (
                         <div className="text-[10px] text-slate-500 truncate">
-                          {item.variant.sku}
+                          {item.sku}
                         </div>
                       )}
 
@@ -142,8 +138,9 @@ export const CartDrawer: React.FC = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => updateQuantity(item.product.id, item.variant?.id, -1)}
-                          className="h-7 w-7 text-xs text-slate-600 hover:bg-slate-100"
+                          disabled={isLoading}
+                          onClick={() => updateQuantity(item.productId, item.variantId, -1)}
+                          className="h-7 w-7 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-50"
                         >
                           -
                         </Button>
@@ -153,8 +150,9 @@ export const CartDrawer: React.FC = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => updateQuantity(item.product.id, item.variant?.id, 1)}
-                          className="h-7 w-7 text-xs text-slate-600 hover:bg-slate-100"
+                          disabled={isLoading}
+                          onClick={() => updateQuantity(item.productId, item.variantId, 1)}
+                          className="h-7 w-7 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-50"
                         >
                           +
                         </Button>
@@ -163,8 +161,9 @@ export const CartDrawer: React.FC = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => removeItem(item.product.id, item.variant?.id)}
-                        className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                        disabled={isLoading}
+                        onClick={() => removeItem(item.productId, item.variantId)}
+                        className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 disabled:opacity-50"
                         title="Xóa khỏi giỏ"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -196,8 +195,9 @@ export const CartDrawer: React.FC = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={clearCart}
-                className="text-rose-600 hover:bg-rose-50 border-rose-200 text-xs"
+                disabled={isLoading}
+                onClick={() => clearCart()}
+                className="text-rose-600 hover:bg-rose-50 border-rose-200 text-xs disabled:opacity-50"
               >
                 Xóa tất cả
               </Button>
@@ -206,8 +206,8 @@ export const CartDrawer: React.FC = () => {
             <Button
               variant="default"
               size="lg"
-              disabled={items.length === 0}
-              className="flex-1 bg-[#ff5636] hover:bg-[#e63e1c] text-white font-bold shadow-md shadow-orange-500/20"
+              disabled={items.length === 0 || isLoading}
+              className="flex-1 bg-[#ff5636] hover:bg-[#e63e1c] text-white font-bold shadow-md shadow-orange-500/20 disabled:opacity-50"
               onClick={() => {
                 alert(`Đặt hàng thành công với tổng số tiền: ${formatVND(totalAmount)}!`);
                 clearCart();

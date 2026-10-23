@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Cpu, Search, ShoppingCart, User, MapPin, Phone, ShieldCheck, Wrench } from 'lucide-react';
-import { useCartStore } from '@/stores';
+import { useCart } from '@/features/cart/hooks/useCart';
 import { useCategories } from '@/features/catalog/hooks/useCatalog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,8 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   selectedCategory = null,
   onSelectCategory,
 }) => {
-  const openCart = useCartStore((state) => state.openCart);
-  const totalCount = useCartStore((state) => state.getTotalCount)();
+  const { openCart, totalCount } = useCart();
   const { data: categories = [] } = useCategories();
 
   return (

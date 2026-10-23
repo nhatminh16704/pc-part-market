@@ -5,7 +5,7 @@ import { formatVND } from '@/utils/format';
 import { Button } from '@/components/ui/button';
 import { parseSpecifications } from '@/utils/specs';
 import { Badge } from '@/components/ui/badge';
-import { useCartStore } from '@/stores';
+import { useCart } from '@/features/cart/hooks/useCart';
 
 interface ProductModalProps {
   product: Product | null;
@@ -16,7 +16,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   product,
   onClose,
 }) => {
-  const addItem = useCartStore((state) => state.addItem);
+  const { addItem } = useCart();
 
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(
     product?.variants?.[0]

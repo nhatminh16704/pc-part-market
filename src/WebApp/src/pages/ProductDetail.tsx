@@ -5,7 +5,7 @@ import { formatVND } from '@/utils/format';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { parseSpecifications } from '@/utils/specs';
-import { useCartStore } from '@/stores';
+import { useCart } from '@/features/cart/hooks/useCart';
 import { ArrowLeft, ShoppingCart, ShieldCheck, Truck, Wrench } from 'lucide-react';
 import type { ProductVariant } from '@/features/catalog/types';
 
@@ -19,7 +19,7 @@ export const ProductDetail: React.FC = () => {
   const product = productById || productBySeo;
   const isLoading = loadingId || loadingSeo;
 
-  const addItem = useCartStore((state) => state.addItem);
+  const { addItem } = useCart();
 
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
