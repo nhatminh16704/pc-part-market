@@ -6,8 +6,19 @@ namespace eShop.Identity.API.Features.Auth;
 
 public record LoginRequest(string Email, string Password);
 
-public static class LoginHandler
+public static class LoginEndpoint
 {
+    public static RouteHandlerBuilder MapLogin(this IEndpointRouteBuilder endpoints)
+    {
+        return endpoints.MapPost("/login", Handle)
+            .WithName("Login")
+            .WithSummary("User login")
+            .WithDescription("Authenticates user by email or username and issues a signed JWT token.")
+            .Produces<AuthResponse>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status401Unauthorized);
+    }
+
     public static async Task<IResult> Handle(
         [FromBody] LoginRequest request,
         UserManager<ApplicationUser> userManager,

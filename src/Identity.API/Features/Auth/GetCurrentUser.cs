@@ -4,8 +4,19 @@ using Duende.IdentityModel;
 
 namespace eShop.Identity.API.Features.Auth;
 
-public static class GetCurrentUserHandler
+public static class GetCurrentUserEndpoint
 {
+    public static RouteHandlerBuilder MapGetCurrentUser(this IEndpointRouteBuilder endpoints)
+    {
+        return endpoints.MapGet("/me", Handle)
+            .WithName("GetCurrentUser")
+            .WithSummary("Get current user profile")
+            .WithDescription("Retrieves the authenticated user profile based on Bearer token.")
+            .Produces<UserDto>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+    }
+
     public static async Task<IResult> Handle(
         HttpContext context,
         UserManager<ApplicationUser> userManager)

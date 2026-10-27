@@ -17,8 +17,19 @@ public record RegisterRequest(
     string? ZipCode = null
 );
 
-public static class RegisterHandler
+public static class RegisterEndpoint
 {
+    public static RouteHandlerBuilder MapRegister(this IEndpointRouteBuilder endpoints)
+    {
+        return endpoints.MapPost("/register", Handle)
+            .WithName("Register")
+            .WithSummary("User registration")
+            .WithDescription("Registers a new customer account and returns a signed JWT token.")
+            .Produces<AuthResponse>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status409Conflict);
+    }
+
     public static async Task<IResult> Handle(
         [FromBody] RegisterRequest request,
         UserManager<ApplicationUser> userManager,
