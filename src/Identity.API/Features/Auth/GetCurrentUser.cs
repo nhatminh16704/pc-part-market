@@ -1,0 +1,62 @@
+#nullable enable
+
+using Duende.IdentityModel;
+
+namespace eShop.Identity.API.Features.Auth;
+
+public static class GetCurrentUserHandler
+{
+    public static async Task<IResult> Handle(
+        HttpContext context,
+        UserManager<ApplicationUser> userManager)
+    {
+        // Extract userId from ClaimsPrincipal or Bearer token
+        string? userId = context.User.FindFirst(JwtClaimTypes.Subject)?.Value 
+                         ?? context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            var authHeader = context.Request.Headers.Authorization.ToString();
+            if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                var tokenStr = authHeader["Bearer ".Length..].Trim();
+                var handler = new JwtSecurityTokenHandler();
+                if (handler.CanReadToken(tokenStr))
+                {
+                    var jwt = handler.ReadJwtToken(tokenStr);
+                    userId = jwt.Claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Subject || c.Type == "sub")?.Value;
+                }
+            }
+        }
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Results.Problem("Chưa xác thực người dùng.", statusCode: StatusCodes.Status401Unauthorized);
+        }
+
+        var user = await userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return Results.Problem("Không tìm thấy thông tin tài khoản.", statusCode: StatusCodes.Status404NotFound);
+        }
+
+        var roles = await userManager.GetRolesAsync(user);
+        var primaryRole = roles.FirstOrDefault() ?? "Customer";
+
+        var userDto = new UserDto(
+            Id: user.Id,
+            Email: user.Email ?? "",
+            Name: $"{user.Name} {user.LastName}".Trim(),
+            LastName: user.LastName ?? "",
+            PhoneNumber: user.PhoneNumber,
+            Role: primaryRole,
+            Street: user.Street,
+            City: user.City,
+            State: user.State,
+            Country: user.Country,
+            ZipCode: user.ZipCode
+        );
+
+        return Results.Ok(userDto);
+    }
+}
