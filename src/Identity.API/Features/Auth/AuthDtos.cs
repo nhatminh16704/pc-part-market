@@ -10,6 +10,7 @@ public record UserDto(
     string Email,
     string? UserName,
     string? PhoneNumber,
+    string Status,
     string? Role
 );
 
@@ -27,12 +28,14 @@ public static class TokenHelper
         IdentityServerTools identityServerTools)
     {
         var primaryRole = roles.FirstOrDefault() ?? "Customer";
+        var status = user.Status ?? UserStatus.Active;
 
         var claims = new List<Claim>
         {
             new(JwtClaimTypes.Subject, user.Id),
             new(JwtClaimTypes.PreferredUserName, user.UserName ?? user.Email ?? ""),
             new(JwtClaimTypes.Email, user.Email ?? ""),
+            new("status", status),
             new(JwtClaimTypes.Role, primaryRole),
             new("role", primaryRole),
             new(JwtClaimTypes.Audience, "basket"),
@@ -56,6 +59,7 @@ public static class TokenHelper
             Email: user.Email ?? "",
             UserName: user.UserName,
             PhoneNumber: user.PhoneNumber,
+            Status: status,
             Role: primaryRole
         );
 

@@ -16,7 +16,8 @@ public static class LoginEndpoint
             .WithDescription("Authenticates user by email or username and issues a signed JWT token.")
             .Produces<AuthResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .ProducesProblem(StatusCodes.Status401Unauthorized);
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden);
     }
 
     public static async Task<IResult> Handle(
@@ -39,6 +40,25 @@ public static class LoginEndpoint
         {
             logger.LogWarning("Login failed: User not found for {Email}", request.Email);
             return Results.Problem("Tài khoản hoặc mật khẩu không chính xác.", statusCode: StatusCodes.Status401Unauthorized);
+        }
+
+        // Check account status: ACTIVE, LOCKED, BANNED
+        if (string.Equals(user.Status, UserStatus.Locked, StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogWarning("Login rejected: Account is LOCKED for {Email}", request.Email);
+            return Results.Problem("Tài khoản của bạn đã bị tạm khóa. Vui lòng liên hệ quản trị viên.", statusCode: StatusCodes.Status403Forbidden);
+        }
+
+        if (string.Equals(user.Status, UserStatus.Banned, StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogWarning("Login rejected: Account is BANNED for {Email}", request.Email);
+            return Results.Problem("Tài khoản của bạn đã bị cấm khỏi hệ thống.", statusCode: StatusCodes.Status403Forbidden);
+        }
+
+        if (!string.Equals(user.Status, UserStatus.Active, StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogWarning("Login rejected: Inactive account status ({Status}) for {Email}", user.Status, request.Email);
+            return Results.Problem("Tài khoản hiện không ở trạng thái hoạt động.", statusCode: StatusCodes.Status403Forbidden);
         }
 
         var checkPassword = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);

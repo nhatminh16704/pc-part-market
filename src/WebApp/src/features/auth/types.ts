@@ -19,6 +19,7 @@ export interface User {
   email: string;
   userName?: string;
   phoneNumber?: string;
+  status: string;
   role: string;
 }
 

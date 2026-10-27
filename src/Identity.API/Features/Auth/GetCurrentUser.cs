@@ -59,6 +59,7 @@ public static class GetCurrentUserEndpoint
             Email: user.Email ?? "",
             UserName: user.UserName,
             PhoneNumber: user.PhoneNumber,
+            Status: user.Status ?? UserStatus.Active,
             Role: primaryRole
         );
 

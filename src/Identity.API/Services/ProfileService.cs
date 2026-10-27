@@ -34,6 +34,12 @@ namespace eShop.Identity.API.Services
 
             if (user != null)
             {
+                if (user.Status != UserStatus.Active)
+                {
+                    context.IsActive = false;
+                    return;
+                }
+
                 if (_userManager.SupportsUserSecurityStamp)
                 {
                     var security_stamp = subject.Claims.Where(c => c.Type == "security_stamp").Select(c => c.Value).SingleOrDefault();
@@ -58,7 +64,8 @@ namespace eShop.Identity.API.Services
             {
                 new Claim(JwtClaimTypes.Subject, user.Id),
                 new Claim(JwtClaimTypes.PreferredUserName, user.UserName ?? user.Email ?? ""),
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? user.Email ?? "")
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? user.Email ?? ""),
+                new Claim("status", user.Status ?? UserStatus.Active)
             };
 
             if (_userManager.SupportsUserEmail && !string.IsNullOrWhiteSpace(user.Email))
