@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Cpu, Search, ShoppingCart, User, MapPin, Phone, ShieldCheck, Wrench } from 'lucide-react';
+import { Cpu, Search, ShoppingCart, User, MapPin, Phone, ShieldCheck, Wrench, LogOut } from 'lucide-react';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useCategories } from '@/features/catalog/hooks/useCatalog';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -21,6 +22,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const { openCart, totalCount } = useCart();
   const { data: categories = [] } = useCategories();
+  const { user, isAuthenticated, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 bg-white shadow-sm border-b border-slate-200/80">
@@ -109,18 +111,37 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </Button>
 
-          {/* User Account Link */}
-          <Button
-            variant="outline"
-            size="sm"
-            asChild
-            className="gap-2 border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-300 hover:bg-slate-50 shadow-sm"
-          >
-            <Link to="/login">
-              <User className="w-4 h-4 text-slate-600" />
-              <span className="text-xs font-semibold hidden sm:inline">Tài khoản</span>
-            </Link>
-          </Button>
+          {/* User Account / Auth */}
+          {isAuthenticated && user ? (
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-800 text-xs font-semibold shadow-sm">
+                <User className="w-3.5 h-3.5 text-[#ff5636]" />
+                <span className="max-w-[110px] sm:max-w-[140px] truncate">{user.name || user.email}</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                title="Đăng xuất"
+                className="h-8 px-2 text-slate-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="sr-only">Đăng xuất</span>
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="gap-2 border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-300 hover:bg-slate-50 shadow-sm"
+            >
+              <Link to="/login">
+                <User className="w-4 h-4 text-slate-600" />
+                <span className="text-xs font-semibold hidden sm:inline">Đăng nhập</span>
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
 

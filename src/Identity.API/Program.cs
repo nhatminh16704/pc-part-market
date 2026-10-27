@@ -1,4 +1,6 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+using eShop.Identity.API.Features.Auth;
+
+var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
@@ -53,5 +55,6 @@ app.UseIdentityServer();
 app.UseAuthorization();
 
 app.MapDefaultControllerRoute();
+app.MapAuthEndpoints();
 
 app.Run();
