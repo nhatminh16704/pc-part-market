@@ -116,7 +116,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center gap-1.5">
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-800 text-xs font-semibold shadow-sm">
                 <User className="w-3.5 h-3.5 text-[#ff5636]" />
-                <span className="max-w-[110px] sm:max-w-[140px] truncate">{user.name || user.email}</span>
+                <span className="max-w-[110px] sm:max-w-[140px] truncate">{user.userName || user.email}</span>
               </div>
               <Button
                 variant="ghost"

@@ -7,8 +7,6 @@ namespace eShop.Identity.API.Features.Auth;
 public record RegisterRequest(
     string Email,
     string Password,
-    string Name,
-    string LastName,
     string? PhoneNumber = null
 );
 
@@ -19,7 +17,7 @@ public static class RegisterEndpoint
         return endpoints.MapPost("/register", Handle)
             .WithName("Register")
             .WithSummary("User registration")
-            .WithDescription("Registers a new customer account and returns a signed JWT token.")
+            .WithDescription("Registers a new customer account with login credentials and returns a signed JWT token.")
             .Produces<AuthResponse>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status409Conflict);
@@ -48,8 +46,6 @@ public static class RegisterEndpoint
             UserName = request.Email,
             Email = request.Email,
             EmailConfirmed = true,
-            Name = request.Name ?? "Khách hàng",
-            LastName = request.LastName ?? "",
             PhoneNumber = request.PhoneNumber ?? ""
         };
 

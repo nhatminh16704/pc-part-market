@@ -61,12 +61,6 @@ namespace eShop.Identity.API.Services
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? user.Email ?? "")
             };
 
-            if (!string.IsNullOrWhiteSpace(user.Name))
-                claims.Add(new Claim("name", $"{user.Name} {user.LastName}".Trim()));
-
-            if (!string.IsNullOrWhiteSpace(user.LastName))
-                claims.Add(new Claim("last_name", user.LastName));
-
             if (_userManager.SupportsUserEmail && !string.IsNullOrWhiteSpace(user.Email))
             {
                 claims.AddRange(new[]

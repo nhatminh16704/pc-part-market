@@ -57,8 +57,7 @@ public static class GetCurrentUserEndpoint
         var userDto = new UserDto(
             Id: user.Id,
             Email: user.Email ?? "",
-            Name: $"{user.Name} {user.LastName}".Trim(),
-            LastName: user.LastName ?? "",
+            UserName: user.UserName,
             PhoneNumber: user.PhoneNumber,
             Role: primaryRole
         );

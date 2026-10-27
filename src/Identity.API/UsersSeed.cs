@@ -14,8 +14,6 @@ public class UsersSeed(ILogger<UsersSeed> logger, UserManager<ApplicationUser> u
                 UserName = "alice",
                 Email = "AliceSmith@email.com",
                 EmailConfirmed = true,
-                Name = "Alice",
-                LastName = "Smith",
                 PhoneNumber = "1234567890"
             };
 
@@ -49,8 +47,6 @@ public class UsersSeed(ILogger<UsersSeed> logger, UserManager<ApplicationUser> u
                 UserName = "bob",
                 Email = "BobSmith@email.com",
                 EmailConfirmed = true,
-                Name = "Bob",
-                LastName = "Smith",
                 PhoneNumber = "1234567890"
             };
 

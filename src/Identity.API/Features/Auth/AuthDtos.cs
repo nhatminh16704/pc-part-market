@@ -8,8 +8,7 @@ namespace eShop.Identity.API.Features.Auth;
 public record UserDto(
     string Id,
     string Email,
-    string Name,
-    string LastName,
+    string? UserName,
     string? PhoneNumber,
     string? Role
 );
@@ -32,9 +31,6 @@ public static class TokenHelper
         var claims = new List<Claim>
         {
             new(JwtClaimTypes.Subject, user.Id),
-            new(JwtClaimTypes.Name, $"{user.Name} {user.LastName}".Trim()),
-            new(JwtClaimTypes.GivenName, user.Name ?? ""),
-            new(JwtClaimTypes.FamilyName, user.LastName ?? ""),
             new(JwtClaimTypes.PreferredUserName, user.UserName ?? user.Email ?? ""),
             new(JwtClaimTypes.Email, user.Email ?? ""),
             new(JwtClaimTypes.Role, primaryRole),
@@ -58,8 +54,7 @@ public static class TokenHelper
         var userDto = new UserDto(
             Id: user.Id,
             Email: user.Email ?? "",
-            Name: $"{user.Name} {user.LastName}".Trim(),
-            LastName: user.LastName ?? "",
+            UserName: user.UserName,
             PhoneNumber: user.PhoneNumber,
             Role: primaryRole
         );
