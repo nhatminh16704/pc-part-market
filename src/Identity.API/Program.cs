@@ -4,7 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
 
 builder.AddNpgsqlDbContext<ApplicationDbContext>("identitydb");
 
@@ -45,8 +45,6 @@ builder.Services.AddTransient<IRedirectService, RedirectService>();
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
-
-app.UseStaticFiles();
 
 // This cookie policy fixes login issues with Chrome 80+ using HTTP
 app.UseCookiePolicy(new CookiePolicyOptions { MinimumSameSitePolicy = SameSiteMode.Lax });

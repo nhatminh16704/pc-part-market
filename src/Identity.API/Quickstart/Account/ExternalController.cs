@@ -119,16 +119,6 @@ public class ExternalController : Controller
         var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
         await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.Id, name, true, context?.Client.ClientId));
 
-        if (context != null)
-        {
-            if (context.IsNativeClient())
-            {
-                // The client is native, so this change in how to
-                // return the response is for better UX for the end user.
-                return this.LoadingPage("Redirect", returnUrl);
-            }
-        }
-
         return Redirect(returnUrl);
     }
 
