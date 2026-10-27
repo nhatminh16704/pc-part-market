@@ -36,7 +36,7 @@ public static class AuthEndpoints
         [FromBody] LoginRequest request,
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        IdentityServerTools identityServerTools,
+        [FromServices] IdentityServerTools identityServerTools,
         ILogger<AuthResponse> logger)
     {
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
@@ -110,7 +110,7 @@ public static class AuthEndpoints
     public static async Task<IResult> RegisterAsync(
         [FromBody] RegisterRequest request,
         UserManager<ApplicationUser> userManager,
-        IdentityServerTools identityServerTools,
+        [FromServices] IdentityServerTools identityServerTools,
         ILogger<AuthResponse> logger)
     {
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
