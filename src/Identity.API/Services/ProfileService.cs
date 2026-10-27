@@ -1,4 +1,4 @@
-﻿namespace eShop.Identity.API.Services
+namespace eShop.Identity.API.Services
 {
     public class ProfileService : IProfileService
     {
@@ -57,44 +57,17 @@
             var claims = new List<Claim>
             {
                 new Claim(JwtClaimTypes.Subject, user.Id),
-                new Claim(JwtClaimTypes.PreferredUserName, user.UserName),
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName)
+                new Claim(JwtClaimTypes.PreferredUserName, user.UserName ?? user.Email ?? ""),
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? user.Email ?? "")
             };
 
             if (!string.IsNullOrWhiteSpace(user.Name))
-                claims.Add(new Claim("name", user.Name));
+                claims.Add(new Claim("name", $"{user.Name} {user.LastName}".Trim()));
 
             if (!string.IsNullOrWhiteSpace(user.LastName))
                 claims.Add(new Claim("last_name", user.LastName));
 
-            if (!string.IsNullOrWhiteSpace(user.CardNumber))
-                claims.Add(new Claim("card_number", user.CardNumber));
-
-            if (!string.IsNullOrWhiteSpace(user.CardHolderName))
-                claims.Add(new Claim("card_holder", user.CardHolderName));
-
-            if (!string.IsNullOrWhiteSpace(user.SecurityNumber))
-                claims.Add(new Claim("card_security_number", user.SecurityNumber));
-
-            if (!string.IsNullOrWhiteSpace(user.Expiration))
-                claims.Add(new Claim("card_expiration", user.Expiration));
-
-            if (!string.IsNullOrWhiteSpace(user.City))
-                claims.Add(new Claim("address_city", user.City));
-
-            if (!string.IsNullOrWhiteSpace(user.Country))
-                claims.Add(new Claim("address_country", user.Country));
-
-            if (!string.IsNullOrWhiteSpace(user.State))
-                claims.Add(new Claim("address_state", user.State));
-
-            if (!string.IsNullOrWhiteSpace(user.Street))
-                claims.Add(new Claim("address_street", user.Street));
-
-            if (!string.IsNullOrWhiteSpace(user.ZipCode))
-                claims.Add(new Claim("address_zip_code", user.ZipCode));
-
-            if (_userManager.SupportsUserEmail)
+            if (_userManager.SupportsUserEmail && !string.IsNullOrWhiteSpace(user.Email))
             {
                 claims.AddRange(new[]
                 {

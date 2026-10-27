@@ -9,12 +9,7 @@ public record RegisterRequest(
     string Password,
     string Name,
     string LastName,
-    string? PhoneNumber = null,
-    string? Street = null,
-    string? City = null,
-    string? State = null,
-    string? Country = null,
-    string? ZipCode = null
+    string? PhoneNumber = null
 );
 
 public static class RegisterEndpoint
@@ -55,17 +50,7 @@ public static class RegisterEndpoint
             EmailConfirmed = true,
             Name = request.Name ?? "Khách hàng",
             LastName = request.LastName ?? "",
-            PhoneNumber = request.PhoneNumber ?? "",
-            Street = request.Street ?? "N/A",
-            City = request.City ?? "Hà Nội",
-            State = request.State ?? "Hà Nội",
-            Country = request.Country ?? "Vietnam",
-            ZipCode = request.ZipCode ?? "100000",
-            CardHolderName = $"{request.Name} {request.LastName}".Trim(),
-            CardNumber = "XXXXXXXXXXXX0000",
-            CardType = 1,
-            Expiration = "12/28",
-            SecurityNumber = "000"
+            PhoneNumber = request.PhoneNumber ?? ""
         };
 
         var result = await userManager.CreateAsync(user, request.Password);

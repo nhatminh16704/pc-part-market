@@ -60,12 +60,7 @@ public static class GetCurrentUserEndpoint
             Name: $"{user.Name} {user.LastName}".Trim(),
             LastName: user.LastName ?? "",
             PhoneNumber: user.PhoneNumber,
-            Role: primaryRole,
-            Street: user.Street,
-            City: user.City,
-            State: user.State,
-            Country: user.Country,
-            ZipCode: user.ZipCode
+            Role: primaryRole
         );
 
         return Results.Ok(userDto);

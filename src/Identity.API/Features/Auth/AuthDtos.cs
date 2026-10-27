@@ -11,12 +11,7 @@ public record UserDto(
     string Name,
     string LastName,
     string? PhoneNumber,
-    string? Role,
-    string? Street,
-    string? City,
-    string? State,
-    string? Country,
-    string? ZipCode
+    string? Role
 );
 
 public record AuthResponse(
@@ -66,12 +61,7 @@ public static class TokenHelper
             Name: $"{user.Name} {user.LastName}".Trim(),
             LastName: user.LastName ?? "",
             PhoneNumber: user.PhoneNumber,
-            Role: primaryRole,
-            Street: user.Street,
-            City: user.City,
-            State: user.State,
-            Country: user.Country,
-            ZipCode: user.ZipCode
+            Role: primaryRole
         );
 
         return new AuthResponse(token, userDto, lifetimeSeconds);

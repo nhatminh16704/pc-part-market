@@ -23,11 +23,6 @@ export interface User {
   lastName?: string;
   phoneNumber?: string;
   role: string;
-  street?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  zipCode?: string;
 }
 
 export interface AuthResponse {

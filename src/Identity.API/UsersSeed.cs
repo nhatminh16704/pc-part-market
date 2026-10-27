@@ -1,4 +1,3 @@
-﻿
 namespace eShop.Identity.API;
 
 public class UsersSeed(ILogger<UsersSeed> logger, UserManager<ApplicationUser> userManager) : IDbSeeder<ApplicationDbContext>
@@ -11,23 +10,13 @@ public class UsersSeed(ILogger<UsersSeed> logger, UserManager<ApplicationUser> u
         {
             alice = new ApplicationUser
             {
+                Id = Guid.NewGuid().ToString(),
                 UserName = "alice",
                 Email = "AliceSmith@email.com",
                 EmailConfirmed = true,
-                CardHolderName = "Alice Smith",
-                CardNumber = "XXXXXXXXXXXX1881",
-                CardType = 1,
-                City = "Redmond",
-                Country = "U.S.",
-                Expiration = "12/24",
-                Id = Guid.NewGuid().ToString(),
-                LastName = "Smith",
                 Name = "Alice",
-                PhoneNumber = "1234567890",
-                ZipCode = "98052",
-                State = "WA",
-                Street = "15703 NE 61st Ct",
-                SecurityNumber = "123"
+                LastName = "Smith",
+                PhoneNumber = "1234567890"
             };
 
             var result = await userManager.CreateAsync(alice, "Pass123$");
@@ -56,23 +45,13 @@ public class UsersSeed(ILogger<UsersSeed> logger, UserManager<ApplicationUser> u
         {
             bob = new ApplicationUser
             {
+                Id = Guid.NewGuid().ToString(),
                 UserName = "bob",
                 Email = "BobSmith@email.com",
                 EmailConfirmed = true,
-                CardHolderName = "Bob Smith",
-                CardNumber = "XXXXXXXXXXXX1881",
-                CardType = 1,
-                City = "Redmond",
-                Country = "U.S.",
-                Expiration = "12/24",
-                Id = Guid.NewGuid().ToString(),
-                LastName = "Smith",
                 Name = "Bob",
-                PhoneNumber = "1234567890",
-                ZipCode = "98052",
-                State = "WA",
-                Street = "15703 NE 61st Ct",
-                SecurityNumber = "456"
+                LastName = "Smith",
+                PhoneNumber = "1234567890"
             };
 
             var result = await userManager.CreateAsync(bob, "Pass123$");
