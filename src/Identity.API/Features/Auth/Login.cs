@@ -1,6 +1,6 @@
 #nullable enable
 
-using Duende.IdentityServer;
+using eShop.Identity.API.Services;
 
 namespace eShop.Identity.API.Features.Auth;
 
@@ -24,7 +24,7 @@ public static class LoginEndpoint
         [FromBody] LoginRequest request,
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        [FromServices] IdentityServerTools identityServerTools,
+        [FromServices] IJwtTokenService tokenService,
         ILogger<AuthResponse> logger)
     {
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
@@ -69,7 +69,7 @@ public static class LoginEndpoint
         }
 
         var roles = await userManager.GetRolesAsync(user);
-        var authResponse = await TokenHelper.CreateTokenResponseAsync(user, roles, identityServerTools);
+        var authResponse = await tokenService.CreateTokenResponseAsync(user, roles);
 
         return Results.Ok(authResponse);
     }

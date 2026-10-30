@@ -1,6 +1,7 @@
 #nullable enable
 
-using Duende.IdentityModel;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace eShop.Identity.API.Features.Auth;
 
@@ -22,8 +23,9 @@ public static class GetCurrentUserEndpoint
         UserManager<ApplicationUser> userManager)
     {
         // Extract userId from ClaimsPrincipal or Bearer token
-        string? userId = context.User.FindFirst(JwtClaimTypes.Subject)?.Value 
-                         ?? context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        string? userId = context.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+                         ?? context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                         ?? context.User.FindFirst("sub")?.Value;
 
         if (string.IsNullOrEmpty(userId))
         {
@@ -35,7 +37,7 @@ public static class GetCurrentUserEndpoint
                 if (handler.CanReadToken(tokenStr))
                 {
                     var jwt = handler.ReadJwtToken(tokenStr);
-                    userId = jwt.Claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Subject || c.Type == "sub")?.Value;
+                    userId = jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub || c.Type == "sub" || c.Type == ClaimTypes.NameIdentifier)?.Value;
                 }
             }
         }
