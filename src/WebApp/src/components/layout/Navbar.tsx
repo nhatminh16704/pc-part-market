@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Cpu, Search, ShoppingCart, User, MapPin, Phone, ShieldCheck, Wrench, LogOut } from 'lucide-react';
+import { Cpu, Search, ShoppingCart, User, LogOut } from 'lucide-react';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useCategories } from '@/features/catalog/hooks/useCatalog';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -26,31 +26,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-white shadow-sm border-b border-slate-200/80">
-      {/* Top Support Bar (TTGShop signature style: deep dark teal) */}
-      <div className="bg-[#002023] text-white text-[12px] py-1.5 px-4 hidden sm:block">
-        <div className="container-custom flex items-center justify-between">
-          <div className="flex items-center gap-6 text-slate-300">
-            <div className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer">
-              <MapPin className="w-3.5 h-3.5 text-[#ff5636]" />
-              <span>Hệ thống Showroom Hà Nội & TP.HCM</span>
-            </div>
-            <div className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer">
-              <Phone className="w-3.5 h-3.5 text-[#ff5636]" />
-              <span>Hotline tư vấn: <strong className="text-white font-semibold">1900 8888</strong></span>
-            </div>
-          </div>
-          <div className="flex items-center gap-5 text-slate-300">
-            <div className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Bảo hành 1-Đổi-1 30 Ngày</span>
-            </div>
-            <div className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer">
-              <Wrench className="w-3.5 h-3.5 text-amber-400" />
-              <span>Tư vấn Build PC miễn phí</span>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Main Nav Container */}
       <div className="container-custom py-3 flex items-center justify-between gap-4 sm:gap-6 min-w-0">
