@@ -12,6 +12,7 @@ export const AppRoutes: React.FC = () => {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Login />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/products/seo/:id" element={<ProductDetail />} />
         <Route path="*" element={<NotFound />} />

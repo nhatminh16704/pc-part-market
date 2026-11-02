@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Cpu, Search, ShoppingCart, User, LogOut } from 'lucide-react';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useCategories } from '@/features/catalog/hooks/useCatalog';
@@ -20,9 +20,44 @@ export const Navbar: React.FC<NavbarProps> = ({
   selectedCategory = null,
   onSelectCategory,
 }) => {
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
   const { openCart, totalCount } = useCart();
   const { data: categories = [] } = useCategories();
   const { user, isAuthenticated, logout } = useAuth();
+
+  // Simplified header for login & register pages: only brand logo & site title
+  if (isAuthPage) {
+    return (
+      <header className="sticky top-0 z-40 bg-white shadow-sm border-b border-slate-200/80">
+        <div className="container-custom py-3.5 flex items-center justify-between min-w-0">
+          <Link
+            to="/"
+            onClick={() => onSelectCategory?.(null)}
+            className="flex items-center gap-3 select-none shrink-0"
+          >
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff5636] to-[#e63e1c] flex items-center justify-center shadow-md shadow-orange-500/20">
+              <Cpu className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <div className="font-heading text-xl font-extrabold tracking-tight leading-none text-slate-900">
+                PC PART <span className="text-[#ff5636]">MARKET</span>
+              </div>
+              <div className="text-[10px] text-slate-500 tracking-wider uppercase font-medium">
+                Linh Kiện & Hiệu Năng Cao
+              </div>
+            </div>
+          </Link>
+          <Link
+            to="/"
+            className="text-xs font-semibold text-slate-500 hover:text-[#ff5636] transition-colors"
+          >
+            ← Về trang chủ
+          </Link>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-40 bg-white shadow-sm border-b border-slate-200/80">
