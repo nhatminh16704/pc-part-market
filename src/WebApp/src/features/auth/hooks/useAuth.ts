@@ -43,7 +43,7 @@ export const useLogin = () => {
   return useMutation<AuthResponse, Error, LoginFormData>({
     mutationFn: (data: LoginFormData) => authApi.login(data),
     onSuccess: async (data) => {
-      localStorage.setItem('access_token', data.token);
+      localStorage.setItem('access_token', data.accessToken);
       try {
         const user = await authApi.getCurrentUser();
         localStorage.setItem('user_info', JSON.stringify(user));
@@ -64,7 +64,7 @@ export const useRegister = () => {
   return useMutation<AuthResponse, Error, RegisterFormData>({
     mutationFn: (data: RegisterFormData) => authApi.register(data),
     onSuccess: async (data) => {
-      localStorage.setItem('access_token', data.token);
+      localStorage.setItem('access_token', data.accessToken);
       try {
         const user = await authApi.getCurrentUser();
         localStorage.setItem('user_info', JSON.stringify(user));

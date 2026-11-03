@@ -13,7 +13,6 @@ public record UserDto(
 );
 
 public record AuthResponse(
-    string Token,
-    string TokenType,
+    string AccessToken,
     long ExpiresIn
 );

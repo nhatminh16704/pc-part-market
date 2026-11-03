@@ -83,7 +83,7 @@ public class JwtTokenService : IJwtTokenService
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var tokenString = tokenHandler.WriteToken(token);
 
-        return Task.FromResult(new AuthResponse(tokenString, "Bearer", lifetimeSeconds));
+        return Task.FromResult(new AuthResponse(tokenString, lifetimeSeconds));
     }
 
     private string GetIssuer(string? explicitIssuer)
