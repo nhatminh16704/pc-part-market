@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,9 +42,18 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
     });
 builder.Services.AddAuthorization();
 
+builder.Services.AddOpenApi();
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+
+app.MapOpenApi();
+if (app.Environment.IsDevelopment())
+{
+    app.MapScalarApiReference(options => options.DefaultFonts = false);
+    app.MapGet("/", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
+}
 
 // Cookie policy for compatibility
 app.UseCookiePolicy(new CookiePolicyOptions { MinimumSameSitePolicy = SameSiteMode.Lax });

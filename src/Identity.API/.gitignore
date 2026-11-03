@@ -1,2 +1,4 @@
 wwwroot/lib/
 keys/
+
+identity_rsa.json
