@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
@@ -14,6 +16,30 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<RsaKeyManager>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
+
+// Validate Bearer tokens issued by this service itself (used by /api/auth/me)
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer();
+
+builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+    .Configure<RsaKeyManager>((options, rsaKeyManager) =>
+    {
+        options.MapInboundClaims = false;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = rsaKeyManager.GetSigningKey()
+        };
+    });
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

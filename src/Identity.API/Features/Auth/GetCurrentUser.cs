@@ -10,6 +10,7 @@ public static class GetCurrentUserEndpoint
     public static RouteHandlerBuilder MapGetCurrentUser(this IEndpointRouteBuilder endpoints)
     {
         return endpoints.MapGet("/me", Handle)
+            .RequireAuthorization()
             .WithName("GetCurrentUser")
             .WithSummary("Get current user profile")
             .WithDescription("Retrieves the authenticated user profile based on Bearer token.")
