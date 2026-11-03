@@ -27,6 +27,7 @@ export const useCurrentUser = () => {
       } catch {
         // If token expired or invalid, clear localStorage
         localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         localStorage.removeItem('user_info');
         return null;
       }
@@ -44,6 +45,9 @@ export const useLogin = () => {
     mutationFn: (data: LoginFormData) => authApi.login(data),
     onSuccess: async (data) => {
       localStorage.setItem('access_token', data.accessToken);
+      if (data.refreshToken) {
+        localStorage.setItem('refresh_token', data.refreshToken);
+      }
       try {
         const user = await authApi.getCurrentUser();
         localStorage.setItem('user_info', JSON.stringify(user));
@@ -65,6 +69,9 @@ export const useRegister = () => {
     mutationFn: (data: RegisterFormData) => authApi.register(data),
     onSuccess: async (data) => {
       localStorage.setItem('access_token', data.accessToken);
+      if (data.refreshToken) {
+        localStorage.setItem('refresh_token', data.refreshToken);
+      }
       try {
         const user = await authApi.getCurrentUser();
         localStorage.setItem('user_info', JSON.stringify(user));
@@ -83,12 +90,22 @@ export const useAuth = () => {
   const loginMutation = useLogin();
   const registerMutation = useRegister();
 
-  const logout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user_info');
-    queryClient.setQueryData(AUTH_KEYS.currentUser(), null);
-    // Refresh basket back to guest state
-    queryClient.invalidateQueries({ queryKey: ['basket'] });
+  const logout = async () => {
+    const refreshToken = localStorage.getItem('refresh_token');
+    try {
+      if (refreshToken) {
+        await authApi.logout(refreshToken);
+      }
+    } catch {
+      // Ignore network errors on logout
+    } finally {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_info');
+      queryClient.setQueryData(AUTH_KEYS.currentUser(), null);
+      // Refresh basket back to guest state
+      queryClient.invalidateQueries({ queryKey: ['basket'] });
+    }
   };
 
   return {

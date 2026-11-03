@@ -28,3 +28,4 @@ public static class LogoutEndpoint
         return Results.Ok(new { message = "Đăng xuất thành công." });
     }
 }
+

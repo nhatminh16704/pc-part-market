@@ -37,3 +37,4 @@ public static class RefreshTokenEndpoint
         return Results.Ok(authResponse);
     }
 }
+
