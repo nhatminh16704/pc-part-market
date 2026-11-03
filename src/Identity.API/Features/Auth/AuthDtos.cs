@@ -14,5 +14,14 @@ public record UserDto(
 
 public record AuthResponse(
     string AccessToken,
+    string RefreshToken,
     long ExpiresIn
+);
+
+public record RefreshTokenRequest(
+    string RefreshToken
+);
+
+public record LogoutRequest(
+    string? RefreshToken
 );
