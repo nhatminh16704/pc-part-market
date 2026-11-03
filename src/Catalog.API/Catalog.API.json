@@ -6,7 +6,7 @@
     "version": "1.0"
   },
   "paths": {
-    "/api/catalog/products": {
+    "/api/v1/catalog/products": {
       "get": {
         "tags": [
           "Products"
@@ -68,15 +68,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
-            }
           }
         ],
         "responses": {
@@ -99,17 +90,6 @@
         "summary": "Create a new product",
         "description": "Create a new product in the catalog.",
         "operationId": "CreateProduct",
-        "parameters": [
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -144,7 +124,7 @@
         }
       }
     },
-    "/api/catalog/products/{id}": {
+    "/api/v1/catalog/products/{id}": {
       "get": {
         "tags": [
           "Products"
@@ -160,15 +140,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
             }
           }
         ],
@@ -210,15 +181,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
             }
           }
         ],
@@ -274,15 +236,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
-            }
           }
         ],
         "responses": {
@@ -295,7 +248,7 @@
         }
       }
     },
-    "/api/catalog/products/seo/{seoName}": {
+    "/api/v1/catalog/products/seo/{seoName}": {
       "get": {
         "tags": [
           "Products"
@@ -310,15 +263,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
             }
           }
         ],
@@ -346,7 +290,7 @@
         }
       }
     },
-    "/api/catalog/products/search": {
+    "/api/v1/catalog/products/search": {
       "post": {
         "tags": [
           "Products"
@@ -354,17 +298,6 @@
         "summary": "Search products by criteria",
         "description": "Search products with structured filter criteria including keyword, category, brand, price range, and specs.",
         "operationId": "SearchProducts",
-        "parameters": [
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -389,7 +322,7 @@
         }
       }
     },
-    "/api/catalog/products/{productId}/variants": {
+    "/api/v1/catalog/products/{productId}/variants": {
       "get": {
         "tags": [
           "Variants"
@@ -405,15 +338,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
             }
           }
         ],
@@ -448,15 +372,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
             }
           }
         ],
@@ -497,7 +412,7 @@
         }
       }
     },
-    "/api/catalog/variants/{id}": {
+    "/api/v1/catalog/variants/{id}": {
       "get": {
         "tags": [
           "Variants"
@@ -513,15 +428,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
             }
           }
         ],
@@ -556,15 +462,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
             }
           }
         ],
@@ -620,15 +517,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
-            }
           }
         ],
         "responses": {
@@ -641,7 +529,7 @@
         }
       }
     },
-    "/api/catalog/brands": {
+    "/api/v1/catalog/brands": {
       "get": {
         "tags": [
           "Brands"
@@ -649,17 +537,6 @@
         "summary": "List brands",
         "description": "Get all active brands.",
         "operationId": "ListBrands",
-        "parameters": [
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -679,17 +556,6 @@
         ],
         "summary": "Create brand",
         "operationId": "CreateBrand",
-        "parameters": [
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -724,7 +590,7 @@
         }
       }
     },
-    "/api/catalog/brands/{id}": {
+    "/api/v1/catalog/brands/{id}": {
       "get": {
         "tags": [
           "Brands"
@@ -739,15 +605,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
             }
           }
         ],
@@ -788,15 +645,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
             }
           }
         ],
@@ -851,15 +699,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
-            }
           }
         ],
         "responses": {
@@ -872,7 +711,7 @@
         }
       }
     },
-    "/api/catalog/categories": {
+    "/api/v1/catalog/categories": {
       "get": {
         "tags": [
           "Categories"
@@ -880,17 +719,6 @@
         "summary": "List categories",
         "description": "Get all active categories.",
         "operationId": "ListCategories",
-        "parameters": [
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -910,17 +738,6 @@
         ],
         "summary": "Create category",
         "operationId": "CreateCategory",
-        "parameters": [
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -955,7 +772,7 @@
         }
       }
     },
-    "/api/catalog/categories/{id}": {
+    "/api/v1/catalog/categories/{id}": {
       "get": {
         "tags": [
           "Categories"
@@ -970,15 +787,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
             }
           }
         ],
@@ -1019,15 +827,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
             }
           }
         ],
@@ -1082,15 +881,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
-            }
           }
         ],
         "responses": {
@@ -1103,7 +893,7 @@
         }
       }
     },
-    "/api/catalog/images/{fileName}": {
+    "/api/v1/catalog/images/{fileName}": {
       "get": {
         "tags": [
           "Images"
@@ -1117,15 +907,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "api-version",
-            "in": "query",
-            "description": "The API version, in the format 'major.minor'.",
-            "schema": {
-              "type": "string",
-              "example": "1.0"
             }
           }
         ],

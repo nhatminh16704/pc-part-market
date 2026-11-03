@@ -11,7 +11,7 @@ public static class BasketEndpoints
 {
     public static IEndpointRouteBuilder MapBasketEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("api/basket")
+        var group = app.MapGroup("api/v1/basket")
             .WithTags("Basket");
 
         group.MapGet("/", GetBasketAsync)

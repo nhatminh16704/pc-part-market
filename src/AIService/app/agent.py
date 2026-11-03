@@ -74,7 +74,7 @@ async def execute_product_search(query: ProductSearchQuery) -> Dict[str, Any]:
     """
     Directly query the Catalog Service backend API for products matching the search query.
     """
-    url = f"{settings.catalog_api_base_url.rstrip('/')}/api/catalog/products/search"
+    url = f"{settings.catalog_api_base_url.rstrip('/')}/api/v1/catalog/products/search"
     payload = {
         "keyword": query.keyword,
         "category": query.category,

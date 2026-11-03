@@ -31,7 +31,7 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
     {
         try
         {
-            var response = await httpClient.GetAsync($"/api/catalog/variants/{variantId}", cancellationToken);
+            var response = await httpClient.GetAsync($"/api/v1/catalog/variants/{variantId}", cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 return null;
@@ -50,7 +50,7 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
     {
         try
         {
-            var response = await httpClient.GetAsync($"/api/catalog/products/{productId}", cancellationToken);
+            var response = await httpClient.GetAsync($"/api/v1/catalog/products/{productId}", cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 return null;

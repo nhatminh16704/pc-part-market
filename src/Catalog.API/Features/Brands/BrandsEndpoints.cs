@@ -61,11 +61,7 @@ public static class BrandsEndpoints
 {
     public static IEndpointRouteBuilder MapBrandsEndpoints(this IEndpointRouteBuilder app)
     {
-        var vApi = app.NewVersionedApi("Catalog");
-        var api = vApi.MapGroup("api/catalog")
-            .HasApiVersion(1, 0)
-            .HasApiVersion(2, 0)
-            .AddEndpointFilter<ValidationFilter>();
+        var api = app.MapGroup("api/v1/catalog").AddEndpointFilter<ValidationFilter>();
 
         api.MapGet("/brands", GetAllBrands)
             .WithName("ListBrands")

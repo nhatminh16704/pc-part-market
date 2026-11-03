@@ -68,11 +68,7 @@ public static class CategoriesEndpoints
 {
     public static IEndpointRouteBuilder MapCategoriesEndpoints(this IEndpointRouteBuilder app)
     {
-        var vApi = app.NewVersionedApi("Catalog");
-        var api = vApi.MapGroup("api/catalog")
-            .HasApiVersion(1, 0)
-            .HasApiVersion(2, 0)
-            .AddEndpointFilter<ValidationFilter>();
+        var api = app.MapGroup("api/v1/catalog").AddEndpointFilter<ValidationFilter>();
 
         api.MapGet("/categories", GetAllCategories)
             .WithName("ListCategories")

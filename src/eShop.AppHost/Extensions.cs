@@ -196,21 +196,22 @@ internal static class Extensions
             var identityCluster = yarp.AddCluster(identityApi);
 
             // Catalog API routes
+            yarp.AddRoute("/api/v1/catalog/{*any}", catalogCluster);
             yarp.AddRoute("/api/catalog/{*any}", catalogCluster);
 
             // Basket API routes
-            yarp.AddRoute("/api/basket/{*any}", basketCluster);
             yarp.AddRoute("/api/v1/basket/{*any}", basketCluster);
+            yarp.AddRoute("/api/basket/{*any}", basketCluster);
 
             // Ordering API routes
-            yarp.AddRoute("/api/orders/{*any}", orderingCluster);
             yarp.AddRoute("/api/v1/orders/{*any}", orderingCluster);
+            yarp.AddRoute("/api/orders/{*any}", orderingCluster);
 
             // Identity API routes
             yarp.AddRoute("/identity/{*any}", identityCluster)
                 .WithTransformPathRemovePrefix("/identity");
+            yarp.AddRoute("/api/v1/auth/{*any}", identityCluster);
             yarp.AddRoute("/api/auth/{*any}", identityCluster);
-
             // Mobile / Legacy compatibility routes
             yarp.AddRoute("/catalog-api/{*any}", catalogCluster)
                 .WithTransformPathRemovePrefix("/catalog-api");

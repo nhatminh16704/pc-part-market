@@ -4,8 +4,7 @@ public static class ImagesEndpoints
 {
     public static IEndpointRouteBuilder MapImagesEndpoints(this IEndpointRouteBuilder app)
     {
-        var vApi = app.NewVersionedApi("Catalog");
-        var api = vApi.MapGroup("api/catalog").HasApiVersion(1, 0).HasApiVersion(2, 0);
+        var api = app.MapGroup("api/v1/catalog");
 
         api.MapGet("/images/{fileName}", GetImageByFileName)
             .WithName("GetImage")
