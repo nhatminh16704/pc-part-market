@@ -42,10 +42,16 @@ export const useLogin = () => {
 
   return useMutation<AuthResponse, Error, LoginFormData>({
     mutationFn: (data: LoginFormData) => authApi.login(data),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       localStorage.setItem('access_token', data.token);
-      localStorage.setItem('user_info', JSON.stringify(data.user));
-      queryClient.setQueryData(AUTH_KEYS.currentUser(), data.user);
+      try {
+        const user = await authApi.getCurrentUser();
+        localStorage.setItem('user_info', JSON.stringify(user));
+        queryClient.setQueryData(AUTH_KEYS.currentUser(), user);
+      } catch {
+        // Fallback: trigger background refetch
+        queryClient.invalidateQueries({ queryKey: AUTH_KEYS.currentUser() });
+      }
       // Invalidate basket so the authenticated user's cart on Redis is loaded
       queryClient.invalidateQueries({ queryKey: ['basket'] });
     },
@@ -57,10 +63,15 @@ export const useRegister = () => {
 
   return useMutation<AuthResponse, Error, RegisterFormData>({
     mutationFn: (data: RegisterFormData) => authApi.register(data),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       localStorage.setItem('access_token', data.token);
-      localStorage.setItem('user_info', JSON.stringify(data.user));
-      queryClient.setQueryData(AUTH_KEYS.currentUser(), data.user);
+      try {
+        const user = await authApi.getCurrentUser();
+        localStorage.setItem('user_info', JSON.stringify(user));
+        queryClient.setQueryData(AUTH_KEYS.currentUser(), user);
+      } catch {
+        queryClient.invalidateQueries({ queryKey: AUTH_KEYS.currentUser() });
+      }
       queryClient.invalidateQueries({ queryKey: ['basket'] });
     },
   });

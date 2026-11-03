@@ -83,17 +83,7 @@ public class JwtTokenService : IJwtTokenService
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var tokenString = tokenHandler.WriteToken(token);
 
-        var userDto = new UserDto(
-            Id: user.Id,
-            Email: user.Email ?? "",
-            UserName: user.UserName,
-            PhoneNumber: user.PhoneNumber,
-            Status: status,
-            UserType: userType,
-            Role: primaryRole
-        );
-
-        return Task.FromResult(new AuthResponse(tokenString, userDto, lifetimeSeconds));
+        return Task.FromResult(new AuthResponse(tokenString, "Bearer", lifetimeSeconds));
     }
 
     private string GetIssuer(string? explicitIssuer)

@@ -14,6 +14,6 @@ public record UserDto(
 
 public record AuthResponse(
     string Token,
-    UserDto User,
+    string TokenType,
     long ExpiresIn
 );
