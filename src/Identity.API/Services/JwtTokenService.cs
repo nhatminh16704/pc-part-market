@@ -30,6 +30,7 @@ public class JwtTokenService : IJwtTokenService
     {
         var primaryRole = roles.FirstOrDefault() ?? "Customer";
         var status = user.Status ?? UserStatus.Active;
+        var userType = user.UserType ?? UserTypes.Customer;
         var tokenIssuer = GetIssuer(issuer);
 
         var claims = new List<Claim>
@@ -38,6 +39,7 @@ public class JwtTokenService : IJwtTokenService
             new(JwtRegisteredClaimNames.Email, user.Email ?? ""),
             new("preferred_username", user.UserName ?? user.Email ?? ""),
             new("status", status),
+            new("user_type", userType),
             new(ClaimTypes.Role, primaryRole),
             new("role", primaryRole),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
@@ -87,6 +89,7 @@ public class JwtTokenService : IJwtTokenService
             UserName: user.UserName,
             PhoneNumber: user.PhoneNumber,
             Status: status,
+            UserType: userType,
             Role: primaryRole
         );
 

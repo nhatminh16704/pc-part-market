@@ -63,6 +63,7 @@ public static class GetCurrentUserEndpoint
             UserName: user.UserName,
             PhoneNumber: user.PhoneNumber,
             Status: user.Status ?? UserStatus.Active,
+            UserType: user.UserType ?? UserTypes.Customer,
             Role: primaryRole
         );
 

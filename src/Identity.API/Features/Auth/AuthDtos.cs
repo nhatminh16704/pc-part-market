@@ -8,6 +8,7 @@ public record UserDto(
     string? UserName,
     string? PhoneNumber,
     string Status,
+    string UserType,
     string? Role
 );
 

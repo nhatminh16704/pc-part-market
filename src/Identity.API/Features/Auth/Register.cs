@@ -47,7 +47,8 @@ public static class RegisterEndpoint
             Email = request.Email,
             EmailConfirmed = true,
             PhoneNumber = request.PhoneNumber ?? "",
-            Status = UserStatus.Active
+            Status = UserStatus.Active,
+            UserType = UserTypes.Customer
         };
 
         var result = await userManager.CreateAsync(user, request.Password);

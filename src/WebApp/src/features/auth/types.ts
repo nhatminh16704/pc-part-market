@@ -20,6 +20,7 @@ export interface User {
   userName?: string;
   phoneNumber?: string;
   status: string;
+  userType: string;
   role: string;
 }
 

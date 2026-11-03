@@ -15,7 +15,8 @@ public class UsersSeed(ILogger<UsersSeed> logger, UserManager<ApplicationUser> u
                 Email = "AliceSmith@email.com",
                 EmailConfirmed = true,
                 PhoneNumber = "1234567890",
-                Status = UserStatus.Active
+                Status = UserStatus.Active,
+                UserType = UserTypes.Admin
             };
 
             var result = await userManager.CreateAsync(alice, "Pass123$");
@@ -49,7 +50,8 @@ public class UsersSeed(ILogger<UsersSeed> logger, UserManager<ApplicationUser> u
                 Email = "BobSmith@email.com",
                 EmailConfirmed = true,
                 PhoneNumber = "1234567890",
-                Status = UserStatus.Active
+                Status = UserStatus.Active,
+                UserType = UserTypes.Customer
             };
 
             var result = await userManager.CreateAsync(bob, "Pass123$");

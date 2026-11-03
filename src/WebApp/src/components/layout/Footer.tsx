@@ -128,7 +128,7 @@ export const Footer: React.FC = () => {
 
       <div className="container-custom pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
         <div>
-          © {CURRENT_YEAR} PC Part Market. Thiết kế lấy cảm hứng từ TTGShop.vn.
+          © {CURRENT_YEAR} PC Part Market.
         </div>
         <div className="flex gap-4">
           <span className="hover:text-white cursor-pointer">Điều khoản</span>

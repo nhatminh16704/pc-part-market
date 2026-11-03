@@ -16,6 +16,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             b.Property(u => u.Status)
                 .HasMaxLength(20)
                 .HasDefaultValue(UserStatus.Active);
+
+            b.Property(u => u.UserType)
+                .HasMaxLength(20)
+                .HasDefaultValue(UserTypes.Customer);
         });
     }
 }

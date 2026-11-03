@@ -212,6 +212,12 @@ namespace eShop.Identity.API.Data.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<string>("UserType")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("CUSTOMER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
