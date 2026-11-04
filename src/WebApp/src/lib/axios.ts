@@ -1,14 +1,8 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type { AuthResponse } from '@/features/auth/types';
+import { useAuthStore, getAccessToken, setAccessToken } from '@/features/auth/stores/authStore';
 
-// In-memory token storage (chỉ lưu trong RAM, bảo vệ hoàn toàn khỏi XSS trộm token lưu persistent)
-let inMemoryAccessToken: string | null = null;
-
-export const setAccessToken = (token: string | null) => {
-  inMemoryAccessToken = token;
-};
-
-export const getAccessToken = () => inMemoryAccessToken;
+export { getAccessToken, setAccessToken };
 
 export const apiClient = axios.create({
   baseURL: '/api/v1',
@@ -52,10 +46,10 @@ function getOrCreateBuyerId(): string {
   }
 }
 
-// Request Interceptor: Tự động đính kèm Authorization Bearer token (từ RAM) & X-Buyer-Id
+// Request Interceptor: Tự động đính kèm Authorization Bearer token (từ RAM Zustand) & X-Buyer-Id
 apiClient.interceptors.request.use(
   (config) => {
-    const token = inMemoryAccessToken;
+    const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -108,7 +102,7 @@ apiClient.interceptors.response.use(
         );
         const { accessToken } = res.data;
 
-        // Cập nhật Access Token trong RAM
+        // Cập nhật Access Token trong RAM qua Zustand
         setAccessToken(accessToken);
         processQueue(null, accessToken);
 
@@ -116,7 +110,7 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshErr) {
         processQueue(refreshErr, null);
-        setAccessToken(null);
+        useAuthStore.getState().clearAuth();
         if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
           window.location.href = '/login';
         }

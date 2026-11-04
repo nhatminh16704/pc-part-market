@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '../api/authApi';
-import { getAccessToken, setAccessToken } from '@/lib/axios';
+import { useAuthStore } from '../stores/authStore';
 import type { LoginFormData, RegisterFormData, AuthResponse, User } from '../types';
 
 export const AUTH_KEYS = {
@@ -14,17 +14,19 @@ export const useCurrentUser = () => {
     queryFn: async () => {
       try {
         // Nếu RAM chưa có AccessToken (F5 hoặc mở tab mới), thử silent refresh qua HttpOnly Cookie
-        if (!getAccessToken()) {
+        if (!useAuthStore.getState().accessToken) {
           try {
             const tokenRes = await authApi.refreshToken();
-            setAccessToken(tokenRes.accessToken);
+            useAuthStore.getState().setAccessToken(tokenRes.accessToken);
           } catch {
             return null;
           }
         }
-        return await authApi.getCurrentUser();
+        const user = await authApi.getCurrentUser();
+        useAuthStore.getState().setUser(user);
+        return user;
       } catch {
-        setAccessToken(null);
+        useAuthStore.getState().clearAuth();
         return null;
       }
     },
@@ -39,9 +41,10 @@ export const useLogin = () => {
   return useMutation<AuthResponse, Error, LoginFormData>({
     mutationFn: (data: LoginFormData) => authApi.login(data),
     onSuccess: async (data) => {
-      setAccessToken(data.accessToken);
+      useAuthStore.getState().setAccessToken(data.accessToken);
       try {
         const user = await authApi.getCurrentUser();
+        useAuthStore.getState().setUser(user);
         queryClient.setQueryData(AUTH_KEYS.currentUser(), user);
       } catch {
         // Fallback: trigger background refetch
@@ -59,9 +62,10 @@ export const useRegister = () => {
   return useMutation<AuthResponse, Error, RegisterFormData>({
     mutationFn: (data: RegisterFormData) => authApi.register(data),
     onSuccess: async (data) => {
-      setAccessToken(data.accessToken);
+      useAuthStore.getState().setAccessToken(data.accessToken);
       try {
         const user = await authApi.getCurrentUser();
+        useAuthStore.getState().setUser(user);
         queryClient.setQueryData(AUTH_KEYS.currentUser(), user);
       } catch {
         queryClient.invalidateQueries({ queryKey: AUTH_KEYS.currentUser() });
@@ -73,7 +77,9 @@ export const useRegister = () => {
 
 export const useAuth = () => {
   const queryClient = useQueryClient();
+  const { accessToken, user: storeUser } = useAuthStore();
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
+  const currentUser = user ?? storeUser;
   const loginMutation = useLogin();
   const registerMutation = useRegister();
 
@@ -83,7 +89,7 @@ export const useAuth = () => {
     } catch {
       // Bỏ qua lỗi mạng khi logout
     } finally {
-      setAccessToken(null);
+      useAuthStore.getState().clearAuth();
       queryClient.setQueryData(AUTH_KEYS.currentUser(), null);
       // Refresh basket back to guest state
       queryClient.invalidateQueries({ queryKey: ['basket'] });
@@ -91,8 +97,9 @@ export const useAuth = () => {
   };
 
   return {
-    user: user ?? null,
-    isAuthenticated: Boolean(user && getAccessToken()),
+    user: currentUser,
+    accessToken,
+    isAuthenticated: Boolean(currentUser && accessToken),
     isLoading: isUserLoading || loginMutation.isPending || registerMutation.isPending,
     login: loginMutation.mutateAsync,
     loginMutation,
