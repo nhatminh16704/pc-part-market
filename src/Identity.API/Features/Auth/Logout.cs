@@ -18,12 +18,10 @@ public static class LogoutEndpoint
 
     public static async Task<IResult> Handle(
         [FromBody] LogoutRequest? request,
-        [FromServices] IJwtTokenService tokenService)
+        [FromServices] IJwtTokenService tokenService,
+        HttpContext context)
     {
-        if (!string.IsNullOrWhiteSpace(request?.RefreshToken))
-        {
-            await tokenService.RevokeRefreshTokenAsync(request.RefreshToken);
-        }
+        await tokenService.RevokeRefreshTokenAsync(request?.RefreshToken, context);
 
         return Results.Ok(new { message = "Đăng xuất thành công." });
     }

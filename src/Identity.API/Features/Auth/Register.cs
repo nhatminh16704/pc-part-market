@@ -27,6 +27,7 @@ public static class RegisterEndpoint
         [FromBody] RegisterRequest request,
         UserManager<ApplicationUser> userManager,
         [FromServices] IJwtTokenService tokenService,
+        HttpContext context,
         ILogger<AuthResponse> logger)
     {
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
@@ -59,7 +60,7 @@ public static class RegisterEndpoint
         }
 
         var roles = await userManager.GetRolesAsync(user);
-        var authResponse = await tokenService.CreateTokenResponseAsync(user, roles);
+        var authResponse = await tokenService.CreateTokenResponseAsync(user, roles, context);
 
         return Results.Created($"/api/auth/me", authResponse);
     }

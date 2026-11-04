@@ -18,16 +18,12 @@ public static class RefreshTokenEndpoint
     }
 
     public static async Task<IResult> Handle(
-        [FromBody] RefreshTokenRequest request,
+        [FromBody] RefreshTokenRequest? request,
         [FromServices] IJwtTokenService tokenService,
+        HttpContext context,
         ILogger<AuthResponse> logger)
     {
-        if (string.IsNullOrWhiteSpace(request.RefreshToken))
-        {
-            return Results.Problem("Refresh token không được để trống.", statusCode: StatusCodes.Status400BadRequest);
-        }
-
-        var authResponse = await tokenService.RefreshTokenAsync(request.RefreshToken);
+        var authResponse = await tokenService.RefreshTokenAsync(request?.RefreshToken, context);
         if (authResponse == null)
         {
             logger.LogWarning("Refresh token validation failed or token is expired/revoked.");

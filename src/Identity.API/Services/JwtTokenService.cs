@@ -13,6 +13,11 @@ namespace eShop.Identity.API.Services;
 
 public class JwtTokenService : IJwtTokenService
 {
+    private const string RefreshTokenCookieName = "refreshToken";
+    private const string AuthCookiePath = "/api/v1/auth";
+    private readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(7);
+    private readonly TimeSpan AccessTokenLifetime = TimeSpan.FromMinutes(15); // AccessToken sống ngắn 15 phút
+
     private readonly RsaKeyManager _rsaKeyManager;
     private readonly IConfiguration _configuration;
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -36,8 +41,11 @@ public class JwtTokenService : IJwtTokenService
     public async Task<AuthResponse> CreateTokenResponseAsync(
         ApplicationUser user,
         IEnumerable<string> roles,
+        HttpContext? httpContext = null,
         string? issuer = null)
     {
+        httpContext ??= _httpContextAccessor.HttpContext;
+
         var primaryRole = roles.FirstOrDefault() ?? "Customer";
         var status = user.Status ?? UserStatus.Active;
         var userType = user.UserType ?? UserTypes.Customer;
@@ -71,8 +79,7 @@ public class JwtTokenService : IJwtTokenService
             _rsaKeyManager.GetSigningKey(),
             SecurityAlgorithms.RsaSha256);
 
-        // AccessToken hết hạn trong 1 giờ (3600s)
-        var lifetimeSeconds = (int)TimeSpan.FromHours(1).TotalSeconds;
+        var lifetimeSeconds = (int)AccessTokenLifetime.TotalSeconds;
         var now = DateTime.UtcNow;
 
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -94,7 +101,7 @@ public class JwtTokenService : IJwtTokenService
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var accessTokenString = tokenHandler.WriteToken(token);
 
-        // Sinh Refresh Token (sống trong 7 ngày)
+        // Sinh Refresh Token ngẫu nhiên và băm SHA-256 lưu vào DB
         var rawRefreshToken = GenerateSecureRawToken();
         var refreshTokenHash = HashToken(rawRefreshToken);
 
@@ -105,20 +112,35 @@ public class JwtTokenService : IJwtTokenService
         {
             UserId = user.Id,
             TokenHash = refreshTokenHash,
-            ExpiresAt = DateTimeOffset.UtcNow.AddDays(7),
+            ExpiresAt = DateTimeOffset.UtcNow.Add(RefreshTokenLifetime),
             CreatedAt = DateTimeOffset.UtcNow
         };
 
         dbContext.RefreshTokens.Add(refreshTokenEntity);
         await dbContext.SaveChangesAsync();
 
-        return new AuthResponse(accessTokenString, rawRefreshToken, lifetimeSeconds);
+        // Ghi Refresh Token vào HttpOnly Secure Cookie với Path=/api/v1/auth
+        if (httpContext != null)
+        {
+            SetRefreshTokenCookie(httpContext, rawRefreshToken, refreshTokenEntity.ExpiresAt);
+        }
+
+        return new AuthResponse(accessTokenString, lifetimeSeconds);
     }
 
-    public async Task<AuthResponse?> RefreshTokenAsync(string rawRefreshToken, string? issuer = null)
+    public async Task<AuthResponse?> RefreshTokenAsync(
+        string? rawRefreshToken = null,
+        HttpContext? httpContext = null,
+        string? issuer = null)
     {
+        httpContext ??= _httpContextAccessor.HttpContext;
+
+        // Ưu tiên đọc từ HttpOnly Cookie, fallback đọc từ parameter nếu có
+        rawRefreshToken ??= httpContext?.Request.Cookies[RefreshTokenCookieName];
+
         if (string.IsNullOrWhiteSpace(rawRefreshToken))
         {
+            _logger.LogWarning("Refresh token request missing cookie and body token.");
             return null;
         }
 
@@ -138,9 +160,7 @@ public class JwtTokenService : IJwtTokenService
             return null;
         }
 
-        // PHÁT HIỆN TẤN CÔNG (Token Reuse Detection):
-        // Nếu token này đã bị thu hồi (Revoked) trước đó mà vẫn bị đem ra dùng, có thể token đã bị lộ/đánh cắp!
-        // Ta thu hồi toàn bộ Refresh Token của User này để bảo vệ tài khoản.
+        // Token Reuse Detection: nếu token đã bị revoked mà vẫn dùng lại -> revoke toàn bộ token của User
         if (existingToken.IsRevoked)
         {
             _logger.LogWarning("Revoked refresh token reuse detected for UserId: {UserId}! Revoking all user tokens.", existingToken.UserId);
@@ -153,12 +173,21 @@ public class JwtTokenService : IJwtTokenService
                 t.RevokedAt = DateTimeOffset.UtcNow;
             }
             await dbContext.SaveChangesAsync();
+
+            if (httpContext != null)
+            {
+                DeleteRefreshTokenCookie(httpContext);
+            }
             return null;
         }
 
         if (existingToken.IsExpired)
         {
             _logger.LogInformation("Expired refresh token for UserId: {UserId}", existingToken.UserId);
+            if (httpContext != null)
+            {
+                DeleteRefreshTokenCookie(httpContext);
+            }
             return null;
         }
 
@@ -166,10 +195,14 @@ public class JwtTokenService : IJwtTokenService
         if (user == null || user.Status != UserStatus.Active)
         {
             _logger.LogWarning("User is null or inactive for refresh token UserId: {UserId}", existingToken.UserId);
+            if (httpContext != null)
+            {
+                DeleteRefreshTokenCookie(httpContext);
+            }
             return null;
         }
 
-        // Token Rotation: Thu hồi token cũ và liên kết tới token mới
+        // Token Rotation: Thu hồi token cũ và sinh token mới
         var newRawRefreshToken = GenerateSecureRawToken();
         var newRefreshTokenHash = HashToken(newRawRefreshToken);
 
@@ -180,12 +213,18 @@ public class JwtTokenService : IJwtTokenService
         {
             UserId = user.Id,
             TokenHash = newRefreshTokenHash,
-            ExpiresAt = DateTimeOffset.UtcNow.AddDays(7),
+            ExpiresAt = DateTimeOffset.UtcNow.Add(RefreshTokenLifetime),
             CreatedAt = DateTimeOffset.UtcNow
         };
 
         dbContext.RefreshTokens.Add(newRefreshTokenEntity);
         await dbContext.SaveChangesAsync();
+
+        // Ghi đè HttpOnly Cookie mới
+        if (httpContext != null)
+        {
+            SetRefreshTokenCookie(httpContext, newRawRefreshToken, newRefreshTokenEntity.ExpiresAt);
+        }
 
         // Cấp AccessToken mới
         var roles = await userManager.GetRolesAsync(user);
@@ -220,7 +259,7 @@ public class JwtTokenService : IJwtTokenService
             _rsaKeyManager.GetSigningKey(),
             SecurityAlgorithms.RsaSha256);
 
-        var lifetimeSeconds = (int)TimeSpan.FromHours(1).TotalSeconds;
+        var lifetimeSeconds = (int)AccessTokenLifetime.TotalSeconds;
         var now = DateTime.UtcNow;
 
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -242,11 +281,21 @@ public class JwtTokenService : IJwtTokenService
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var accessTokenString = tokenHandler.WriteToken(token);
 
-        return new AuthResponse(accessTokenString, newRawRefreshToken, lifetimeSeconds);
+        return new AuthResponse(accessTokenString, lifetimeSeconds);
     }
 
-    public async Task<bool> RevokeRefreshTokenAsync(string rawRefreshToken)
+    public async Task<bool> RevokeRefreshTokenAsync(
+        string? rawRefreshToken = null,
+        HttpContext? httpContext = null)
     {
+        httpContext ??= _httpContextAccessor.HttpContext;
+        rawRefreshToken ??= httpContext?.Request.Cookies[RefreshTokenCookieName];
+
+        if (httpContext != null)
+        {
+            DeleteRefreshTokenCookie(httpContext);
+        }
+
         if (string.IsNullOrWhiteSpace(rawRefreshToken))
         {
             return false;
@@ -268,6 +317,29 @@ public class JwtTokenService : IJwtTokenService
         tokenEntity.RevokedAt = DateTimeOffset.UtcNow;
         await dbContext.SaveChangesAsync();
         return true;
+    }
+
+    private static void SetRefreshTokenCookie(HttpContext context, string rawToken, DateTimeOffset expiresAt)
+    {
+        context.Response.Cookies.Append(RefreshTokenCookieName, rawToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true, // Gửi qua HTTPS hoặc localhost HTTPS
+            SameSite = SameSiteMode.Lax,
+            Path = AuthCookiePath, // Chỉ gửi cookie này cho /api/v1/auth
+            Expires = expiresAt
+        });
+    }
+
+    private static void DeleteRefreshTokenCookie(HttpContext context)
+    {
+        context.Response.Cookies.Delete(RefreshTokenCookieName, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Path = AuthCookiePath
+        });
     }
 
     private static string GenerateSecureRawToken()
