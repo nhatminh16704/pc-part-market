@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '../api/authApi';
+import { getAccessToken, setAccessToken } from '@/lib/axios';
 import type { LoginFormData, RegisterFormData, AuthResponse, User } from '../types';
 
 export const AUTH_KEYS = {
@@ -7,34 +8,28 @@ export const AUTH_KEYS = {
   currentUser: () => [...AUTH_KEYS.all, 'me'] as const,
 };
 
-const getStoredUser = (): User | null => {
-  try {
-    const raw = localStorage.getItem('user_info');
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-};
-
 export const useCurrentUser = () => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-
   return useQuery<User | null>({
     queryKey: AUTH_KEYS.currentUser(),
     queryFn: async () => {
       try {
+        // Nếu RAM chưa có AccessToken (F5 hoặc mở tab mới), thử silent refresh qua HttpOnly Cookie
+        if (!getAccessToken()) {
+          try {
+            const tokenRes = await authApi.refreshToken();
+            setAccessToken(tokenRes.accessToken);
+          } catch {
+            return null;
+          }
+        }
         return await authApi.getCurrentUser();
       } catch {
-        // If token expired or invalid, clear localStorage
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user_info');
+        setAccessToken(null);
         return null;
       }
     },
-    enabled: Boolean(token),
-    initialData: getStoredUser,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 10, // 10 phút
+    retry: false,
   });
 };
 
@@ -44,13 +39,9 @@ export const useLogin = () => {
   return useMutation<AuthResponse, Error, LoginFormData>({
     mutationFn: (data: LoginFormData) => authApi.login(data),
     onSuccess: async (data) => {
-      localStorage.setItem('access_token', data.accessToken);
-      if (data.refreshToken) {
-        localStorage.setItem('refresh_token', data.refreshToken);
-      }
+      setAccessToken(data.accessToken);
       try {
         const user = await authApi.getCurrentUser();
-        localStorage.setItem('user_info', JSON.stringify(user));
         queryClient.setQueryData(AUTH_KEYS.currentUser(), user);
       } catch {
         // Fallback: trigger background refetch
@@ -68,13 +59,9 @@ export const useRegister = () => {
   return useMutation<AuthResponse, Error, RegisterFormData>({
     mutationFn: (data: RegisterFormData) => authApi.register(data),
     onSuccess: async (data) => {
-      localStorage.setItem('access_token', data.accessToken);
-      if (data.refreshToken) {
-        localStorage.setItem('refresh_token', data.refreshToken);
-      }
+      setAccessToken(data.accessToken);
       try {
         const user = await authApi.getCurrentUser();
-        localStorage.setItem('user_info', JSON.stringify(user));
         queryClient.setQueryData(AUTH_KEYS.currentUser(), user);
       } catch {
         queryClient.invalidateQueries({ queryKey: AUTH_KEYS.currentUser() });
@@ -91,17 +78,12 @@ export const useAuth = () => {
   const registerMutation = useRegister();
 
   const logout = async () => {
-    const refreshToken = localStorage.getItem('refresh_token');
     try {
-      if (refreshToken) {
-        await authApi.logout(refreshToken);
-      }
+      await authApi.logout();
     } catch {
-      // Ignore network errors on logout
+      // Bỏ qua lỗi mạng khi logout
     } finally {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user_info');
+      setAccessToken(null);
       queryClient.setQueryData(AUTH_KEYS.currentUser(), null);
       // Refresh basket back to guest state
       queryClient.invalidateQueries({ queryKey: ['basket'] });
@@ -110,7 +92,7 @@ export const useAuth = () => {
 
   return {
     user: user ?? null,
-    isAuthenticated: Boolean(user && localStorage.getItem('access_token')),
+    isAuthenticated: Boolean(user && getAccessToken()),
     isLoading: isUserLoading || loginMutation.isPending || registerMutation.isPending,
     login: loginMutation.mutateAsync,
     loginMutation,

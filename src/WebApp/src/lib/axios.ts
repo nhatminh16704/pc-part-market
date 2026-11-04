@@ -1,4 +1,14 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import type { AuthResponse } from '@/features/auth/types';
+
+// In-memory token storage (chỉ lưu trong RAM, bảo vệ hoàn toàn khỏi XSS trộm token lưu persistent)
+let inMemoryAccessToken: string | null = null;
+
+export const setAccessToken = (token: string | null) => {
+  inMemoryAccessToken = token;
+};
+
+export const getAccessToken = () => inMemoryAccessToken;
 
 export const apiClient = axios.create({
   baseURL: '/api/v1',
@@ -6,6 +16,7 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 10000,
+  withCredentials: true, // Cho phép trình duyệt gửi và nhận HttpOnly Secure Cookies
 });
 
 // Queue management for concurrent 401 requests
@@ -41,10 +52,10 @@ function getOrCreateBuyerId(): string {
   }
 }
 
-// Request Interceptor: Tự động đính kèm Authorization Bearer token & X-Buyer-Id
+// Request Interceptor: Tự động đính kèm Authorization Bearer token (từ RAM) & X-Buyer-Id
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('access_token');
+    const token = inMemoryAccessToken;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -57,7 +68,7 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Xử lý 401 tự động Refresh Token và log lỗi
+// Response Interceptor: Xử lý 401 tự động Refresh Token qua HttpOnly cookie và log lỗi
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -69,18 +80,9 @@ apiClient.interceptors.response.use(
       originalRequest &&
       !originalRequest._retry &&
       !originalRequest.url?.includes('/auth/login') &&
+      !originalRequest.url?.includes('/auth/register') &&
       !originalRequest.url?.includes('/auth/refresh-token')
     ) {
-      const refreshToken = localStorage.getItem('refresh_token');
-
-      // Nếu không có refresh token -> Không thể làm mới, chuyển về trang đăng nhập
-      if (!refreshToken) {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user_info');
-        return Promise.reject(error);
-      }
-
       // Nếu đang có 1 request khác thực hiện refresh -> xếp hàng chờ
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -98,24 +100,23 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Dùng axios thuần để gọi refresh-token tránh lặp qua interceptor
-        const res = await axios.post('/api/v1/auth/refresh-token', { refreshToken });
-        const { accessToken, refreshToken: newRefreshToken } = res.data;
+        // Dùng axios thuần để gọi refresh-token (cookie HttpOnly tự động được gửi qua withCredentials)
+        const res = await axios.post<AuthResponse>(
+          '/api/v1/auth/refresh-token',
+          {},
+          { withCredentials: true }
+        );
+        const { accessToken } = res.data;
 
-        localStorage.setItem('access_token', accessToken);
-        if (newRefreshToken) {
-          localStorage.setItem('refresh_token', newRefreshToken);
-        }
-
+        // Cập nhật Access Token trong RAM
+        setAccessToken(accessToken);
         processQueue(null, accessToken);
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return apiClient(originalRequest);
       } catch (refreshErr) {
         processQueue(refreshErr, null);
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user_info');
+        setAccessToken(null);
         if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
