@@ -30,6 +30,7 @@
     <PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="$(ApiVersioningVersion)" />
     <PackageVersion Include="Asp.Versioning.OpenApi" Version="$(ApiVersioningVersion)" />
     <!-- Version together with ASP.NET -->
+    <PackageVersion Include="Google.Apis.Auth" Version="1.78.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(DotnetPackagesVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="$(DotnetPackagesVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.QuickGrid" Version="$(DotnetPackagesVersion)" />

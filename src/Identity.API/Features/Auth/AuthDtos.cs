@@ -24,3 +24,7 @@ public record RefreshTokenRequest(
 public record LogoutRequest(
     string? RefreshToken
 );
+
+public record GoogleLoginRequest(
+    string IdToken
+);

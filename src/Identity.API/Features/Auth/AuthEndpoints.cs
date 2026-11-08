@@ -11,6 +11,7 @@ public static class AuthEndpoints
 
         group.MapLogin();
         group.MapRegister();
+        group.MapGoogleLogin();
         group.MapGetCurrentUser();
         group.MapRefreshToken();
         group.MapLogout();
