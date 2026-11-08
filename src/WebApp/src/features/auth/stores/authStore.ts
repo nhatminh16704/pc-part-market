@@ -23,3 +23,4 @@ export const useAuthStore = create<AuthState>((set) => ({
 export const getAccessToken = () => useAuthStore.getState().accessToken;
 export const setAccessToken = (token: string | null) => useAuthStore.getState().setAccessToken(token);
 export const getUser = () => useAuthStore.getState().user;
+

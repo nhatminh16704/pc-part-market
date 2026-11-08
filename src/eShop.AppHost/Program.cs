@@ -81,7 +81,7 @@ var gateway = builder.AddYarp("gateway")
     .ConfigureApiGatewayRoutes(catalogApi, basketApi, orderingApi, identityApi);
 
 var webApp = builder.AddNpmApp("webapp", "../WebApp", "dev")
-    .WithHttpEndpoint(env: "PORT")
+    .WithHttpEndpoint(port: 5173, env: "PORT")
     .WithExternalHttpEndpoints()
     .WithReference(gateway)
     .WithReference(catalogApi)
