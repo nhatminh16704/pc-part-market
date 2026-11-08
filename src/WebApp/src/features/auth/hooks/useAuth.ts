@@ -75,6 +75,25 @@ export const useRegister = () => {
   });
 };
 
+export const useGoogleLogin = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<AuthResponse, Error, string>({
+    mutationFn: (idToken: string) => authApi.loginWithGoogle(idToken),
+    onSuccess: async (data) => {
+      useAuthStore.getState().setAccessToken(data.accessToken);
+      try {
+        const user = await authApi.getCurrentUser();
+        useAuthStore.getState().setUser(user);
+        queryClient.setQueryData(AUTH_KEYS.currentUser(), user);
+      } catch {
+        queryClient.invalidateQueries({ queryKey: AUTH_KEYS.currentUser() });
+      }
+      queryClient.invalidateQueries({ queryKey: ['basket'] });
+    },
+  });
+};
+
 export const useAuth = () => {
   const queryClient = useQueryClient();
   const { accessToken, user: storeUser } = useAuthStore();
@@ -82,6 +101,7 @@ export const useAuth = () => {
   const currentUser = user ?? storeUser;
   const loginMutation = useLogin();
   const registerMutation = useRegister();
+  const googleLoginMutation = useGoogleLogin();
 
   const logout = async () => {
     try {
@@ -100,11 +120,13 @@ export const useAuth = () => {
     user: currentUser,
     accessToken,
     isAuthenticated: Boolean(currentUser && accessToken),
-    isLoading: isUserLoading || loginMutation.isPending || registerMutation.isPending,
+    isLoading: isUserLoading || loginMutation.isPending || registerMutation.isPending || googleLoginMutation.isPending,
     login: loginMutation.mutateAsync,
     loginMutation,
     register: registerMutation.mutateAsync,
     registerMutation,
+    googleLogin: googleLoginMutation.mutateAsync,
+    googleLoginMutation,
     logout,
   };
 };

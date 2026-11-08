@@ -7,11 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lock, Mail, Phone, Loader2, Sparkles, UserCheck, UserPlus } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 
 export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, register: registerUser, loginMutation, registerMutation } = useAuth();
+  const { login, register: registerUser, googleLogin, loginMutation, registerMutation, googleLoginMutation } = useAuth();
   const [mode, setMode] = useState<'login' | 'register'>(
     location.pathname === '/register' ? 'register' : 'login'
   );
@@ -77,13 +78,32 @@ export const LoginForm: React.FC = () => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      setErrorMessage('Không nhận được token xác thực từ Google.');
+      return;
+    }
+    setErrorMessage(null);
+    try {
+      await googleLogin(credentialResponse.credential);
+      navigate(returnUrl, { replace: true });
+    } catch (err: any) {
+      const detail =
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        err.message ||
+        'Đăng nhập Google thất bại. Vui lòng thử lại.';
+      setErrorMessage(detail);
+    }
+  };
+
   const fillDemoAccount = (username: string) => {
     setLoginValue('email', username, { shouldValidate: true });
     setLoginValue('password', 'Pass123$', { shouldValidate: true });
     setErrorMessage(null);
   };
 
-  const isPending = loginMutation.isPending || registerMutation.isPending;
+  const isPending = loginMutation.isPending || registerMutation.isPending || googleLoginMutation.isPending;
 
   return (
     <div className="w-full max-w-md p-8 bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/50">
@@ -258,6 +278,32 @@ export const LoginForm: React.FC = () => {
           </Button>
         </form>
       )}
+
+      {/* Divider */}
+      <div className="relative my-5">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-slate-200" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-3 text-slate-400 font-semibold tracking-wider">
+            Hoặc tiếp tục với
+          </span>
+        </div>
+      </div>
+
+      {/* Google Sign-In Button */}
+      <div className="flex justify-center w-full min-h-[40px]">
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => setErrorMessage('Đăng nhập Google thất bại. Vui lòng thử lại.')}
+          useOneTap={false}
+          theme="outline"
+          shape="rectangular"
+          size="large"
+          width="384"
+          text={mode === 'login' ? 'signin_with' : 'signup_with'}
+        />
+      </div>
 
       {/* Demo Account Quick Pick for Login */}
       {mode === 'login' && (
