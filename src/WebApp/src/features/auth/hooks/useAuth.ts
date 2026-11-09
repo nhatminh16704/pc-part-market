@@ -9,19 +9,12 @@ export const AUTH_KEYS = {
 };
 
 export const useCurrentUser = () => {
+  const accessToken = useAuthStore((s) => s.accessToken);
+
   return useQuery<User | null>({
     queryKey: AUTH_KEYS.currentUser(),
     queryFn: async () => {
       try {
-        // Nếu RAM chưa có AccessToken (F5 hoặc mở tab mới), thử silent refresh qua HttpOnly Cookie
-        if (!useAuthStore.getState().accessToken) {
-          try {
-            const tokenRes = await authApi.refreshToken();
-            useAuthStore.getState().setAccessToken(tokenRes.accessToken);
-          } catch {
-            return null;
-          }
-        }
         const user = await authApi.getCurrentUser();
         useAuthStore.getState().setUser(user);
         return user;
@@ -30,6 +23,7 @@ export const useCurrentUser = () => {
         return null;
       }
     },
+    enabled: Boolean(accessToken), // Chỉ gọi khi RAM đã có AccessToken hợp lệ
     staleTime: 1000 * 60 * 10, // 10 phút
     retry: false,
   });
@@ -96,7 +90,7 @@ export const useGoogleLogin = () => {
 
 export const useAuth = () => {
   const queryClient = useQueryClient();
-  const { accessToken, user: storeUser } = useAuthStore();
+  const { accessToken, user: storeUser, isInitialized } = useAuthStore();
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const currentUser = user ?? storeUser;
   const loginMutation = useLogin();
@@ -120,7 +114,8 @@ export const useAuth = () => {
     user: currentUser,
     accessToken,
     isAuthenticated: Boolean(currentUser && accessToken),
-    isLoading: isUserLoading || loginMutation.isPending || registerMutation.isPending || googleLoginMutation.isPending,
+    isInitialized,
+    isLoading: !isInitialized || isUserLoading || loginMutation.isPending || registerMutation.isPending || googleLoginMutation.isPending,
     login: loginMutation.mutateAsync,
     loginMutation,
     register: registerMutation.mutateAsync,

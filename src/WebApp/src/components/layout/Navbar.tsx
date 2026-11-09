@@ -24,7 +24,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
   const { openCart, totalCount } = useCart();
   const { data: categories = [] } = useCategories();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, isLoading } = useAuth();
 
   // Simplified header for login & register pages: only brand logo & site title
   if (isAuthPage) {
@@ -122,7 +122,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           </Button>
 
           {/* User Account / Auth */}
-          {isAuthenticated && user ? (
+          {isLoading ? (
+            <div className="h-8 w-24 bg-slate-100 animate-pulse rounded-lg border border-slate-200" />
+          ) : isAuthenticated && user ? (
             <div className="flex items-center gap-1.5">
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-800 text-xs font-semibold shadow-sm">
                 <User className="w-3.5 h-3.5 text-[#ff5636]" />
