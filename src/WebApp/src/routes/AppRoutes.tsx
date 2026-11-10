@@ -1,22 +1,40 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Home } from '@/pages/Home';
 import { ProductDetail } from '@/pages/ProductDetail';
 import { Login } from '@/pages/Login';
 import { NotFound } from '@/pages/NotFound';
+import { ErrorPage } from '@/pages/ErrorPage';
 
-export const AppRoutes: React.FC = () => {
-  return (
-    <Routes>
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Login />} />
-        <Route path="/products/:id" element={<ProductDetail />} />
-        <Route path="/products/seo/:id" element={<ProductDetail />} />
-        <Route path="*" element={<NotFound />} />
-      </Route>
-    </Routes>
-  );
-};
+export const router = createBrowserRouter([
+  {
+    element: <MainLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: '/',
+        element: <Home />,
+      },
+      {
+        path: '/login',
+        element: <Login />,
+      },
+      {
+        path: '/register',
+        element: <Login />,
+      },
+      {
+        path: '/products/:id',
+        element: <ProductDetail />,
+      },
+      {
+        path: '/products/seo/:id',
+        element: <ProductDetail />,
+      },
+      {
+        path: '*',
+        element: <NotFound />,
+      },
+    ],
+  },
+]);
