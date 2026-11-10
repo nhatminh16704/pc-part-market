@@ -77,7 +77,9 @@
     <PackageVersion Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.0-rc.1.23461.3" />
     <!-- Grpc -->
     <PackageVersion Include="Grpc.AspNetCore" Version="$(GrpcVersion)" />
+    <PackageVersion Include="Grpc.AspNetCore.Web" Version="$(GrpcVersion)" />
     <PackageVersion Include="Grpc.Net.ClientFactory" Version="$(GrpcVersion)" />
+    <PackageVersion Include="Grpc.Net.Client.Web" Version="$(GrpcVersion)" />
     <PackageVersion Include="Grpc.Tools" Version="2.78.0" PrivateAssets="All" />
     <!-- Miscellaneous -->
     <PackageVersion Include="Dapper" Version="2.1.35" />

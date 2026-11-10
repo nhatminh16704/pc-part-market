@@ -31,7 +31,7 @@ public class BasketServiceTests
     public async Task GetBasketReturnsItemsForValidUserId()
     {
         var mockRepository = Substitute.For<IBasketRepository>();
-        List<BasketItem> items = [new BasketItem { Id = "some-id" }];
+        List<BasketItem> items = [new BasketItem { ProductId = Guid.NewGuid(), VariantId = Guid.NewGuid() }];
         mockRepository.GetBasketAsync("1").Returns(Task.FromResult(new CustomerBasket { BuyerId = "1", Items = items }));
         var service = new BasketService(mockRepository, NullLogger<BasketService>.Instance);
         var serverCallContext = TestServerCallContext.Create(cancellationToken: TestContext.CancellationToken);
@@ -49,7 +49,7 @@ public class BasketServiceTests
     public async Task GetBasketReturnsEmptyForInvalidUserId()
     {
         var mockRepository = Substitute.For<IBasketRepository>();
-        List<BasketItem> items = [new BasketItem { Id = "some-id" }];
+        List<BasketItem> items = [new BasketItem { ProductId = Guid.NewGuid(), VariantId = Guid.NewGuid() }];
         mockRepository.GetBasketAsync("1").Returns(Task.FromResult(new CustomerBasket { BuyerId = "1", Items = items }));
         var service = new BasketService(mockRepository, NullLogger<BasketService>.Instance);
         var serverCallContext = TestServerCallContext.Create(cancellationToken: TestContext.CancellationToken);

@@ -5,6 +5,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.AddApplicationServices();
 
+builder.Services.AddGrpc();
+
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
@@ -40,4 +42,8 @@ app.MapDefaultEndpoints();
 app.MapCatalogApi();
 
 app.UseDefaultOpenApi();
+
+app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
+app.MapGrpcService<eShop.Catalog.API.Grpc.CatalogService>().EnableGrpcWeb();
+
 app.Run();

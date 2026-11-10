@@ -8,10 +8,13 @@
   <ItemGroup>
     <PackageReference Include="Aspire.StackExchange.Redis" />
     <PackageReference Include="Grpc.AspNetCore" />
+    <PackageReference Include="Grpc.Net.ClientFactory" />
+    <PackageReference Include="Grpc.Net.Client.Web" />
   </ItemGroup>
 
   <ItemGroup>
     <Protobuf Include="Proto\basket.proto" GrpcServices="Server" />
+    <Protobuf Include="..\Catalog.API\Proto\catalog.proto" GrpcServices="Client" Link="Proto\catalog.proto" />
   </ItemGroup>
 
   <ItemGroup>

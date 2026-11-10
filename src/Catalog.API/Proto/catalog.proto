@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option csharp_namespace = "eShop.Catalog.API.Grpc";
+
+package CatalogApi;
+
+service Catalog {
+    rpc GetVariantById(GetVariantByIdRequest) returns (CatalogVariantResponse) {}
+    rpc GetProductById(GetProductByIdRequest) returns (CatalogProductResponse) {}
+}
+
+message GetVariantByIdRequest {
+    string id = 1;
+}
+
+message CatalogVariantResponse {
+    string id = 1;
+    string product_id = 2;
+    int64 price = 3;
+    int32 quantity = 4;
+    string sku = 5;
+    string model = 6;
+    string image_url = 7;
+}
+
+message GetProductByIdRequest {
+    string id = 1;
+}
+
+message CatalogProductResponse {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+}
+

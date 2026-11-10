@@ -1,5 +1,5 @@
-using System.Net.Http.Json;
-using System.Text.Json;
+using eShop.Catalog.API.Grpc;
+using Grpc.Core;
 
 namespace eShop.Basket.API.Services;
 
@@ -25,23 +25,33 @@ public record CatalogProductDto(
     string? Description
 );
 
-public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> logger) : ICatalogApiClient
+public class CatalogGrpcClient(global::eShop.Catalog.API.Grpc.Catalog.CatalogClient client, ILogger<CatalogGrpcClient> logger) : ICatalogApiClient
 {
     public async Task<CatalogVariantDto?> GetVariantAsync(Guid variantId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var response = await httpClient.GetAsync($"/api/v1/catalog/variants/{variantId}", cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                return null;
-            }
+            var request = new GetVariantByIdRequest { Id = variantId.ToString() };
+            var response = await client.GetVariantByIdAsync(request, cancellationToken: cancellationToken);
 
-            return await response.Content.ReadFromJsonAsync<CatalogVariantDto>(cancellationToken: cancellationToken);
+            return new CatalogVariantDto(
+                Guid.Parse(response.Id),
+                Guid.Parse(response.ProductId),
+                response.Price,
+                response.Quantity,
+                response.Sku,
+                string.IsNullOrEmpty(response.Model) ? null : response.Model,
+                string.IsNullOrEmpty(response.ImageUrl) ? null : response.ImageUrl
+            );
+        }
+        catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
+        {
+            logger.LogWarning("Variant {VariantId} not found in catalog-api via gRPC", variantId);
+            return null;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to fetch variant {VariantId} from catalog-api", variantId);
+            logger.LogError(ex, "Failed to fetch variant {VariantId} from catalog-api via gRPC", variantId);
             return null;
         }
     }
@@ -50,26 +60,23 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
     {
         try
         {
-            var response = await httpClient.GetAsync($"/api/v1/catalog/products/{productId}", cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                return null;
-            }
+            var request = new GetProductByIdRequest { Id = productId.ToString() };
+            var response = await client.GetProductByIdAsync(request, cancellationToken: cancellationToken);
 
-            using var doc = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(cancellationToken), cancellationToken: cancellationToken);
-            if (doc.RootElement.TryGetProperty("data", out var dataElement) && dataElement.ValueKind == JsonValueKind.Object)
-            {
-                var id = dataElement.GetProperty("id").GetGuid();
-                var name = dataElement.GetProperty("name").GetString() ?? string.Empty;
-                var description = dataElement.TryGetProperty("description", out var desc) ? desc.GetString() : null;
-                return new CatalogProductDto(id, name, description);
-            }
-
+            return new CatalogProductDto(
+                Guid.Parse(response.Id),
+                response.Name,
+                string.IsNullOrEmpty(response.Description) ? null : response.Description
+            );
+        }
+        catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
+        {
+            logger.LogWarning("Product {ProductId} not found in catalog-api via gRPC", productId);
             return null;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to fetch product {ProductId} from catalog-api", productId);
+            logger.LogError(ex, "Failed to fetch product {ProductId} from catalog-api via gRPC", productId);
             return null;
         }
     }
