@@ -16,6 +16,7 @@ var postgres = builder.AddPostgres("postgres")
 
 var catalogDb = postgres.AddDatabase("catalogdb");
 var identityDb = postgres.AddDatabase("identitydb");
+var customerDb = postgres.AddDatabase("customerdb");
 var orderDb = postgres.AddDatabase("orderingdb");
 var webhooksDb = postgres.AddDatabase("webhooksdb");
 
@@ -28,6 +29,11 @@ var identityApi = builder.AddProject<Projects.Identity_API>("identity-api", laun
     .WithHttpHealthCheck("/health");
 
 var identityEndpoint = identityApi.GetEndpoint(launchProfileName);
+
+var customerApi = builder.AddProject<Projects.Customer_API>("customer-api")
+    .WithReference(customerDb)
+    .WithHttpHealthCheck("/health")
+    .WithEnvironment("Identity__Url", identityEndpoint);
 
 var catalogApi = builder.AddProject<Projects.Catalog_API>("catalog-api")
     .WithReference(rabbitMq).WaitFor(rabbitMq)
@@ -78,7 +84,7 @@ var aiService = builder.AddExecutable("ai-service", pythonExecutable, "../AIServ
 // API Gateway (YARP Reverse Proxy)
 var gateway = builder.AddYarp("gateway")
     .WithExternalHttpEndpoints()
-    .ConfigureApiGatewayRoutes(catalogApi, basketApi, orderingApi, identityApi);
+    .ConfigureApiGatewayRoutes(catalogApi, basketApi, orderingApi, identityApi, customerApi);
 
 var webApp = builder.AddNpmApp("webapp", "../WebApp", "dev")
     .WithHttpEndpoint(port: 5173, env: "PORT")
@@ -87,6 +93,7 @@ var webApp = builder.AddNpmApp("webapp", "../WebApp", "dev")
     .WithReference(catalogApi)
     .WithReference(basketApi)
     .WithReference(identityApi)
+    .WithReference(customerApi)
     .PublishAsDockerFile();
 
 webhooksClient.WithEnvironment("CallBackUrl", webhooksClient.GetEndpoint(launchProfileName));
