@@ -1,4 +1,5 @@
 using eShop.Customer.API.Extensions;
+using eShop.Customer.API.Features.Customers;
 using eShop.ServiceDefaults;
 using Scalar.AspNetCore;
 
@@ -20,5 +21,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapCustomerEndpoints();
 
 app.Run();
