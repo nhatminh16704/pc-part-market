@@ -8,6 +8,7 @@ public static class AddressEndpoints
             .WithTags("Addresses");
 
         group.MapGetMyAddresses();
+        group.MapCreateMyAddress();
 
         return app;
     }
