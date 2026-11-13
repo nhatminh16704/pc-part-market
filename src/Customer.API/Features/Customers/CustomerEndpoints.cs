@@ -9,6 +9,7 @@ public static class CustomerEndpoints
 
         group.MapGetMyProfile();
         group.MapUpdateMyProfile();
+        group.MapGetCustomers();
 
         return app;
     }
