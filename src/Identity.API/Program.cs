@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Scalar.AspNetCore;
 
@@ -10,7 +11,14 @@ builder.AddNpgsqlDbContext<ApplicationDbContext>("identitydb");
 // Apply database migration automatically.
 builder.Services.AddMigration<ApplicationDbContext, UsersSeed>();
 
-builder.AddMassTransitEventBus("eventbus");
+builder.AddMassTransitEventBus("eventbus", x =>
+{
+    x.AddEntityFrameworkOutbox<ApplicationDbContext>(o =>
+    {
+        o.UsePostgres();
+        o.UseBusOutbox();
+    });
+});
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()

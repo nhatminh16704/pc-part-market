@@ -28,6 +28,7 @@ public static class GoogleLoginEndpoint
     public static async Task<IResult> Handle(
         [FromBody] GoogleLoginRequest request,
         UserManager<ApplicationUser> userManager,
+        ApplicationDbContext dbContext,
         [FromServices] IJwtTokenService tokenService,
         [FromServices] IPublishEndpoint publishEndpoint,
         IConfiguration configuration,
@@ -85,6 +86,8 @@ public static class GoogleLoginEndpoint
                 UserType = UserTypes.Customer
             };
 
+            await using var transaction = await dbContext.Database.BeginTransactionAsync(context.RequestAborted);
+
             var createResult = await userManager.CreateAsync(user);
             if (!createResult.Succeeded)
             {
@@ -105,7 +108,11 @@ public static class GoogleLoginEndpoint
                     LastName: payload.FamilyName,
                     AvatarUrl: payload.Picture
                 ), context.RequestAborted);
+
+                await dbContext.SaveChangesAsync(context.RequestAborted);
             }
+
+            await transaction.CommitAsync(context.RequestAborted);
         }
         else
         {

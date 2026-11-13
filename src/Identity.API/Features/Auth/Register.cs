@@ -28,6 +28,7 @@ public static class RegisterEndpoint
     public static async Task<IResult> Handle(
         [FromBody] RegisterRequest request,
         UserManager<ApplicationUser> userManager,
+        ApplicationDbContext dbContext,
         [FromServices] IJwtTokenService tokenService,
         [FromServices] IPublishEndpoint publishEndpoint,
         HttpContext context,
@@ -55,6 +56,8 @@ public static class RegisterEndpoint
             UserType = UserTypes.Customer
         };
 
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(context.RequestAborted);
+
         var result = await userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
@@ -69,7 +72,11 @@ public static class RegisterEndpoint
                 Email: user.Email!,
                 PhoneNumber: string.IsNullOrWhiteSpace(user.PhoneNumber) ? null : user.PhoneNumber
             ), context.RequestAborted);
+
+            await dbContext.SaveChangesAsync(context.RequestAborted);
         }
+
+        await transaction.CommitAsync(context.RequestAborted);
 
         var roles = await userManager.GetRolesAsync(user);
         var authResponse = await tokenService.CreateTokenResponseAsync(user, roles, context);

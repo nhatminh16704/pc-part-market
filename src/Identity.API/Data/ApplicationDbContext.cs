@@ -1,3 +1,5 @@
+using MassTransit;
+
 namespace eShop.Identity.API.Data;
 
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
@@ -47,5 +49,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
+        builder.AddInboxStateEntity();
+        builder.AddOutboxMessageEntity();
+        builder.AddOutboxStateEntity();
     }
 }
