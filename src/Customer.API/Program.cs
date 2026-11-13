@@ -1,4 +1,5 @@
 using eShop.Customer.API.Extensions;
+using eShop.Customer.API.Features.Addresses;
 using eShop.Customer.API.Features.Customers;
 using eShop.ServiceDefaults;
 using Scalar.AspNetCore;
@@ -23,5 +24,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapCustomerEndpoints();
+app.MapAddressEndpoints();
 
 app.Run();
