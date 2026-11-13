@@ -11,6 +11,7 @@ public static class AddressEndpoints
         group.MapCreateMyAddress();
         group.MapUpdateMyAddress();
         group.MapDeleteMyAddress();
+        group.MapSetDefaultAddress();
 
         return app;
     }
