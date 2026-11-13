@@ -15,3 +15,4 @@ public class Customer
 
     public ICollection<CustomerAddress> Addresses { get; set; } = new List<CustomerAddress>();
 }
+

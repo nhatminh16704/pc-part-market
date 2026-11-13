@@ -87,3 +87,4 @@ public class CustomerAddressEntityTypeConfiguration : IEntityTypeConfiguration<C
             .HasDatabaseName("ix_customer_addresses_default_per_customer");
     }
 }
+

@@ -65,3 +65,4 @@ public class CustomerEntityTypeConfiguration : IEntityTypeConfiguration<Model.Cu
             .HasColumnType("timestamp with time zone");
     }
 }
+

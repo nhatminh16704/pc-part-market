@@ -15,3 +15,4 @@ public class CustomerContext(DbContextOptions<CustomerContext> options) : DbCont
         builder.ApplyConfiguration(new CustomerAddressEntityTypeConfiguration());
     }
 }
+
