@@ -25,12 +25,14 @@ var launchProfileName = ShouldUseHttpForEndpoints() ? "http" : "https";
 // Services
 var identityApi = builder.AddProject<Projects.Identity_API>("identity-api", launchProfileName)
     .WithExternalHttpEndpoints()
+    .WithReference(rabbitMq).WaitFor(rabbitMq)
     .WithReference(identityDb)
     .WithHttpHealthCheck("/health");
 
 var identityEndpoint = identityApi.GetEndpoint(launchProfileName);
 
 var customerApi = builder.AddProject<Projects.Customer_API>("customer-api")
+    .WithReference(rabbitMq).WaitFor(rabbitMq)
     .WithReference(customerDb)
     .WithHttpHealthCheck("/health")
     .WithEnvironment("Identity__Url", identityEndpoint);

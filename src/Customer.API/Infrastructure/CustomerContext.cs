@@ -1,5 +1,6 @@
 using eShop.Customer.API.Infrastructure.EntityConfigurations;
 using eShop.Customer.API.Model;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Customer.API.Infrastructure;
@@ -13,6 +14,10 @@ public class CustomerContext(DbContextOptions<CustomerContext> options) : DbCont
     {
         builder.ApplyConfiguration(new CustomerEntityTypeConfiguration());
         builder.ApplyConfiguration(new CustomerAddressEntityTypeConfiguration());
+
+        builder.AddInboxStateEntity();
+        builder.AddOutboxMessageEntity();
+        builder.AddOutboxStateEntity();
     }
 }
 
