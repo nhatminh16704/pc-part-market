@@ -1,8 +1,10 @@
 #nullable enable
 
 using Google.Apis.Auth;
+using eShop.Contracts;
 using eShop.Identity.API.Models;
 using eShop.Identity.API.Services;
+using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,6 +29,7 @@ public static class GoogleLoginEndpoint
         [FromBody] GoogleLoginRequest request,
         UserManager<ApplicationUser> userManager,
         [FromServices] IJwtTokenService tokenService,
+        [FromServices] IPublishEndpoint publishEndpoint,
         IConfiguration configuration,
         HttpContext context,
         ILogger<AuthResponse> logger)
@@ -92,6 +95,17 @@ public static class GoogleLoginEndpoint
 
             await userManager.AddLoginAsync(user, new UserLoginInfo("Google", payload.Subject, "Google"));
             logger.LogInformation("New user registered via Google: {Email}", payload.Email);
+
+            if (Guid.TryParse(user.Id, out var userGuid))
+            {
+                await publishEndpoint.Publish(new UserRegisteredIntegrationEvent(
+                    UserId: userGuid,
+                    Email: user.Email!,
+                    FirstName: payload.GivenName,
+                    LastName: payload.FamilyName,
+                    AvatarUrl: payload.Picture
+                ), context.RequestAborted);
+            }
         }
         else
         {

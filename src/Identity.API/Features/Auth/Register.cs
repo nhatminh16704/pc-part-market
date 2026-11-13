@@ -1,6 +1,8 @@
 #nullable enable
 
+using eShop.Contracts;
 using eShop.Identity.API.Services;
+using MassTransit;
 
 namespace eShop.Identity.API.Features.Auth;
 
@@ -27,6 +29,7 @@ public static class RegisterEndpoint
         [FromBody] RegisterRequest request,
         UserManager<ApplicationUser> userManager,
         [FromServices] IJwtTokenService tokenService,
+        [FromServices] IPublishEndpoint publishEndpoint,
         HttpContext context,
         ILogger<AuthResponse> logger)
     {
@@ -57,6 +60,15 @@ public static class RegisterEndpoint
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
             return Results.Problem($"Đăng ký không thành công: {errors}", statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        if (Guid.TryParse(user.Id, out var userGuid))
+        {
+            await publishEndpoint.Publish(new UserRegisteredIntegrationEvent(
+                UserId: userGuid,
+                Email: user.Email!,
+                PhoneNumber: string.IsNullOrWhiteSpace(user.PhoneNumber) ? null : user.PhoneNumber
+            ), context.RequestAborted);
         }
 
         var roles = await userManager.GetRolesAsync(user);

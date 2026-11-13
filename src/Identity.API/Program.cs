@@ -10,6 +10,8 @@ builder.AddNpgsqlDbContext<ApplicationDbContext>("identitydb");
 // Apply database migration automatically.
 builder.Services.AddMigration<ApplicationDbContext, UsersSeed>();
 
+builder.AddMassTransitEventBus("eventbus");
+
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
