@@ -8,6 +8,7 @@ public static class CustomerEndpoints
             .WithTags("Customers");
 
         group.MapGetMyProfile();
+        group.MapUpdateMyProfile();
 
         return app;
     }
