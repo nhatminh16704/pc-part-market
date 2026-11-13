@@ -10,6 +10,7 @@ public static class AddressEndpoints
         group.MapGetMyAddresses();
         group.MapCreateMyAddress();
         group.MapUpdateMyAddress();
+        group.MapDeleteMyAddress();
 
         return app;
     }
