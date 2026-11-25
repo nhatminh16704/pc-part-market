@@ -41,19 +41,23 @@ public static class SetDefaultAddressEndpoint
 
         if (!address.IsDefault)
         {
-            await using var transaction = await db.Database.BeginTransactionAsync(ct);
+            var strategy = db.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
-            await db.CustomerAddresses
-                .Where(a => a.CustomerId == customerId.Value && a.IsDefault && a.Id != addressId)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(a => a.IsDefault, false)
-                    .SetProperty(a => a.UpdatedAt, DateTime.UtcNow), ct);
+                await db.CustomerAddresses
+                    .Where(a => a.CustomerId == customerId.Value && a.IsDefault && a.Id != addressId)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(a => a.IsDefault, false)
+                        .SetProperty(a => a.UpdatedAt, DateTime.UtcNow), ct);
 
-            address.IsDefault = true;
-            address.UpdatedAt = DateTime.UtcNow;
+                address.IsDefault = true;
+                address.UpdatedAt = DateTime.UtcNow;
 
-            await db.SaveChangesAsync(ct);
-            await transaction.CommitAsync(ct);
+                await db.SaveChangesAsync(ct);
+                await transaction.CommitAsync(ct);
+            });
         }
 
         return Results.Ok(CustomerAddressDto.FromEntity(address));

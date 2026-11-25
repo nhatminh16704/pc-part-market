@@ -86,33 +86,43 @@ public static class GoogleLoginEndpoint
                 UserType = UserTypes.Customer
             };
 
-            await using var transaction = await dbContext.Database.BeginTransactionAsync(context.RequestAborted);
-
-            var createResult = await userManager.CreateAsync(user);
-            if (!createResult.Succeeded)
+            var strategy = dbContext.Database.CreateExecutionStrategy();
+            var errorResult = await strategy.ExecuteAsync<IResult?>(async () =>
             {
-                var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
-                logger.LogError("Failed to create user from Google login: {Errors}", errors);
-                return Results.Problem($"Đăng ký tài khoản không thành công: {errors}", statusCode: StatusCodes.Status400BadRequest);
-            }
+                await using var transaction = await dbContext.Database.BeginTransactionAsync(context.RequestAborted);
 
-            await userManager.AddLoginAsync(user, new UserLoginInfo("Google", payload.Subject, "Google"));
-            logger.LogInformation("New user registered via Google: {Email}", payload.Email);
+                var createResult = await userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                {
+                    var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
+                    logger.LogError("Failed to create user from Google login: {Errors}", errors);
+                    return Results.Problem($"Đăng ký tài khoản không thành công: {errors}", statusCode: StatusCodes.Status400BadRequest);
+                }
 
-            if (Guid.TryParse(user.Id, out var userGuid))
+                await userManager.AddLoginAsync(user, new UserLoginInfo("Google", payload.Subject, "Google"));
+                logger.LogInformation("New user registered via Google: {Email}", payload.Email);
+
+                if (Guid.TryParse(user.Id, out var userGuid))
+                {
+                    await publishEndpoint.Publish(new UserRegisteredIntegrationEvent(
+                        UserId: userGuid,
+                        Email: user.Email!,
+                        FirstName: payload.GivenName,
+                        LastName: payload.FamilyName,
+                        AvatarUrl: payload.Picture
+                    ), context.RequestAborted);
+
+                    await dbContext.SaveChangesAsync(context.RequestAborted);
+                }
+
+                await transaction.CommitAsync(context.RequestAborted);
+                return null;
+            });
+
+            if (errorResult is not null)
             {
-                await publishEndpoint.Publish(new UserRegisteredIntegrationEvent(
-                    UserId: userGuid,
-                    Email: user.Email!,
-                    FirstName: payload.GivenName,
-                    LastName: payload.FamilyName,
-                    AvatarUrl: payload.Picture
-                ), context.RequestAborted);
-
-                await dbContext.SaveChangesAsync(context.RequestAborted);
+                return errorResult;
             }
-
-            await transaction.CommitAsync(context.RequestAborted);
         }
         else
         {

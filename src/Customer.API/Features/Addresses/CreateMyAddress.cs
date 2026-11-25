@@ -67,51 +67,56 @@ public static class CreateMyAddressEndpoint
             return Results.ValidationProblem(validation.ToDictionary());
         }
 
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
-
-        var customerExists = await db.Customers.AnyAsync(c => c.Id == customerId.Value, ct);
-        if (!customerExists)
+        var strategy = db.Database.CreateExecutionStrategy();
+        var address = await strategy.ExecuteAsync(async () =>
         {
-            db.Customers.Add(new Model.Customer
+            await using var transaction = await db.Database.BeginTransactionAsync(ct);
+
+            var customerExists = await db.Customers.AnyAsync(c => c.Id == customerId.Value, ct);
+            if (!customerExists)
             {
-                Id = customerId.Value,
-                Email = user.GetEmail(),
+                db.Customers.Add(new Model.Customer
+                {
+                    Id = customerId.Value,
+                    Email = user.GetEmail(),
+                    CreatedAt = DateTime.UtcNow
+                });
+                await db.SaveChangesAsync(ct);
+            }
+
+            var hasAnyAddress = await db.CustomerAddresses.AnyAsync(a => a.CustomerId == customerId.Value, ct);
+            var shouldBeDefault = request.IsDefault || !hasAnyAddress;
+
+            if (shouldBeDefault && hasAnyAddress)
+            {
+                await db.CustomerAddresses
+                    .Where(a => a.CustomerId == customerId.Value && a.IsDefault)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(a => a.IsDefault, false)
+                        .SetProperty(a => a.UpdatedAt, DateTime.UtcNow), ct);
+            }
+
+            var created = new CustomerAddress
+            {
+                Id = Guid.CreateVersion7(),
+                CustomerId = customerId.Value,
+                ReceiverName = request.ReceiverName.Trim(),
+                ReceiverPhone = request.ReceiverPhone.Trim(),
+                Province = request.Province.Trim(),
+                District = request.District.Trim(),
+                Ward = request.Ward.Trim(),
+                StreetAddress = request.StreetAddress.Trim(),
+                PostalCode = request.PostalCode?.Trim(),
+                IsDefault = shouldBeDefault,
+                Label = request.Label?.Trim(),
                 CreatedAt = DateTime.UtcNow
-            });
+            };
+
+            db.CustomerAddresses.Add(created);
             await db.SaveChangesAsync(ct);
-        }
-
-        var hasAnyAddress = await db.CustomerAddresses.AnyAsync(a => a.CustomerId == customerId.Value, ct);
-        var shouldBeDefault = request.IsDefault || !hasAnyAddress;
-
-        if (shouldBeDefault && hasAnyAddress)
-        {
-            await db.CustomerAddresses
-                .Where(a => a.CustomerId == customerId.Value && a.IsDefault)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(a => a.IsDefault, false)
-                    .SetProperty(a => a.UpdatedAt, DateTime.UtcNow), ct);
-        }
-
-        var address = new CustomerAddress
-        {
-            Id = Guid.CreateVersion7(),
-            CustomerId = customerId.Value,
-            ReceiverName = request.ReceiverName.Trim(),
-            ReceiverPhone = request.ReceiverPhone.Trim(),
-            Province = request.Province.Trim(),
-            District = request.District.Trim(),
-            Ward = request.Ward.Trim(),
-            StreetAddress = request.StreetAddress.Trim(),
-            PostalCode = request.PostalCode?.Trim(),
-            IsDefault = shouldBeDefault,
-            Label = request.Label?.Trim(),
-            CreatedAt = DateTime.UtcNow
-        };
-
-        db.CustomerAddresses.Add(address);
-        await db.SaveChangesAsync(ct);
-        await transaction.CommitAsync(ct);
+            await transaction.CommitAsync(ct);
+            return created;
+        });
 
         var dto = CustomerAddressDto.FromEntity(address);
         return Results.Created($"/api/v1/customers/me/addresses/{address.Id}", dto);

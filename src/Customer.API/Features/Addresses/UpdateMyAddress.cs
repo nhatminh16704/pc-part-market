@@ -76,30 +76,34 @@ public static class UpdateMyAddressEndpoint
             return Results.Problem("Không tìm thấy địa chỉ.", statusCode: StatusCodes.Status404NotFound);
         }
 
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
-
-        if (request.IsDefault && !address.IsDefault)
+        var strategy = db.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
         {
-            await db.CustomerAddresses
-                .Where(a => a.CustomerId == customerId.Value && a.IsDefault && a.Id != addressId)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(a => a.IsDefault, false)
-                    .SetProperty(a => a.UpdatedAt, DateTime.UtcNow), ct);
-        }
+            await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
-        address.ReceiverName = request.ReceiverName.Trim();
-        address.ReceiverPhone = request.ReceiverPhone.Trim();
-        address.Province = request.Province.Trim();
-        address.District = request.District.Trim();
-        address.Ward = request.Ward.Trim();
-        address.StreetAddress = request.StreetAddress.Trim();
-        address.PostalCode = request.PostalCode?.Trim();
-        address.IsDefault = request.IsDefault;
-        address.Label = request.Label?.Trim();
-        address.UpdatedAt = DateTime.UtcNow;
+            if (request.IsDefault && !address.IsDefault)
+            {
+                await db.CustomerAddresses
+                    .Where(a => a.CustomerId == customerId.Value && a.IsDefault && a.Id != addressId)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(a => a.IsDefault, false)
+                        .SetProperty(a => a.UpdatedAt, DateTime.UtcNow), ct);
+            }
 
-        await db.SaveChangesAsync(ct);
-        await transaction.CommitAsync(ct);
+            address.ReceiverName = request.ReceiverName.Trim();
+            address.ReceiverPhone = request.ReceiverPhone.Trim();
+            address.Province = request.Province.Trim();
+            address.District = request.District.Trim();
+            address.Ward = request.Ward.Trim();
+            address.StreetAddress = request.StreetAddress.Trim();
+            address.PostalCode = request.PostalCode?.Trim();
+            address.IsDefault = request.IsDefault;
+            address.Label = request.Label?.Trim();
+            address.UpdatedAt = DateTime.UtcNow;
+
+            await db.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
+        });
 
         return Results.Ok(CustomerAddressDto.FromEntity(address));
     }

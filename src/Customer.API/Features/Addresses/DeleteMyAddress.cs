@@ -41,27 +41,31 @@ public static class DeleteMyAddressEndpoint
 
         var wasDefault = address.IsDefault;
 
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
-
-        db.CustomerAddresses.Remove(address);
-        await db.SaveChangesAsync(ct);
-
-        if (wasDefault)
+        var strategy = db.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
         {
-            var nextAddress = await db.CustomerAddresses
-                .Where(a => a.CustomerId == customerId.Value)
-                .OrderByDescending(a => a.CreatedAt)
-                .FirstOrDefaultAsync(ct);
+            await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
-            if (nextAddress is not null)
+            db.CustomerAddresses.Remove(address);
+            await db.SaveChangesAsync(ct);
+
+            if (wasDefault)
             {
-                nextAddress.IsDefault = true;
-                nextAddress.UpdatedAt = DateTime.UtcNow;
-                await db.SaveChangesAsync(ct);
-            }
-        }
+                var nextAddress = await db.CustomerAddresses
+                    .Where(a => a.CustomerId == customerId.Value)
+                    .OrderByDescending(a => a.CreatedAt)
+                    .FirstOrDefaultAsync(ct);
 
-        await transaction.CommitAsync(ct);
+                if (nextAddress is not null)
+                {
+                    nextAddress.IsDefault = true;
+                    nextAddress.UpdatedAt = DateTime.UtcNow;
+                    await db.SaveChangesAsync(ct);
+                }
+            }
+
+            await transaction.CommitAsync(ct);
+        });
 
         return Results.NoContent();
     }

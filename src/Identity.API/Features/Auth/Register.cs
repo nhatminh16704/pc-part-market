@@ -56,27 +56,37 @@ public static class RegisterEndpoint
             UserType = UserTypes.Customer
         };
 
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(context.RequestAborted);
-
-        var result = await userManager.CreateAsync(user, request.Password);
-        if (!result.Succeeded)
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        var errorResult = await strategy.ExecuteAsync<IResult?>(async () =>
         {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            return Results.Problem($"Đăng ký không thành công: {errors}", statusCode: StatusCodes.Status400BadRequest);
-        }
+            await using var transaction = await dbContext.Database.BeginTransactionAsync(context.RequestAborted);
 
-        if (Guid.TryParse(user.Id, out var userGuid))
+            var result = await userManager.CreateAsync(user, request.Password);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return Results.Problem($"Đăng ký không thành công: {errors}", statusCode: StatusCodes.Status400BadRequest);
+            }
+
+            if (Guid.TryParse(user.Id, out var userGuid))
+            {
+                await publishEndpoint.Publish(new UserRegisteredIntegrationEvent(
+                    UserId: userGuid,
+                    Email: user.Email!,
+                    PhoneNumber: string.IsNullOrWhiteSpace(user.PhoneNumber) ? null : user.PhoneNumber
+                ), context.RequestAborted);
+
+                await dbContext.SaveChangesAsync(context.RequestAborted);
+            }
+
+            await transaction.CommitAsync(context.RequestAborted);
+            return null;
+        });
+
+        if (errorResult is not null)
         {
-            await publishEndpoint.Publish(new UserRegisteredIntegrationEvent(
-                UserId: userGuid,
-                Email: user.Email!,
-                PhoneNumber: string.IsNullOrWhiteSpace(user.PhoneNumber) ? null : user.PhoneNumber
-            ), context.RequestAborted);
-
-            await dbContext.SaveChangesAsync(context.RequestAborted);
+            return errorResult;
         }
-
-        await transaction.CommitAsync(context.RequestAborted);
 
         var roles = await userManager.GetRolesAsync(user);
         var authResponse = await tokenService.CreateTokenResponseAsync(user, roles, context);
