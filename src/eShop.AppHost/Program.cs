@@ -11,6 +11,7 @@ var rabbitMq = builder.AddRabbitMQ("eventbus")
 var postgres = builder.AddPostgres("postgres")
     .WithImage("ankane/pgvector")
     .WithImageTag("latest")
+    .WithEndpoint("tcp", e => e.Port = 5433)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume();
 
