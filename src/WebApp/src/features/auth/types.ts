@@ -5,11 +5,19 @@ export const loginSchema = z.object({
   password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
 });
 
-export const registerSchema = z.object({
-  email: z.string().min(1, 'Email không được để trống').email('Email không đúng định dạng'),
-  password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
-  phoneNumber: z.string().optional(),
-});
+export const registerSchema = z
+  .object({
+    lastName: z.string().trim().min(1, 'Họ không được để trống'),
+    firstName: z.string().trim().min(1, 'Tên không được để trống'),
+    email: z.string().min(1, 'Email không được để trống').email('Email không đúng định dạng'),
+    password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
+    confirmPassword: z.string().min(1, 'Vui lòng nhập lại mật khẩu'),
+    phoneNumber: z.string().optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Mật khẩu nhập lại không khớp',
+    path: ['confirmPassword'],
+  });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;

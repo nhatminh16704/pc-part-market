@@ -5,7 +5,7 @@ import { loginSchema, registerSchema, type LoginFormData, type RegisterFormData 
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Lock, Mail, Phone, Loader2, Sparkles, UserCheck, UserPlus } from 'lucide-react';
+import { Lock, Mail, Phone, User, Loader2, Sparkles, UserCheck, UserPlus } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 
@@ -50,8 +50,11 @@ export const LoginForm: React.FC = () => {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
+      lastName: '',
+      firstName: '',
       email: '',
       password: '',
+      confirmPassword: '',
       phoneNumber: '',
     },
   });
@@ -207,6 +210,48 @@ export const LoginForm: React.FC = () => {
         </form>
       ) : (
         <form onSubmit={handleRegisterSubmit(onRegisterSubmit)} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                Họ
+              </label>
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder="Nguyễn"
+                  {...registerRegisterField('lastName')}
+                  className={`pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#ff5636] focus:ring-[#ff5636] ${
+                    registerErrors.lastName ? 'border-red-400 focus:ring-red-400' : ''
+                  }`}
+                />
+              </div>
+              {registerErrors.lastName && (
+                <p className="mt-1 text-xs text-red-500 font-medium">{registerErrors.lastName.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                Tên
+              </label>
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder="Minh"
+                  {...registerRegisterField('firstName')}
+                  className={`pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#ff5636] focus:ring-[#ff5636] ${
+                    registerErrors.firstName ? 'border-red-400 focus:ring-red-400' : ''
+                  }`}
+                />
+              </div>
+              {registerErrors.firstName && (
+                <p className="mt-1 text-xs text-red-500 font-medium">{registerErrors.firstName.message}</p>
+              )}
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
               Email đăng ký
@@ -244,6 +289,26 @@ export const LoginForm: React.FC = () => {
             </div>
             {registerErrors.password && (
               <p className="mt-1 text-xs text-red-500 font-medium">{registerErrors.password.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+              Nhập lại mật khẩu
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                type="password"
+                placeholder="••••••••"
+                {...registerRegisterField('confirmPassword')}
+                className={`pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#ff5636] focus:ring-[#ff5636] ${
+                  registerErrors.confirmPassword ? 'border-red-400 focus:ring-red-400' : ''
+                }`}
+              />
+            </div>
+            {registerErrors.confirmPassword && (
+              <p className="mt-1 text-xs text-red-500 font-medium">{registerErrors.confirmPassword.message}</p>
             )}
           </div>
 

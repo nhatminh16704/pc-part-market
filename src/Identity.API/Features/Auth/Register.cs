@@ -9,6 +9,8 @@ namespace eShop.Identity.API.Features.Auth;
 public record RegisterRequest(
     string Email,
     string Password,
+    string? FirstName = null,
+    string? LastName = null,
     string? PhoneNumber = null
 );
 
@@ -73,6 +75,8 @@ public static class RegisterEndpoint
                 await publishEndpoint.Publish(new UserRegisteredIntegrationEvent(
                     UserId: userGuid,
                     Email: user.Email!,
+                    FirstName: string.IsNullOrWhiteSpace(request.FirstName) ? null : request.FirstName.Trim(),
+                    LastName: string.IsNullOrWhiteSpace(request.LastName) ? null : request.LastName.Trim(),
                     PhoneNumber: string.IsNullOrWhiteSpace(user.PhoneNumber) ? null : user.PhoneNumber
                 ), context.RequestAborted);
 
