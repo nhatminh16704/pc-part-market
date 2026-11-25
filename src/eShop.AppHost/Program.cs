@@ -85,6 +85,7 @@ var aiService = builder.AddExecutable("ai-service", pythonExecutable, "../AIServ
 
 // API Gateway (YARP Reverse Proxy)
 var gateway = builder.AddYarp("gateway")
+    .WithEndpoint("http", e => e.Port = 5220)
     .WithExternalHttpEndpoints()
     .ConfigureApiGatewayRoutes(catalogApi, basketApi, orderingApi, identityApi, customerApi);
 
