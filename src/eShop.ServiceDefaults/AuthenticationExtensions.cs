@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -45,6 +45,7 @@ public static class AuthenticationExtensions
                 identityUrl,
                 "https://10.0.2.2:5243",
                 "http://host.docker.internal:5223",
+                "http://host.docker.internal:5243",
                 "https://host.docker.internal:5243",
                 "http://localhost:5223",
                 "https://localhost:5243"
