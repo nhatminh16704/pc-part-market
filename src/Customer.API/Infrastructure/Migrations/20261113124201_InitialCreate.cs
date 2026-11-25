@@ -36,7 +36,7 @@ namespace Customer.API.Infrastructure.Migrations
                 name: "customer_addresses",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuidv7()"),
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
                     customer_id = table.Column<Guid>(type: "uuid", nullable: false),
                     receiver_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     receiver_phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),

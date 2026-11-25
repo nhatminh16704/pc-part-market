@@ -14,7 +14,7 @@ public class CustomerAddressEntityTypeConfiguration : IEntityTypeConfiguration<C
 
         builder.Property(a => a.Id)
             .HasColumnName("id")
-            .HasDefaultValueSql("uuidv7()");
+            .HasDefaultValueSql("gen_random_uuid()");
 
         builder.Property(a => a.CustomerId)
             .HasColumnName("customer_id")
