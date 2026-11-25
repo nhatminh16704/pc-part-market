@@ -274,7 +274,7 @@ export const LoginForm: React.FC = () => {
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-              Mật khẩu (tối thiểu 6 ký tự)
+              Mật khẩu
             </label>
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -287,8 +287,12 @@ export const LoginForm: React.FC = () => {
                 }`}
               />
             </div>
-            {registerErrors.password && (
+            {registerErrors.password ? (
               <p className="mt-1 text-xs text-red-500 font-medium">{registerErrors.password.message}</p>
+            ) : (
+              <p className="mt-1 text-[11px] text-slate-400">
+                Tối thiểu 6 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+              </p>
             )}
           </div>
 
