@@ -40,8 +40,15 @@ public static class AuthenticationExtensions
             options.Audience = audience;
             
 #if DEBUG
-            //Needed if using Android Emulator Locally. See https://learn.microsoft.com/en-us/dotnet/maui/data-cloud/local-web-services?view=net-maui-8.0#android
-            options.TokenValidationParameters.ValidIssuers = [identityUrl, "https://10.0.2.2:5243"];
+            //Needed if using Android Emulator Locally or YARP Gateway in Docker.
+            options.TokenValidationParameters.ValidIssuers = [
+                identityUrl,
+                "https://10.0.2.2:5243",
+                "http://host.docker.internal:5223",
+                "https://host.docker.internal:5243",
+                "http://localhost:5223",
+                "https://localhost:5243"
+            ];
 #else
             options.TokenValidationParameters.ValidIssuers = [identityUrl];
 #endif
