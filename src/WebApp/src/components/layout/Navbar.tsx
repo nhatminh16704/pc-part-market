@@ -126,10 +126,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="h-8 w-24 bg-slate-100 animate-pulse rounded-lg border border-slate-200" />
           ) : isAuthenticated && user ? (
             <div className="flex items-center gap-1.5">
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-800 text-xs font-semibold shadow-sm">
+              <Link
+                to="/account"
+                title="Hồ sơ & Sổ địa chỉ"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-orange-50 hover:border-orange-200 text-slate-800 text-xs font-semibold shadow-sm transition-colors"
+              >
                 <User className="w-3.5 h-3.5 text-[#ff5636]" />
                 <span className="max-w-[110px] sm:max-w-[140px] truncate">{user.userName || user.email}</span>
-              </div>
+              </Link>
               <Button
                 variant="ghost"
                 size="sm"
