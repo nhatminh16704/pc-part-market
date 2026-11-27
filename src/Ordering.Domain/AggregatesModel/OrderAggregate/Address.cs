@@ -1,33 +1,47 @@
-﻿using eShop.Ordering.Domain.SeedWork;
+﻿#nullable enable
+
+using eShop.Ordering.Domain.SeedWork;
 
 namespace eShop.Ordering.Domain.AggregatesModel.OrderAggregate;
 
 public class Address : ValueObject
 {
-    public string Street { get; private set; }
-    public string City { get; private set; }
-    public string State { get; private set; }
-    public string Country { get; private set; }
-    public string ZipCode { get; private set; }
+    public string ReceiverName { get; private set; } = string.Empty;
+    public string ReceiverPhone { get; private set; } = string.Empty;
+    public string Province { get; private set; } = string.Empty;
+    public string District { get; private set; } = string.Empty;
+    public string Ward { get; private set; } = string.Empty;
+    public string StreetAddress { get; private set; } = string.Empty;
+    public string? PostalCode { get; private set; }
 
     public Address() { }
 
-    public Address(string street, string city, string state, string country, string zipcode)
+    public Address(
+        string receiverName,
+        string receiverPhone,
+        string province,
+        string district,
+        string ward,
+        string streetAddress,
+        string? postalCode = null)
     {
-        Street = street;
-        City = city;
-        State = state;
-        Country = country;
-        ZipCode = zipcode;
+        ReceiverName = receiverName;
+        ReceiverPhone = receiverPhone;
+        Province = province;
+        District = district;
+        Ward = ward;
+        StreetAddress = streetAddress;
+        PostalCode = postalCode;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
     {
-        // Using a yield return statement to return each element one at a time
-        yield return Street;
-        yield return City;
-        yield return State;
-        yield return Country;
-        yield return ZipCode;
+        yield return ReceiverName;
+        yield return ReceiverPhone;
+        yield return Province;
+        yield return District;
+        yield return Ward;
+        yield return StreetAddress;
+        yield return PostalCode ?? string.Empty;
     }
 }
