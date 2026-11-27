@@ -19,7 +19,12 @@ public static class Extensions
         builder.Services.AddGrpcClient<eShop.Catalog.API.Grpc.Catalog.CatalogClient>(client =>
         {
             client.Address = new("http://catalog-api");
-        }).ConfigurePrimaryHttpMessageHandler(() => new GrpcWebHandler(new HttpClientHandler()));
+            client.ChannelOptionsActions.Add(options =>
+            {
+                options.HttpVersion = System.Net.HttpVersion.Version11;
+                options.HttpVersionPolicy = System.Net.Http.HttpVersionPolicy.RequestVersionExact;
+            });
+        }).ConfigurePrimaryHttpMessageHandler(() => new GrpcWebHandler(GrpcWebMode.GrpcWeb, new HttpClientHandler()));
 
         builder.Services.AddScoped<ICatalogApiClient, CatalogGrpcClient>();
 
