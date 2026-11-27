@@ -43,7 +43,6 @@ app.MapCatalogApi();
 
 app.UseDefaultOpenApi();
 
-app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
-app.MapGrpcService<eShop.Catalog.API.Grpc.CatalogService>().EnableGrpcWeb();
+app.MapGrpcService<eShop.Catalog.API.Grpc.CatalogService>();
 
 app.Run();

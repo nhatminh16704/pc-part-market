@@ -1,7 +1,6 @@
 using eShop.Basket.API.Repositories;
 using eShop.Basket.API.IntegrationEvents.EventHandling;
 using eShop.Basket.API.Services;
-using Grpc.Net.Client.Web;
 using MassTransit;
 
 namespace eShop.Basket.API.Extensions;
@@ -18,13 +17,8 @@ public static class Extensions
 
         builder.Services.AddGrpcClient<eShop.Catalog.API.Grpc.Catalog.CatalogClient>(client =>
         {
-            client.Address = new("http://catalog-api");
-            client.ChannelOptionsActions.Add(options =>
-            {
-                options.HttpVersion = System.Net.HttpVersion.Version11;
-                options.HttpVersionPolicy = System.Net.Http.HttpVersionPolicy.RequestVersionExact;
-            });
-        }).ConfigurePrimaryHttpMessageHandler(() => new GrpcWebHandler(GrpcWebMode.GrpcWeb, new HttpClientHandler()));
+            client.Address = new("http://_grpc.catalog-api");
+        });
 
         builder.Services.AddScoped<ICatalogApiClient, CatalogGrpcClient>();
 

@@ -43,6 +43,8 @@ var mediaApi = builder.AddProject<Projects.Media_API>("media-api")
     .WithEnvironment("Identity__Url", identityEndpoint);
 
 var catalogApi = builder.AddProject<Projects.Catalog_API>("catalog-api")
+    .WithHttpEndpoint(port: 5232, name: "grpc")
+    .WithEnvironment("Kestrel__Endpoints__grpc__Protocols", "Http2")
     .WithReference(rabbitMq).WaitFor(rabbitMq)
     .WithReference(catalogDb)
     .WithReference(redis);
