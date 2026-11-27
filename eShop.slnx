@@ -24,7 +24,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Basket.UnitTests/Basket.UnitTests.csproj" />
-    <Project Path="tests/Ordering.FunctionalTests/Ordering.FunctionalTests.csproj" />
     <Project Path="tests/Ordering.UnitTests/Ordering.UnitTests.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
