@@ -1,4 +1,4 @@
-﻿namespace eShop.Ordering.API.Application.DomainEventHandlers;
+namespace eShop.Ordering.API.Application.DomainEventHandlers;
 
 public class OrderStatusChangedToAwaitingValidationDomainEventHandler
     : INotificationHandler<OrderStatusChangedToAwaitingValidationDomainEvent>

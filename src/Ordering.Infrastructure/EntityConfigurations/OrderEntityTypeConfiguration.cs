@@ -1,4 +1,4 @@
-﻿namespace eShop.Ordering.Infrastructure.EntityConfigurations;
+namespace eShop.Ordering.Infrastructure.EntityConfigurations;
 
 class OrderEntityTypeConfiguration : IEntityTypeConfiguration<Order>
 {
@@ -42,5 +42,11 @@ class OrderEntityTypeConfiguration : IEntityTypeConfiguration<Order>
             .Property(o => o.PaymentStatus)
             .HasConversion<string>()
             .HasMaxLength(30);
+
+        orderConfiguration
+            .HasMany(o => o.StatusHistories)
+            .WithOne()
+            .HasForeignKey("OrderId")
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

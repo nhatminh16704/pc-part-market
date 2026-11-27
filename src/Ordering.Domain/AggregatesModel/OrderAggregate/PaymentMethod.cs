@@ -10,3 +10,4 @@ public enum PaymentMethod
     MOMO = 3,
     BANK_TRANSFER = 4
 }
+

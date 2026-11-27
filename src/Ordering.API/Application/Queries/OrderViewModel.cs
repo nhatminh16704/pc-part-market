@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 namespace eShop.Ordering.API.Application.Queries;
 
@@ -13,6 +13,14 @@ public record Orderitem
     public long Discount { get; init; }
     public string? PictureUrl { get; init; }
 }
+
+public record OrderStatusHistoryDto(
+    string? FromStatus,
+    string ToStatus,
+    string? Note,
+    string ChangedBy,
+    DateTime CreatedAt
+);
 
 public record Order
 {
@@ -30,6 +38,7 @@ public record Order
     public string StreetAddress { get; init; } = string.Empty;
     public string? PostalCode { get; init; }
     public List<Orderitem> OrderItems { get; set; } = [];
+    public List<OrderStatusHistoryDto> StatusHistories { get; set; } = [];
     public long Total { get; set; }
 }
 

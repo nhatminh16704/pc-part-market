@@ -29,6 +29,9 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.HasSequence("orderseq")
                 .IncrementsBy(10);
 
+            modelBuilder.HasSequence("orderstatushistoryseq")
+                .IncrementsBy(10);
+
             modelBuilder.Entity("eShop.IntegrationEventLogEF.IntegrationEventLogEntry", b =>
                 {
                     b.Property<Guid>("EventId")
@@ -146,6 +149,45 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("orderItems", "ordering");
                 });
 
+            modelBuilder.Entity("eShop.Ordering.Domain.AggregatesModel.OrderAggregate.OrderStatusHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseHiLo(b.Property<int>("Id"), "orderstatushistoryseq");
+
+                    b.Property<string>("ChangedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FromStatus")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ToStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("orderStatusHistories", "ordering");
+                });
+
             modelBuilder.Entity("eShop.Ordering.Infrastructure.Idempotency.ClientRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -226,9 +268,20 @@ namespace Ordering.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("eShop.Ordering.Domain.AggregatesModel.OrderAggregate.OrderStatusHistory", b =>
+                {
+                    b.HasOne("eShop.Ordering.Domain.AggregatesModel.OrderAggregate.Order", null)
+                        .WithMany("StatusHistories")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("eShop.Ordering.Domain.AggregatesModel.OrderAggregate.Order", b =>
                 {
                     b.Navigation("OrderItems");
+
+                    b.Navigation("StatusHistories");
                 });
 #pragma warning restore 612, 618
         }

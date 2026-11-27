@@ -1,4 +1,4 @@
-﻿namespace eShop.Ordering.API.Application.Queries;
+namespace eShop.Ordering.API.Application.Queries;
 
 public class OrderQueries(OrderingContext context)
     : IOrderQueries
@@ -8,6 +8,7 @@ public class OrderQueries(OrderingContext context)
         var order = await context.Orders
             .AsNoTracking()
             .Include(o => o.OrderItems)
+            .Include(o => o.StatusHistories)
             .FirstOrDefaultAsync(o => o.Id == id);
 
         if (order is null)
@@ -39,7 +40,16 @@ public class OrderQueries(OrderingContext context)
                 UnitPrice = oi.UnitPrice,
                 Discount = oi.Discount,
                 PictureUrl = oi.PictureUrl
-            }).ToList()
+            }).ToList(),
+            StatusHistories = order.StatusHistories
+                .OrderBy(h => h.CreatedAt)
+                .Select(h => new OrderStatusHistoryDto(
+                    h.FromStatus?.ToString(),
+                    h.ToStatus.ToString(),
+                    h.Note,
+                    h.ChangedBy,
+                    h.CreatedAt))
+                .ToList()
         };
     }
 

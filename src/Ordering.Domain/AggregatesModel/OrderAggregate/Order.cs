@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System.ComponentModel.DataAnnotations;
 
@@ -29,6 +29,10 @@ public class Order : Entity, IAggregateRoot
 
     public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
 
+    private readonly List<OrderStatusHistory> _statusHistories;
+
+    public IReadOnlyCollection<OrderStatusHistory> StatusHistories => _statusHistories.AsReadOnly();
+
     public static Order NewDraft()
     {
         return new Order
@@ -40,6 +44,7 @@ public class Order : Entity, IAggregateRoot
     protected Order()
     {
         _orderItems = new List<OrderItem>();
+        _statusHistories = new List<OrderStatusHistory>();
         _isDraft = false;
     }
 
@@ -53,6 +58,7 @@ public class Order : Entity, IAggregateRoot
         OrderDate = DateTime.UtcNow;
         Description = description;
 
+        RecordStatusChange(null, OrderStatus.Submitted, "Order submitted.", customerId.ToString());
         AddDomainEvent(new OrderStartedDomainEvent(this, customerId));
     }
 
@@ -88,8 +94,10 @@ public class Order : Entity, IAggregateRoot
     {
         if (OrderStatus == OrderStatus.Submitted)
         {
+            var prev = OrderStatus;
             AddDomainEvent(new OrderStatusChangedToAwaitingValidationDomainEvent(Id, _orderItems));
             OrderStatus = OrderStatus.AwaitingValidation;
+            RecordStatusChange(prev, OrderStatus.AwaitingValidation, "Awaiting stock validation.");
         }
     }
 
@@ -97,10 +105,12 @@ public class Order : Entity, IAggregateRoot
     {
         if (OrderStatus == OrderStatus.AwaitingValidation)
         {
+            var prev = OrderStatus;
             AddDomainEvent(new OrderStatusChangedToStockConfirmedDomainEvent(Id));
 
             OrderStatus = OrderStatus.StockConfirmed;
             Description = "All the items were confirmed with available stock.";
+            RecordStatusChange(prev, OrderStatus.StockConfirmed, Description);
         }
     }
 
@@ -110,17 +120,19 @@ public class Order : Entity, IAggregateRoot
 
         if (OrderStatus == OrderStatus.StockConfirmed)
         {
+            var prev = OrderStatus;
             AddDomainEvent(new OrderStatusChangedToPaidDomainEvent(Id, OrderItems));
 
             OrderStatus = OrderStatus.Paid;
             Description = "Payment confirmed.";
+            RecordStatusChange(prev, OrderStatus.Paid, Description);
         }
     }
 
     public void SetPaymentFailedStatus()
     {
         PaymentStatus = PaymentStatus.Failed;
-        SetCancelledStatus();
+        SetCancelledStatus("Payment failed.");
     }
 
     public void SetShippedStatus()
@@ -133,8 +145,10 @@ public class Order : Entity, IAggregateRoot
             StatusChangeException(OrderStatus.Shipped);
         }
 
+        var prev = OrderStatus;
         OrderStatus = OrderStatus.Shipped;
         Description = "The order was shipped.";
+        RecordStatusChange(prev, OrderStatus.Shipped, Description);
         AddDomainEvent(new OrderShippedDomainEvent(this));
     }
 
@@ -145,6 +159,7 @@ public class Order : Entity, IAggregateRoot
             StatusChangeException(OrderStatus.Delivered);
         }
 
+        var prev = OrderStatus;
         OrderStatus = OrderStatus.Delivered;
         if (PaymentMethod == PaymentMethod.COD && PaymentStatus == PaymentStatus.Unpaid)
         {
@@ -152,9 +167,10 @@ public class Order : Entity, IAggregateRoot
         }
 
         Description = "The order was delivered.";
+        RecordStatusChange(prev, OrderStatus.Delivered, Description);
     }
 
-    public void SetCancelledStatus()
+    public void SetCancelledStatus(string? reason = null, string? changedBy = null)
     {
         if (OrderStatus == OrderStatus.Paid ||
             OrderStatus == OrderStatus.Shipped ||
@@ -163,8 +179,10 @@ public class Order : Entity, IAggregateRoot
             StatusChangeException(OrderStatus.Cancelled);
         }
 
+        var prev = OrderStatus;
         OrderStatus = OrderStatus.Cancelled;
-        Description = "The order was cancelled.";
+        Description = string.IsNullOrWhiteSpace(reason) ? "The order was cancelled." : reason;
+        RecordStatusChange(prev, OrderStatus.Cancelled, Description, changedBy);
         AddDomainEvent(new OrderCancelledDomainEvent(this));
     }
 
@@ -172,6 +190,7 @@ public class Order : Entity, IAggregateRoot
     {
         if (OrderStatus == OrderStatus.AwaitingValidation)
         {
+            var prev = OrderStatus;
             OrderStatus = OrderStatus.Cancelled;
 
             var itemsStockRejectedProductNames = OrderItems
@@ -180,7 +199,13 @@ public class Order : Entity, IAggregateRoot
 
             var itemsStockRejectedDescription = string.Join(", ", itemsStockRejectedProductNames);
             Description = $"The product items don't have stock: ({itemsStockRejectedDescription}).";
+            RecordStatusChange(prev, OrderStatus.Cancelled, Description);
         }
+    }
+
+    private void RecordStatusChange(OrderStatus? fromStatus, OrderStatus toStatus, string? note = null, string? changedBy = null)
+    {
+        _statusHistories.Add(new OrderStatusHistory(fromStatus, toStatus, note, changedBy));
     }
 
     private void StatusChangeException(OrderStatus orderStatusToChange)

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 namespace eShop.Ordering.API.Application.Commands;
 

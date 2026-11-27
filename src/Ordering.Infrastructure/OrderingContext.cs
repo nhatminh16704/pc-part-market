@@ -1,4 +1,4 @@
-﻿using eShop.IntegrationEventLogEF;
+using eShop.IntegrationEventLogEF;
 
 namespace eShop.Ordering.Infrastructure;
 
@@ -11,6 +11,7 @@ public class OrderingContext : DbContext, IUnitOfWork
 {
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
 
     private readonly IMediator _mediator;
     private IDbContextTransaction _currentTransaction;
@@ -35,6 +36,7 @@ public class OrderingContext : DbContext, IUnitOfWork
         modelBuilder.ApplyConfiguration(new ClientRequestEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new OrderEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new OrderItemEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new OrderStatusHistoryEntityTypeConfiguration());
         modelBuilder.UseIntegrationEventLogs();
     }
 
