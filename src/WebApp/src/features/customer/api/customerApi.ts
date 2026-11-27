@@ -25,6 +25,11 @@ export const customerApi = {
     return response.data;
   },
 
+  updateMyAvatar: async (avatarUrl: string): Promise<CustomerProfile> => {
+    const response = await apiClient.patch<CustomerProfile>('/customers/me/avatar', { avatarUrl });
+    return response.data;
+  },
+
   getMyAddresses: async (): Promise<CustomerAddress[]> => {
     const response = await apiClient.get<CustomerAddress[]>('/customers/me/addresses');
     return response.data;
@@ -59,3 +64,4 @@ export const customerApi = {
     return response.data;
   },
 };
+

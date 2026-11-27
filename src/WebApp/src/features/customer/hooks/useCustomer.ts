@@ -31,6 +31,17 @@ export const useUpdateMyProfile = () => {
   });
 };
 
+export const useUpdateMyAvatar = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (avatarUrl: string) => customerApi.updateMyAvatar(avatarUrl),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(CUSTOMER_KEYS.profile(), updated);
+    },
+  });
+};
+
 export const useMyAddresses = () => {
   const accessToken = useAuthStore((s) => s.accessToken);
 
@@ -86,3 +97,4 @@ export const useSetDefaultAddress = () => {
     },
   });
 };
+

@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle2, Loader2, Mail, Phone, User, Calendar, ImageIcon } from 'lucide-react';
-import { useMyProfile, useUpdateMyProfile } from '../hooks/useCustomer';
+import { CheckCircle2, Loader2, Mail, Phone, User, Calendar, Camera } from 'lucide-react';
+import { useMyProfile, useUpdateMyAvatar, useUpdateMyProfile } from '../hooks/useCustomer';
+import { mediaApi } from '@/features/media/mediaApi';
 import { updateProfileSchema, type UpdateProfileFormData } from '../types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,9 @@ import { Input } from '@/components/ui/input';
 export const ProfileForm: React.FC = () => {
   const { data: profile, isLoading, isError } = useMyProfile();
   const updateMutation = useUpdateMyProfile();
+  const updateAvatarMutation = useUpdateMyAvatar();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -18,6 +22,7 @@ export const ProfileForm: React.FC = () => {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors, isDirty },
   } = useForm<UpdateProfileFormData>({
     resolver: zodResolver(updateProfileSchema),
@@ -64,6 +69,43 @@ export const ProfileForm: React.FC = () => {
     }
   };
 
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setErrorMessage('Chỉ hỗ trợ ảnh định dạng JPG, PNG hoặc WebP.');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setErrorMessage('Kích thước ảnh đại diện tối đa là 2MB.');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      const secureUrl = await mediaApi.uploadImage(file, 'avatar');
+      await updateAvatarMutation.mutateAsync(secureUrl);
+      setValue('avatarUrl', secureUrl, { shouldDirty: false });
+      setSuccessMessage('Cập nhật ảnh đại diện thành công!');
+    } catch (err: any) {
+      const detail =
+        err.response?.data?.detail ||
+        err.response?.data?.title ||
+        err.message ||
+        'Không thể tải ảnh đại diện. Vui lòng thử lại.';
+      setErrorMessage(detail);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="p-8 bg-white border border-slate-200 rounded-2xl shadow-sm flex items-center justify-center min-h-[320px]">
@@ -87,23 +129,57 @@ export const ProfileForm: React.FC = () => {
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-6 mb-6 border-b border-slate-100">
-        {avatarPreview ? (
-          <img
-            src={avatarPreview}
-            alt="Avatar"
-            className="w-16 h-16 rounded-full object-cover border-2 border-orange-100 shadow-sm bg-slate-100 shrink-0"
-          />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#ff5636] to-[#e63e1c] text-white font-bold text-xl flex items-center justify-center shadow-md shadow-orange-500/20 shrink-0">
-            {initials}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-slate-100">
+        <div className="flex items-center gap-4">
+          <div className="relative shrink-0">
+            {avatarPreview ? (
+              <img
+                src={avatarPreview}
+                alt="Avatar"
+                className="w-16 h-16 rounded-full object-cover border-2 border-orange-100 shadow-sm bg-slate-100"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#ff5636] to-[#e63e1c] text-white font-bold text-xl flex items-center justify-center shadow-md shadow-orange-500/20">
+                {initials}
+              </div>
+            )}
+            {isUploadingAvatar && (
+              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
+                <Loader2 className="w-5 h-5 text-white animate-spin" />
+              </div>
+            )}
           </div>
-        )}
-        <div>
-          <h2 className="text-xl font-bold text-slate-900 font-heading">Hồ sơ cá nhân</h2>
-          <p className="text-sm text-slate-500">
-            Quản lý thông tin liên hệ để đặt hàng và nhận ưu đãi thành viên.
-          </p>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 font-heading">Hồ sơ cá nhân</h2>
+            <p className="text-sm text-slate-500">
+              Quản lý thông tin liên hệ và ảnh đại diện của bạn.
+            </p>
+          </div>
+        </div>
+
+        <div className="shrink-0">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={handleAvatarFileChange}
+            className="hidden"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isUploadingAvatar}
+            onClick={() => fileInputRef.current?.click()}
+            className="border-slate-200 hover:border-[#ff5636] hover:text-[#ff5636] cursor-pointer gap-1.5"
+          >
+            {isUploadingAvatar ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Camera className="w-4 h-4" />
+            )}
+            <span>{isUploadingAvatar ? 'Đang tải lên...' : 'Đổi ảnh đại diện'}</span>
+          </Button>
         </div>
       </div>
 
@@ -238,24 +314,6 @@ export const ProfileForm: React.FC = () => {
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-            Link ảnh đại diện (Avatar URL)
-          </label>
-          <div className="relative">
-            <ImageIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              type="url"
-              placeholder="https://example.com/avatar.jpg"
-              {...register('avatarUrl')}
-              className="pl-10 h-11 bg-slate-50 border-slate-200 focus:bg-white focus:border-[#ff5636] focus:ring-[#ff5636]"
-            />
-          </div>
-          {errors.avatarUrl && (
-            <p className="mt-1 text-xs text-red-500 font-medium">{errors.avatarUrl.message}</p>
-          )}
-        </div>
-
         <div className="pt-2 flex justify-end">
           <Button
             type="submit"
@@ -276,3 +334,4 @@ export const ProfileForm: React.FC = () => {
     </div>
   );
 };
+
