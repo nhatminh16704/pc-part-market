@@ -187,7 +187,8 @@ internal static class Extensions
         IResourceBuilder<ProjectResource> basketApi,
         IResourceBuilder<ProjectResource> orderingApi,
         IResourceBuilder<ProjectResource> identityApi,
-        IResourceBuilder<ProjectResource> customerApi)
+        IResourceBuilder<ProjectResource> customerApi,
+        IResourceBuilder<ProjectResource> mediaApi)
     {
         return builder.WithConfiguration(yarp =>
         {
@@ -196,6 +197,7 @@ internal static class Extensions
             var orderingCluster = yarp.AddCluster(orderingApi);
             var identityCluster = yarp.AddCluster(identityApi);
             var customerCluster = yarp.AddCluster(customerApi);
+            var mediaCluster = yarp.AddCluster(mediaApi);
 
             // Catalog API routes
             yarp.AddRoute("/api/v1/catalog/{*any}", catalogCluster);
@@ -217,6 +219,9 @@ internal static class Extensions
 
             // Customer API routes
             yarp.AddRoute("/api/v1/customers/{*any}", customerCluster);
+
+            // Media API routes
+            yarp.AddRoute("/api/v1/media/{*any}", mediaCluster);
             // Mobile / Legacy compatibility routes
             yarp.AddRoute("/catalog-api/{*any}", catalogCluster)
                 .WithTransformPathRemovePrefix("/catalog-api");

@@ -38,6 +38,10 @@ var customerApi = builder.AddProject<Projects.Customer_API>("customer-api")
     .WithHttpHealthCheck("/health")
     .WithEnvironment("Identity__Url", identityEndpoint);
 
+var mediaApi = builder.AddProject<Projects.Media_API>("media-api")
+    .WithHttpHealthCheck("/health")
+    .WithEnvironment("Identity__Url", identityEndpoint);
+
 var catalogApi = builder.AddProject<Projects.Catalog_API>("catalog-api")
     .WithReference(rabbitMq).WaitFor(rabbitMq)
     .WithReference(catalogDb)
@@ -88,7 +92,7 @@ var aiService = builder.AddExecutable("ai-service", pythonExecutable, "../AIServ
 var gateway = builder.AddYarp("gateway")
     .WithEndpoint("http", e => e.Port = 5220)
     .WithExternalHttpEndpoints()
-    .ConfigureApiGatewayRoutes(catalogApi, basketApi, orderingApi, identityApi, customerApi);
+    .ConfigureApiGatewayRoutes(catalogApi, basketApi, orderingApi, identityApi, customerApi, mediaApi);
 
 var webApp = builder.AddNpmApp("webapp", "../WebApp", "dev")
     .WithHttpEndpoint(port: 5173, env: "PORT")
@@ -98,6 +102,7 @@ var webApp = builder.AddNpmApp("webapp", "../WebApp", "dev")
     .WithReference(basketApi)
     .WithReference(identityApi)
     .WithReference(customerApi)
+    .WithReference(mediaApi)
     .PublishAsDockerFile();
 
 webhooksClient.WithEnvironment("CallBackUrl", webhooksClient.GetEndpoint(launchProfileName));
