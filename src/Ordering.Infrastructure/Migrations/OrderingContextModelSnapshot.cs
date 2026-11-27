@@ -18,21 +18,15 @@ namespace Ordering.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("ordering")
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "10.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.HasSequence("buyerseq")
-                .IncrementsBy(10);
 
             modelBuilder.HasSequence("orderitemseq")
                 .IncrementsBy(10);
 
             modelBuilder.HasSequence("orderseq")
-                .IncrementsBy(10);
-
-            modelBuilder.HasSequence("paymentseq")
                 .IncrementsBy(10);
 
             modelBuilder.Entity("eShop.IntegrationEventLogEF.IntegrationEventLogEntry", b =>
@@ -66,92 +60,6 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("IntegrationEventLog", "ordering");
                 });
 
-            modelBuilder.Entity("eShop.Ordering.Domain.AggregatesModel.BuyerAggregate.Buyer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseHiLo(b.Property<int>("Id"), "buyerseq");
-
-                    b.Property<string>("IdentityGuid")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdentityGuid")
-                        .IsUnique();
-
-                    b.ToTable("buyers", "ordering");
-                });
-
-            modelBuilder.Entity("eShop.Ordering.Domain.AggregatesModel.BuyerAggregate.CardType", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("cardtypes", "ordering");
-                });
-
-            modelBuilder.Entity("eShop.Ordering.Domain.AggregatesModel.BuyerAggregate.PaymentMethod", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseHiLo(b.Property<int>("Id"), "paymentseq");
-
-                    b.Property<int>("BuyerId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("_alias")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("Alias");
-
-                    b.Property<string>("_cardHolderName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("CardHolderName");
-
-                    b.Property<string>("_cardNumber")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("character varying(25)")
-                        .HasColumnName("CardNumber");
-
-                    b.Property<int>("_cardTypeId")
-                        .HasColumnType("integer")
-                        .HasColumnName("CardTypeId");
-
-                    b.Property<DateTime>("_expiration")
-                        .HasMaxLength(25)
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("Expiration");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BuyerId");
-
-                    b.HasIndex("_cardTypeId");
-
-                    b.ToTable("paymentmethods", "ordering");
-                });
-
             modelBuilder.Entity("eShop.Ordering.Domain.AggregatesModel.OrderAggregate.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -160,31 +68,34 @@ namespace Ordering.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseHiLo(b.Property<int>("Id"), "orderseq");
 
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Description")
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("OrderStatus")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
 
-                    b.Property<int?>("_buyerId")
-                        .HasColumnType("integer")
-                        .HasColumnName("BuyerId");
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
 
-                    b.Property<DateTime>("_orderDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("OrderDate");
-
-                    b.Property<int?>("_paymentMethodId")
-                        .HasColumnType("integer")
-                        .HasColumnName("PaymentMethodId");
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("_buyerId");
-
-                    b.HasIndex("_paymentMethodId");
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_orders_customer_id");
 
                     b.ToTable("orders", "ordering");
                 });
@@ -197,32 +108,36 @@ namespace Ordering.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseHiLo(b.Property<int>("Id"), "orderitemseq");
 
+                    b.Property<long>("Discount")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ProductId")
+                    b.Property<string>("PictureUrl")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<long>("UnitPrice")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Units")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("_discount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("Discount");
-
-                    b.Property<string>("_pictureUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("PictureUrl");
-
-                    b.Property<string>("_productName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("ProductName");
-
-                    b.Property<decimal>("_unitPrice")
-                        .HasColumnType("numeric")
-                        .HasColumnName("UnitPrice");
-
-                    b.Property<int>("_units")
-                        .HasColumnType("integer")
-                        .HasColumnName("Units");
+                    b.Property<Guid>("VariantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -249,53 +164,46 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("requests", "ordering");
                 });
 
-            modelBuilder.Entity("eShop.Ordering.Domain.AggregatesModel.BuyerAggregate.PaymentMethod", b =>
-                {
-                    b.HasOne("eShop.Ordering.Domain.AggregatesModel.BuyerAggregate.Buyer", null)
-                        .WithMany("PaymentMethods")
-                        .HasForeignKey("BuyerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("eShop.Ordering.Domain.AggregatesModel.BuyerAggregate.CardType", "CardType")
-                        .WithMany()
-                        .HasForeignKey("_cardTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CardType");
-                });
-
             modelBuilder.Entity("eShop.Ordering.Domain.AggregatesModel.OrderAggregate.Order", b =>
                 {
-                    b.HasOne("eShop.Ordering.Domain.AggregatesModel.BuyerAggregate.Buyer", null)
-                        .WithMany()
-                        .HasForeignKey("_buyerId");
-
-                    b.HasOne("eShop.Ordering.Domain.AggregatesModel.BuyerAggregate.PaymentMethod", null)
-                        .WithMany()
-                        .HasForeignKey("_paymentMethodId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.OwnsOne("eShop.Ordering.Domain.AggregatesModel.OrderAggregate.Address", "Address", b1 =>
                         {
                             b1.Property<int>("OrderId")
                                 .HasColumnType("integer");
 
-                            b1.Property<string>("City")
-                                .HasColumnType("text");
+                            b1.Property<string>("District")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)");
 
-                            b1.Property<string>("Country")
-                                .HasColumnType("text");
+                            b1.Property<string>("PostalCode")
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)");
 
-                            b1.Property<string>("State")
-                                .HasColumnType("text");
+                            b1.Property<string>("Province")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)");
 
-                            b1.Property<string>("Street")
-                                .HasColumnType("text");
+                            b1.Property<string>("ReceiverName")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)");
 
-                            b1.Property<string>("ZipCode")
-                                .HasColumnType("text");
+                            b1.Property<string>("ReceiverPhone")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)");
+
+                            b1.Property<string>("StreetAddress")
+                                .IsRequired()
+                                .HasMaxLength(255)
+                                .HasColumnType("character varying(255)");
+
+                            b1.Property<string>("Ward")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)");
 
                             b1.HasKey("OrderId");
 
@@ -316,11 +224,6 @@ namespace Ordering.Infrastructure.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("eShop.Ordering.Domain.AggregatesModel.BuyerAggregate.Buyer", b =>
-                {
-                    b.Navigation("PaymentMethods");
                 });
 
             modelBuilder.Entity("eShop.Ordering.Domain.AggregatesModel.OrderAggregate.Order", b =>
