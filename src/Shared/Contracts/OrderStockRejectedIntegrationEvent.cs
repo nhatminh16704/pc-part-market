@@ -1,6 +1,6 @@
 namespace eShop.Contracts;
 
-public record ConfirmedOrderStockItem(int ProductId, bool HasStock);
+public record ConfirmedOrderStockItem(Guid VariantId, bool HasStock);
 
 public record OrderStockRejectedIntegrationEvent(
     int OrderId,

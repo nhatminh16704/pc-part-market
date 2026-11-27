@@ -1,3 +1,3 @@
 namespace eShop.Contracts;
 
-public record OrderStockItem(int ProductId, int Units);
+public record OrderStockItem(Guid ProductId, Guid VariantId, int Units);

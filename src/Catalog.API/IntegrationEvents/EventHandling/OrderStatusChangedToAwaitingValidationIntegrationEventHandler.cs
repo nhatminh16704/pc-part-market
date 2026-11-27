@@ -18,10 +18,9 @@ public class OrderStatusChangedToAwaitingValidationIntegrationEventHandler(
 
         foreach (var orderStockItem in @event.OrderStockItems)
         {
-            // By default confirm stock availability for integration compatibility
-            var hasStock = await catalogContext.ProductVariants.AnyAsync();
-            var confirmedOrderStockItem = new ConfirmedOrderStockItem(orderStockItem.ProductId, hasStock || true);
-            confirmedOrderStockItems.Add(confirmedOrderStockItem);
+            var variant = await catalogContext.ProductVariants.FindAsync([orderStockItem.VariantId], context.CancellationToken);
+            var hasStock = variant is not null && variant.Quantity >= orderStockItem.Units;
+            confirmedOrderStockItems.Add(new ConfirmedOrderStockItem(orderStockItem.VariantId, hasStock));
         }
 
         var confirmedIntegrationEvent = confirmedOrderStockItems.Any(c => !c.HasStock)
