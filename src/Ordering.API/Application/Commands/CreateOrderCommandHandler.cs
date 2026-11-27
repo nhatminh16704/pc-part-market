@@ -2,46 +2,49 @@
 
 using eShop.Ordering.Domain.AggregatesModel.OrderAggregate;
 
-// Regular CommandHandler
-public class CreateOrderCommandHandler
-    : IRequestHandler<CreateOrderCommand, bool>
+public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, bool>
 {
     private readonly IOrderRepository _orderRepository;
-    private readonly IIdentityService _identityService;
-    private readonly IMediator _mediator;
     private readonly IOrderingIntegrationEventService _orderingIntegrationEventService;
     private readonly ILogger<CreateOrderCommandHandler> _logger;
 
-    // Using DI to inject infrastructure persistence Repositories
-    public CreateOrderCommandHandler(IMediator mediator,
+    public CreateOrderCommandHandler(
         IOrderingIntegrationEventService orderingIntegrationEventService,
         IOrderRepository orderRepository,
-        IIdentityService identityService,
         ILogger<CreateOrderCommandHandler> logger)
     {
         _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
-        _identityService = identityService ?? throw new ArgumentNullException(nameof(identityService));
-        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         _orderingIntegrationEventService = orderingIntegrationEventService ?? throw new ArgumentNullException(nameof(orderingIntegrationEventService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<bool> Handle(CreateOrderCommand message, CancellationToken cancellationToken)
     {
-        // Add Integration event to clean the basket
-        var orderStartedIntegrationEvent = new OrderStartedIntegrationEvent(message.UserId);
+        var orderStartedIntegrationEvent = new OrderStartedIntegrationEvent(message.CustomerId.ToString());
         await _orderingIntegrationEventService.AddAndSaveEventAsync(orderStartedIntegrationEvent);
 
-        // Add/Update the Buyer AggregateRoot
-        // DDD patterns comment: Add child entities and value-objects through the Order Aggregate-Root
-        // methods and constructor so validations, invariants and business logic 
-        // make sure that consistency is preserved across the whole aggregate
-        var address = new Address(message.Street, message.City, message.State, message.Country, message.ZipCode);
-        var order = new Order(message.UserId, message.UserName, address, message.CardTypeId, message.CardNumber, message.CardSecurityNumber, message.CardHolderName, message.CardExpiration);
+        var address = new Address(
+            message.ReceiverName,
+            message.ReceiverPhone,
+            message.Province,
+            message.District,
+            message.Ward,
+            message.StreetAddress,
+            message.PostalCode);
+
+        var order = new Order(message.CustomerId, address, message.PaymentMethod, message.Description);
 
         foreach (var item in message.OrderItems)
         {
-            order.AddOrderItem(item.ProductId, item.ProductName, item.UnitPrice, item.Discount, item.PictureUrl, item.Units);
+            order.AddOrderItem(
+                item.ProductId,
+                item.VariantId,
+                item.Sku,
+                item.ProductName,
+                item.UnitPrice,
+                item.Discount,
+                item.PictureUrl,
+                item.Units);
         }
 
         _logger.LogInformation("Creating Order - Order: {@Order}", order);
@@ -52,8 +55,6 @@ public class CreateOrderCommandHandler
     }
 }
 
-
-// Use for Idempotency in Command process
 public class CreateOrderIdentifiedCommandHandler : IdentifiedCommandHandler<CreateOrderCommand, bool>
 {
     public CreateOrderIdentifiedCommandHandler(
@@ -66,6 +67,6 @@ public class CreateOrderIdentifiedCommandHandler : IdentifiedCommandHandler<Crea
 
     protected override bool CreateResultForDuplicateRequest()
     {
-        return true; // Ignore duplicate requests for creating order.
+        return true;
     }
 }

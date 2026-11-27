@@ -17,7 +17,6 @@ global using eShop.Ordering.API.Application.Validations;
 global using eShop.Ordering.API.Extensions;
 global using eShop.Ordering.API.Infrastructure;
 global using eShop.Ordering.API.Infrastructure.Services;
-global using eShop.Ordering.Domain.AggregatesModel.BuyerAggregate;
 global using eShop.Ordering.Domain.AggregatesModel.OrderAggregate;
 global using eShop.Ordering.Domain.Events;
 global using eShop.Ordering.Domain.Exceptions;

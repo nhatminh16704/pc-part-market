@@ -51,7 +51,6 @@ internal static class Extensions
         services.AddValidatorsFromAssemblyContaining<CancelOrderCommandValidator>();
 
         services.AddScoped<IOrderQueries, OrderQueries>();
-        services.AddScoped<IBuyerRepository, BuyerRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IRequestManager, RequestManager>();
     }

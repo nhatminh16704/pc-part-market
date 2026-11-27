@@ -1,13 +1,15 @@
-﻿namespace eShop.Ordering.API.Application.Models;
+﻿#nullable enable
+
+namespace eShop.Ordering.API.Application.Models;
 
 public class BasketItem
 {
-    public string Id { get; init; }
-    public int ProductId { get; init; }
-    public string ProductName { get; init; }
-    public decimal UnitPrice { get; init; }
-    public decimal OldUnitPrice { get; init; }
+    public Guid ProductId { get; init; }
+    public Guid VariantId { get; init; }
+    public string Sku { get; init; } = string.Empty;
+    public string ProductName { get; init; } = string.Empty;
+    public long UnitPrice { get; init; }
+    public long OldUnitPrice { get; init; }
     public int Quantity { get; init; }
-    public string PictureUrl { get; init; }
+    public string? PictureUrl { get; init; }
 }
-

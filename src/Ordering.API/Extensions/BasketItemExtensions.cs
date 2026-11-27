@@ -15,6 +15,8 @@ public static class BasketItemExtensions
         return new OrderItemDTO()
         {
             ProductId = item.ProductId,
+            VariantId = item.VariantId,
+            Sku = item.Sku,
             ProductName = item.ProductName,
             PictureUrl = item.PictureUrl,
             UnitPrice = item.UnitPrice,

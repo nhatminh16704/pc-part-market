@@ -1,5 +1,6 @@
+#nullable enable
+
 using Microsoft.AspNetCore.Http.HttpResults;
-using CardType = eShop.Ordering.API.Application.Queries.CardType;
 using Order = eShop.Ordering.API.Application.Queries.Order;
 
 public static class OrdersApi
@@ -12,7 +13,6 @@ public static class OrdersApi
         api.MapPut("/ship", ShipOrderAsync);
         api.MapGet("{orderId:int}", GetOrderAsync);
         api.MapGet("/", GetOrdersByUserAsync);
-        api.MapGet("/cardtypes", GetCardTypesAsync);
         api.MapPost("/draft", CreateOrderDraftAsync);
         api.MapPost("/", CreateOrderAsync);
 
@@ -93,14 +93,13 @@ public static class OrdersApi
     public static async Task<Ok<IEnumerable<OrderSummary>>> GetOrdersByUserAsync([AsParameters] OrderServices services)
     {
         var userId = services.IdentityService.GetUserIdentity();
-        var orders = await services.Queries.GetOrdersFromUserAsync(userId);
-        return TypedResults.Ok(orders);
-    }
+        if (!Guid.TryParse(userId, out var customerId))
+        {
+            return TypedResults.Ok<IEnumerable<OrderSummary>>([]);
+        }
 
-    public static async Task<Ok<IEnumerable<CardType>>> GetCardTypesAsync(IOrderQueries orderQueries)
-    {
-        var cardTypes = await orderQueries.GetCardTypesAsync();
-        return TypedResults.Ok(cardTypes);
+        var orders = await services.Queries.GetOrdersFromUserAsync(customerId);
+        return TypedResults.Ok(orders);
     }
 
     public static async Task<OrderDraftDTO> CreateOrderDraftAsync(CreateOrderDraftCommand command, [AsParameters] OrderServices services)
@@ -120,28 +119,32 @@ public static class OrdersApi
         CreateOrderRequest request,
         [AsParameters] OrderServices services)
     {
-        
-        //mask the credit card number
-        
-        services.Logger.LogInformation(
-            "Sending command: {CommandName} - {IdProperty}: {CommandId}",
-            request.GetGenericTypeName(),
-            nameof(request.UserId),
-            request.UserId); //don't log the request as it has CC number
-
         if (requestId == Guid.Empty)
         {
-            services.Logger.LogWarning("Invalid IntegrationEvent - RequestId is missing - {@IntegrationEvent}", request);
+            services.Logger.LogWarning("Invalid Request - RequestId is missing");
             return TypedResults.BadRequest("RequestId is missing.");
+        }
+
+        var userId = services.IdentityService.GetUserIdentity();
+        if (!Guid.TryParse(userId, out var customerId))
+        {
+            return TypedResults.BadRequest("Invalid customer identity.");
         }
 
         using (services.Logger.BeginScope(new List<KeyValuePair<string, object>> { new("IdentifiedCommandId", requestId) }))
         {
-            var maskedCCNumber = request.CardNumber.Substring(request.CardNumber.Length - 4).PadLeft(request.CardNumber.Length, 'X');
-            var createOrderCommand = new CreateOrderCommand(request.Items, request.UserId, request.UserName, request.City, request.Street,
-                request.State, request.Country, request.ZipCode,
-                maskedCCNumber, request.CardHolderName, request.CardExpiration,
-                request.CardSecurityNumber, request.CardTypeId);
+            var createOrderCommand = new CreateOrderCommand(
+                request.Items,
+                customerId,
+                request.ReceiverName,
+                request.ReceiverPhone,
+                request.Province,
+                request.District,
+                request.Ward,
+                request.StreetAddress,
+                request.PostalCode,
+                request.PaymentMethod,
+                request.Description);
 
             var requestCreateOrder = new IdentifiedCommand<CreateOrderCommand, bool>(createOrderCommand, requestId);
 
@@ -169,17 +172,13 @@ public static class OrdersApi
 }
 
 public record CreateOrderRequest(
-    string UserId,
-    string UserName,
-    string City,
-    string Street,
-    string State,
-    string Country,
-    string ZipCode,
-    string CardNumber,
-    string CardHolderName,
-    DateTime CardExpiration,
-    string CardSecurityNumber,
-    int CardTypeId,
-    string Buyer,
+    string ReceiverName,
+    string ReceiverPhone,
+    string Province,
+    string District,
+    string Ward,
+    string StreetAddress,
+    string? PostalCode,
+    PaymentMethod PaymentMethod,
+    string? Description,
     List<BasketItem> Items);

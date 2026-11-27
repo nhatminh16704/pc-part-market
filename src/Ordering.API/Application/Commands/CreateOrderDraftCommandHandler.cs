@@ -1,9 +1,10 @@
-﻿namespace eShop.Ordering.API.Application.Commands;
+﻿#nullable enable
+
+namespace eShop.Ordering.API.Application.Commands;
 
 using eShop.Ordering.API.Extensions;
 using eShop.Ordering.Domain.AggregatesModel.OrderAggregate;
 
-// Regular CommandHandler
 public class CreateOrderDraftCommandHandler
     : IRequestHandler<CreateOrderDraftCommand, OrderDraftDTO>
 {
@@ -13,7 +14,7 @@ public class CreateOrderDraftCommandHandler
         var orderItems = message.Items.Select(i => i.ToOrderItemDTO());
         foreach (var item in orderItems)
         {
-            order.AddOrderItem(item.ProductId, item.ProductName, item.UnitPrice, item.Discount, item.PictureUrl, item.Units);
+            order.AddOrderItem(item.ProductId, item.VariantId, item.Sku, item.ProductName, item.UnitPrice, item.Discount, item.PictureUrl, item.Units);
         }
 
         return Task.FromResult(OrderDraftDTO.FromOrder(order));
@@ -22,8 +23,8 @@ public class CreateOrderDraftCommandHandler
 
 public record OrderDraftDTO
 {
-    public IEnumerable<OrderItemDTO> OrderItems { get; init; }
-    public decimal Total { get; init; }
+    public IEnumerable<OrderItemDTO> OrderItems { get; init; } = [];
+    public long Total { get; init; }
 
     public static OrderDraftDTO FromOrder(Order order)
     {
@@ -33,6 +34,8 @@ public record OrderDraftDTO
             {
                 Discount = oi.Discount,
                 ProductId = oi.ProductId,
+                VariantId = oi.VariantId,
+                Sku = oi.Sku,
                 UnitPrice = oi.UnitPrice,
                 PictureUrl = oi.PictureUrl,
                 Units = oi.Units,
@@ -45,15 +48,19 @@ public record OrderDraftDTO
 
 public record OrderItemDTO
 {
-    public int ProductId { get; init; }
+    public Guid ProductId { get; init; }
 
-    public string ProductName { get; init; }
+    public Guid VariantId { get; init; }
 
-    public decimal UnitPrice { get; init; }
+    public string Sku { get; init; } = string.Empty;
 
-    public decimal Discount { get; init; }
+    public string ProductName { get; init; } = string.Empty;
+
+    public long UnitPrice { get; init; }
+
+    public long Discount { get; init; }
 
     public int Units { get; init; }
 
-    public string PictureUrl { get; init; }
+    public string? PictureUrl { get; init; }
 }

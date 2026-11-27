@@ -1,38 +1,44 @@
-﻿namespace eShop.Ordering.API.Application.Queries;
+﻿#nullable enable
+
+namespace eShop.Ordering.API.Application.Queries;
 
 public record Orderitem
 {
-    public string ProductName { get; init; }
+    public Guid ProductId { get; init; }
+    public Guid VariantId { get; init; }
+    public string Sku { get; init; } = string.Empty;
+    public string ProductName { get; init; } = string.Empty;
     public int Units { get; init; }
-    public double UnitPrice { get; init; }
-    public string PictureUrl { get; init; }
+    public long UnitPrice { get; init; }
+    public long Discount { get; init; }
+    public string? PictureUrl { get; init; }
 }
 
 public record Order
 {
     public int OrderNumber { get; init; }
     public DateTime Date { get; init; }
-    public string Status { get; init; }
-    public string Description { get; init; }
-    public string Street { get; init; }
-    public string City { get; init; }
-    public string State { get; init; }
-    public string Zipcode { get; init; }
-    public string Country { get; init; }
-    public List<Orderitem> OrderItems { get; set; }
-    public decimal Total { get; set; }
+    public string Status { get; init; } = string.Empty;
+    public string PaymentMethod { get; init; } = string.Empty;
+    public string PaymentStatus { get; init; } = string.Empty;
+    public string? Description { get; init; }
+    public string ReceiverName { get; init; } = string.Empty;
+    public string ReceiverPhone { get; init; } = string.Empty;
+    public string Province { get; init; } = string.Empty;
+    public string District { get; init; } = string.Empty;
+    public string Ward { get; init; } = string.Empty;
+    public string StreetAddress { get; init; } = string.Empty;
+    public string? PostalCode { get; init; }
+    public List<Orderitem> OrderItems { get; set; } = [];
+    public long Total { get; set; }
 }
 
 public record OrderSummary
 {
     public int OrderNumber { get; init; }
     public DateTime Date { get; init; }
-    public string Status { get; init; }
-    public double Total { get; init; }
-}
-
-public record CardType
-{
-    public int Id { get; init; }
-    public string Name { get; init; }
+    public string Status { get; init; } = string.Empty;
+    public string PaymentMethod { get; init; } = string.Empty;
+    public string PaymentStatus { get; init; } = string.Empty;
+    public long Total { get; init; }
 }

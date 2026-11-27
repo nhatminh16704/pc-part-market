@@ -1,22 +1,19 @@
 ﻿namespace eShop.Ordering.API.Application.DomainEventHandlers;
 
 public class OrderStatusChangedToAwaitingValidationDomainEventHandler
-                : INotificationHandler<OrderStatusChangedToAwaitingValidationDomainEvent>
+    : INotificationHandler<OrderStatusChangedToAwaitingValidationDomainEvent>
 {
     private readonly IOrderRepository _orderRepository;
     private readonly ILogger _logger;
-    private readonly IBuyerRepository _buyerRepository;
     private readonly IOrderingIntegrationEventService _orderingIntegrationEventService;
 
     public OrderStatusChangedToAwaitingValidationDomainEventHandler(
         IOrderRepository orderRepository,
         ILogger<OrderStatusChangedToAwaitingValidationDomainEventHandler> logger,
-        IBuyerRepository buyerRepository,
         IOrderingIntegrationEventService orderingIntegrationEventService)
     {
         _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _buyerRepository = buyerRepository;
         _orderingIntegrationEventService = orderingIntegrationEventService;
     }
 
@@ -25,12 +22,18 @@ public class OrderStatusChangedToAwaitingValidationDomainEventHandler
         OrderingApiTrace.LogOrderStatusUpdated(_logger, domainEvent.OrderId, OrderStatus.AwaitingValidation);
 
         var order = await _orderRepository.GetAsync(domainEvent.OrderId);
-        var buyer = await _buyerRepository.FindByIdAsync(order.BuyerId.Value);
+        if (order is null) return;
 
         var orderStockList = domainEvent.OrderItems
-            .Select(orderItem => new OrderStockItem(orderItem.ProductId, orderItem.Units));
+            .Select(orderItem => new OrderStockItem(orderItem.ProductId, orderItem.VariantId, orderItem.Units));
 
-        var integrationEvent = new OrderStatusChangedToAwaitingValidationIntegrationEvent(order.Id, order.OrderStatus, buyer.Name, buyer.IdentityGuid, orderStockList);
+        var integrationEvent = new OrderStatusChangedToAwaitingValidationIntegrationEvent(
+            order.Id,
+            order.OrderStatus,
+            order.Address.ReceiverName,
+            order.CustomerId.ToString(),
+            orderStockList);
+
         await _orderingIntegrationEventService.AddAndSaveEventAsync(integrationEvent);
     }
 }

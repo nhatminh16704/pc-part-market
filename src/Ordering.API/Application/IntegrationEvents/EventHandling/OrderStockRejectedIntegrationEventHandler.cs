@@ -14,7 +14,7 @@ public class OrderStockRejectedIntegrationEventHandler(
 
         var orderStockRejectedItems = @event.OrderStockItems
             .FindAll(c => !c.HasStock)
-            .Select(c => c.ProductId)
+            .Select(c => c.VariantId)
             .ToList();
 
         var command = new SetStockRejectedOrderStatusCommand(@event.OrderId, orderStockRejectedItems);

@@ -6,9 +6,10 @@ public class OrderQueries(OrderingContext context)
     public async Task<Order> GetOrderAsync(int id)
     {
         var order = await context.Orders
+            .AsNoTracking()
             .Include(o => o.OrderItems)
             .FirstOrDefaultAsync(o => o.Id == id);
-      
+
         if (order is null)
             throw new KeyNotFoundException();
 
@@ -17,37 +18,46 @@ public class OrderQueries(OrderingContext context)
             OrderNumber = order.Id,
             Date = order.OrderDate,
             Description = order.Description,
-            City = order.Address.City,
-            Country = order.Address.Country,
-            State = order.Address.State,
-            Street = order.Address.Street,
-            Zipcode = order.Address.ZipCode,
             Status = order.OrderStatus.ToString(),
+            PaymentMethod = order.PaymentMethod.ToString(),
+            PaymentStatus = order.PaymentStatus.ToString(),
+            ReceiverName = order.Address.ReceiverName,
+            ReceiverPhone = order.Address.ReceiverPhone,
+            Province = order.Address.Province,
+            District = order.Address.District,
+            Ward = order.Address.Ward,
+            StreetAddress = order.Address.StreetAddress,
+            PostalCode = order.Address.PostalCode,
             Total = order.GetTotal(),
             OrderItems = order.OrderItems.Select(oi => new Orderitem
             {
+                ProductId = oi.ProductId,
+                VariantId = oi.VariantId,
+                Sku = oi.Sku,
                 ProductName = oi.ProductName,
                 Units = oi.Units,
-                UnitPrice = (double)oi.UnitPrice,
+                UnitPrice = oi.UnitPrice,
+                Discount = oi.Discount,
                 PictureUrl = oi.PictureUrl
             }).ToList()
         };
     }
 
-    public async Task<IEnumerable<OrderSummary>> GetOrdersFromUserAsync(string userId)
+    public async Task<IEnumerable<OrderSummary>> GetOrdersFromUserAsync(Guid customerId)
     {
         return await context.Orders
-            .Where(o => o.Buyer.IdentityGuid == userId)  
+            .AsNoTracking()
+            .Where(o => o.CustomerId == customerId)
+            .OrderByDescending(o => o.OrderDate)
             .Select(o => new OrderSummary
             {
                 OrderNumber = o.Id,
                 Date = o.OrderDate,
                 Status = o.OrderStatus.ToString(),
-                Total =(double) o.OrderItems.Sum(oi => oi.UnitPrice* oi.Units)
+                PaymentMethod = o.PaymentMethod.ToString(),
+                PaymentStatus = o.PaymentStatus.ToString(),
+                Total = o.OrderItems.Sum(oi => (oi.UnitPrice * oi.Units) - oi.Discount)
             })
             .ToListAsync();
-    } 
-    
-    public async Task<IEnumerable<CardType>> GetCardTypesAsync() => 
-        await context.CardTypes.Select(c=> new CardType { Id = c.Id, Name = c.Name }).ToListAsync();
+    }
 }
