@@ -8,17 +8,12 @@ public class SetStockRejectedOrderStatusCommandTest
     [TestMethod]
     public void Set_Stock_Rejected_OrderStatusCommand_Check_Serialization()
     {
-        // Arrange
-        var command = new SetStockRejectedOrderStatusCommand(123, new List<int> { 1, 2, 3 });
+        var command = new SetStockRejectedOrderStatusCommand(123, [Guid.NewGuid(), Guid.NewGuid()]);
 
-        // Act
         var json = JsonSerializer.Serialize(command);
         var deserializedCommand = JsonSerializer.Deserialize<SetStockRejectedOrderStatusCommand>(json);
 
-        //Assert
         Assert.AreEqual(command.OrderNumber, deserializedCommand.OrderNumber);
-
-        //Assert for List<int>
         Assert.IsNotNull(deserializedCommand.OrderStockItems);
         Assert.HasCount(command.OrderStockItems.Count, deserializedCommand.OrderStockItems);
 
@@ -28,4 +23,3 @@ public class SetStockRejectedOrderStatusCommandTest
         }
     }
 }
-

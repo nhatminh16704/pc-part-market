@@ -6,7 +6,7 @@ public class AddressBuilder
 {
     public Address Build()
     {
-        return new Address("street", "city", "state", "country", "zipcode");
+        return new Address("Minh", "0912345678", "Ha Noi", "Cau Giay", "Dich Vong", "123 Xuan Thuy");
     }
 }
 
@@ -16,26 +16,20 @@ public class OrderBuilder
 
     public OrderBuilder(Address address)
     {
-        order = new Order(
-            "userId",
-            "fakeName",
-            address,
-            cardTypeId: 5,
-            cardNumber: "12",
-            cardSecurityNumber: "123",
-            cardHolderName: "name",
-            cardExpiration: DateTime.UtcNow);
+        order = new Order(Guid.NewGuid(), address, PaymentMethod.COD);
     }
 
     public OrderBuilder AddOne(
-        int productId,
+        Guid productId,
+        Guid variantId,
+        string sku,
         string productName,
-        decimal unitPrice,
-        decimal discount,
+        long unitPrice,
+        long discount,
         string pictureUrl,
         int units = 1)
     {
-        order.AddOrderItem(productId, productName, unitPrice, discount, pictureUrl, units);
+        order.AddOrderItem(productId, variantId, sku, productName, unitPrice, discount, pictureUrl, units);
         return this;
     }
 

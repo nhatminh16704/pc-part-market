@@ -138,16 +138,26 @@ public sealed class OrderingApiTests : IClassFixture<OrderingApiFixture>
         // Act
         var item = new BasketItem
         {
-            Id = "1",
-            ProductId = 12,
+            ProductId = Guid.NewGuid(),
+            VariantId = Guid.NewGuid(),
+            Sku = "SKU-1",
             ProductName = "Test",
             UnitPrice = 10,
             OldUnitPrice = 9,
             Quantity = 1,
             PictureUrl = null
         };
-        var cardExpirationDate = Convert.ToDateTime("2023-12-22T12:34:24.334Z");
-        var OrderRequest = new CreateOrderRequest("1", "TestUser", null, null, null, null, null, "XXXXXXXXXXXX0005", "Test User", cardExpirationDate, "test buyer", 1, null, new List<BasketItem> { item });
+        var OrderRequest = new CreateOrderRequest(
+            "Test User",
+            "0912345678",
+            "Ha Noi",
+            "Cau Giay",
+            "Dich Vong",
+            "123 Xuan Thuy",
+            null,
+            eShop.Ordering.Domain.AggregatesModel.OrderAggregate.PaymentMethod.COD,
+            null,
+            new List<BasketItem> { item });
         var content = new StringContent(JsonSerializer.Serialize(OrderRequest), UTF8Encoding.UTF8, "application/json")
         {
             Headers = { { "x-requestid", Guid.NewGuid().ToString() } }
@@ -165,8 +175,9 @@ public sealed class OrderingApiTests : IClassFixture<OrderingApiFixture>
         // Act
         var item = new BasketItem
         {
-            Id = "1",
-            ProductId = 12,
+            ProductId = Guid.NewGuid(),
+            VariantId = Guid.NewGuid(),
+            Sku = "SKU-1",
             ProductName = "Test",
             UnitPrice = 10,
             OldUnitPrice = 9,
@@ -212,11 +223,12 @@ public sealed class OrderingApiTests : IClassFixture<OrderingApiFixture>
             {
                 new BasketItem()
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    ProductId = 1,
+                    ProductId = Guid.NewGuid(),
+                    VariantId = Guid.NewGuid(),
+                    Sku = "SKU-1",
                     ProductName = "Test Product 1",
-                    UnitPrice = 10.2m,
-                    OldUnitPrice = 9.8m,
+                    UnitPrice = 10,
+                    OldUnitPrice = 9,
                     Quantity = 2,
                     PictureUrl = Guid.NewGuid().ToString(),
                 }
