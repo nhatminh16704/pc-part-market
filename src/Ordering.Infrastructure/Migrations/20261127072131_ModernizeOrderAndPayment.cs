@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -193,14 +193,18 @@ namespace Ordering.Infrastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "text");
 
-            migrationBuilder.AlterColumn<Guid>(
+            migrationBuilder.DropColumn(
+                name: "ProductId",
+                schema: "ordering",
+                table: "orderItems");
+
+            migrationBuilder.AddColumn<Guid>(
                 name: "ProductId",
                 schema: "ordering",
                 table: "orderItems",
                 type: "uuid",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer");
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
 
             migrationBuilder.AlterColumn<long>(
                 name: "Discount",
@@ -381,14 +385,18 @@ namespace Ordering.Infrastructure.Migrations
                 oldType: "character varying(255)",
                 oldMaxLength: 255);
 
-            migrationBuilder.AlterColumn<int>(
+            migrationBuilder.DropColumn(
+                name: "ProductId",
+                schema: "ordering",
+                table: "orderItems");
+
+            migrationBuilder.AddColumn<int>(
                 name: "ProductId",
                 schema: "ordering",
                 table: "orderItems",
                 type: "integer",
                 nullable: false,
-                oldClrType: typeof(Guid),
-                oldType: "uuid");
+                defaultValue: 0);
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "Discount",
