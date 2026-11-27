@@ -11,6 +11,14 @@ class OrderEntityTypeConfiguration : IEntityTypeConfiguration<Order>
         orderConfiguration.Property(o => o.Id)
             .UseHiLo("orderseq");
 
+        orderConfiguration.Property(o => o.OrderNumber)
+            .HasMaxLength(32)
+            .IsRequired();
+
+        orderConfiguration.HasIndex(o => o.OrderNumber)
+            .IsUnique()
+            .HasDatabaseName("ix_orders_order_number");
+
         orderConfiguration.Property(o => o.CustomerId)
             .IsRequired();
 

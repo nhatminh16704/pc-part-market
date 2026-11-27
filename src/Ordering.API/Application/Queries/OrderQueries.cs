@@ -14,9 +14,48 @@ public class OrderQueries(OrderingContext context)
         if (order is null)
             throw new KeyNotFoundException();
 
+        return MapToOrderViewModel(order);
+    }
+
+    public async Task<Order> GetOrderByNumberAsync(string orderNumber)
+    {
+        var order = await context.Orders
+            .AsNoTracking()
+            .Include(o => o.OrderItems)
+            .Include(o => o.StatusHistories)
+            .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber);
+
+        if (order is null)
+            throw new KeyNotFoundException();
+
+        return MapToOrderViewModel(order);
+    }
+
+    public async Task<IEnumerable<OrderSummary>> GetOrdersFromUserAsync(Guid customerId)
+    {
+        return await context.Orders
+            .AsNoTracking()
+            .Where(o => o.CustomerId == customerId)
+            .OrderByDescending(o => o.OrderDate)
+            .Select(o => new OrderSummary
+            {
+                OrderId = o.Id,
+                OrderNumber = o.OrderNumber,
+                Date = o.OrderDate,
+                Status = o.OrderStatus.ToString(),
+                PaymentMethod = o.PaymentMethod.ToString(),
+                PaymentStatus = o.PaymentStatus.ToString(),
+                Total = o.OrderItems.Sum(oi => (oi.UnitPrice * oi.Units) - oi.Discount)
+            })
+            .ToListAsync();
+    }
+
+    private static Order MapToOrderViewModel(Domain.AggregatesModel.OrderAggregate.Order order)
+    {
         return new Order
         {
-            OrderNumber = order.Id,
+            OrderId = order.Id,
+            OrderNumber = order.OrderNumber,
             Date = order.OrderDate,
             Description = order.Description,
             Status = order.OrderStatus.ToString(),
@@ -51,23 +90,5 @@ public class OrderQueries(OrderingContext context)
                     h.CreatedAt))
                 .ToList()
         };
-    }
-
-    public async Task<IEnumerable<OrderSummary>> GetOrdersFromUserAsync(Guid customerId)
-    {
-        return await context.Orders
-            .AsNoTracking()
-            .Where(o => o.CustomerId == customerId)
-            .OrderByDescending(o => o.OrderDate)
-            .Select(o => new OrderSummary
-            {
-                OrderNumber = o.Id,
-                Date = o.OrderDate,
-                Status = o.OrderStatus.ToString(),
-                PaymentMethod = o.PaymentMethod.ToString(),
-                PaymentStatus = o.PaymentStatus.ToString(),
-                Total = o.OrderItems.Sum(oi => (oi.UnitPrice * oi.Units) - oi.Discount)
-            })
-            .ToListAsync();
     }
 }

@@ -30,3 +30,4 @@ class OrderStatusHistoryEntityTypeConfiguration : IEntityTypeConfiguration<Order
             .IsRequired();
     }
 }
+

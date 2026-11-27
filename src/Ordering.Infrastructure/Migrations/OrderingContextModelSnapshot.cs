@@ -80,6 +80,11 @@ namespace Ordering.Infrastructure.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
                     b.Property<string>("OrderStatus")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -99,6 +104,10 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("CustomerId")
                         .HasDatabaseName("ix_orders_customer_id");
+
+                    b.HasIndex("OrderNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ix_orders_order_number");
 
                     b.ToTable("orders", "ordering");
                 });

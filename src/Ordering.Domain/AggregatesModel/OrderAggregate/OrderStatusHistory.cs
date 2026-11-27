@@ -29,3 +29,4 @@ public class OrderStatusHistory : Entity
         CreatedAt = DateTime.UtcNow;
     }
 }
+

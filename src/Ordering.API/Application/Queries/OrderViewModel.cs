@@ -24,7 +24,8 @@ public record OrderStatusHistoryDto(
 
 public record Order
 {
-    public int OrderNumber { get; init; }
+    public int OrderId { get; init; }
+    public string OrderNumber { get; init; } = string.Empty;
     public DateTime Date { get; init; }
     public string Status { get; init; } = string.Empty;
     public string PaymentMethod { get; init; } = string.Empty;
@@ -44,7 +45,8 @@ public record Order
 
 public record OrderSummary
 {
-    public int OrderNumber { get; init; }
+    public int OrderId { get; init; }
+    public string OrderNumber { get; init; } = string.Empty;
     public DateTime Date { get; init; }
     public string Status { get; init; } = string.Empty;
     public string PaymentMethod { get; init; } = string.Empty;

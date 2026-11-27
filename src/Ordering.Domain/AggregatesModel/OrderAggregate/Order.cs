@@ -1,11 +1,16 @@
 #nullable enable
 
 using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
 
 namespace eShop.Ordering.Domain.AggregatesModel.OrderAggregate;
 
 public class Order : Entity, IAggregateRoot
 {
+    private const string OrderNumberAlphabet = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+
+    public string OrderNumber { get; private set; } = string.Empty;
+
     public DateTime OrderDate { get; private set; }
 
     [Required]
@@ -56,6 +61,7 @@ public class Order : Entity, IAggregateRoot
         PaymentStatus = PaymentStatus.Unpaid;
         OrderStatus = OrderStatus.Submitted;
         OrderDate = DateTime.UtcNow;
+        OrderNumber = GenerateOrderNumber(OrderDate);
         Description = description;
 
         RecordStatusChange(null, OrderStatus.Submitted, "Order submitted.", customerId.ToString());
@@ -211,6 +217,12 @@ public class Order : Entity, IAggregateRoot
     private void StatusChangeException(OrderStatus orderStatusToChange)
     {
         throw new OrderingDomainException($"Is not possible to change the order status from {OrderStatus} to {orderStatusToChange}.");
+    }
+
+    private static string GenerateOrderNumber(DateTime utcNow)
+    {
+        var suffix = RandomNumberGenerator.GetString(OrderNumberAlphabet, 6);
+        return $"ORD-{utcNow:yyMMdd}-{suffix}";
     }
 
     public long GetTotal() => _orderItems.Sum(o => (o.Units * o.UnitPrice) - o.Discount);
