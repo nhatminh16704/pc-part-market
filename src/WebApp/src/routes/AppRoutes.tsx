@@ -4,6 +4,7 @@ import { Home } from '@/pages/Home';
 import { ProductDetail } from '@/pages/ProductDetail';
 import { Login } from '@/pages/Login';
 import { Account } from '@/pages/Account';
+import { Checkout } from '@/pages/Checkout';
 import { NotFound } from '@/pages/NotFound';
 import { ErrorPage } from '@/pages/ErrorPage';
 
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
       {
         path: '/account',
         element: <Account />,
+      },
+      {
+        path: '/checkout/:sessionId',
+        element: <Checkout />,
       },
       {
         path: '/products/:id',
