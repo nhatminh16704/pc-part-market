@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Trash2, ShoppingBag, ArrowRight, AlertTriangle, TrendingDown } from 'lucide-react';
 import { formatVND } from '@/utils/format';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/features/auth/stores/authStore';
+import { useCreateCheckoutSession } from '@/features/checkout/hooks/useCheckout';
 import { useCart } from '../hooks/useCart';
 
 export const CartDrawer: React.FC = () => {
+  const navigate = useNavigate();
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const createCheckoutSession = useCreateCheckoutSession();
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
   const {
     isOpen,
     closeCart,
@@ -19,6 +27,34 @@ export const CartDrawer: React.FC = () => {
   } = useCart();
 
   if (!isOpen) return null;
+
+  const handleProceedToCheckout = async () => {
+    setCheckoutError(null);
+
+    if (!accessToken) {
+      closeCart();
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const session = await createCheckoutSession.mutateAsync({
+        source: 'BASKET',
+        items: items.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+        })),
+      });
+      closeCart();
+      navigate(`/checkout/${session.id}`);
+    } catch (err: any) {
+      const message =
+        err?.response?.data ||
+        err?.message ||
+        'Không thể tạo phiên thanh toán. Vui lòng thử lại.';
+      setCheckoutError(typeof message === 'string' ? message : 'Không thể tạo phiên thanh toán.');
+    }
+  };
 
   return (
     <div
@@ -190,12 +226,18 @@ export const CartDrawer: React.FC = () => {
             </span>
           </div>
 
+          {checkoutError && (
+            <div className="mb-3 p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+              {checkoutError}
+            </div>
+          )}
+
           <div className="flex gap-2.5">
             {items.length > 0 && (
               <Button
                 variant="outline"
                 size="sm"
-                disabled={isLoading}
+                disabled={isLoading || createCheckoutSession.isPending}
                 onClick={() => clearCart()}
                 className="text-rose-600 hover:bg-rose-50 border-rose-200 text-xs disabled:opacity-50"
               >
@@ -206,15 +248,13 @@ export const CartDrawer: React.FC = () => {
             <Button
               variant="default"
               size="lg"
-              disabled={items.length === 0 || isLoading}
+              disabled={items.length === 0 || isLoading || createCheckoutSession.isPending}
               className="flex-1 bg-[#ff5636] hover:bg-[#e63e1c] text-white font-bold shadow-md shadow-orange-500/20 disabled:opacity-50"
-              onClick={() => {
-                alert(`Đặt hàng thành công với tổng số tiền: ${formatVND(totalAmount)}!`);
-                clearCart();
-                closeCart();
-              }}
+              onClick={handleProceedToCheckout}
             >
-              <span>Tiến Hành Đặt Hàng</span>
+              <span>
+                {createCheckoutSession.isPending ? 'Đang khởi tạo...' : 'Tiến Hành Đặt Hàng'}
+              </span>
               <ArrowRight className="w-4 h-4 ml-1.5" />
             </Button>
           </div>

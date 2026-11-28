@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useProduct, useProductBySeo } from '@/features/catalog/hooks/useCatalog';
 import { formatVND } from '@/utils/format';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { parseSpecifications } from '@/utils/specs';
 import { useCart } from '@/features/cart/hooks/useCart';
-import { ArrowLeft, ShoppingCart, ShieldCheck, Truck, Wrench } from 'lucide-react';
+import { useAuthStore } from '@/features/auth/stores/authStore';
+import { useCreateCheckoutSession } from '@/features/checkout/hooks/useCheckout';
+import { ArrowLeft, ShoppingCart, ShieldCheck, Truck, Wrench, Zap } from 'lucide-react';
 import type { ProductVariant } from '@/features/catalog/types';
 
 export const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const createCheckoutSession = useCreateCheckoutSession();
+  const [buyNowError, setBuyNowError] = useState<string | null>(null);
   const isGuid = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
   const { data: productById, isLoading: loadingId } = useProduct(isGuid ? id : undefined);
@@ -175,16 +181,55 @@ export const ProductDetail: React.FC = () => {
             </div>
           )}
 
-          {/* Add to Cart CTA */}
-          <Button
-            variant="default"
-            size="lg"
-            className="w-full mt-2 bg-[#ff5636] hover:bg-[#e63e1c] text-white font-bold shadow-md shadow-orange-500/20"
-            onClick={() => addItem(product, currentVariant)}
-          >
-            <ShoppingCart className="w-5 h-5 mr-2" />
-            <span>Thêm vào giỏ hàng</span>
-          </Button>
+          {buyNowError && (
+            <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+              {buyNowError}
+            </div>
+          )}
+
+          {/* Add to Cart & Buy Now CTA */}
+          <div className="flex flex-col sm:flex-row gap-3 mt-2">
+            <Button
+              variant="outline"
+              size="lg"
+              className="flex-1 border-[#ff5636] text-[#ff5636] hover:bg-orange-50 font-bold"
+              onClick={() => addItem(product, currentVariant)}
+            >
+              <ShoppingCart className="w-5 h-5 mr-2" />
+              <span>Thêm vào giỏ hàng</span>
+            </Button>
+
+            <Button
+              variant="default"
+              size="lg"
+              disabled={!currentVariant || currentVariant.quantity < 1 || createCheckoutSession.isPending}
+              className="flex-1 bg-[#ff5636] hover:bg-[#e63e1c] text-white font-bold shadow-md shadow-orange-500/20 disabled:opacity-50"
+              onClick={async () => {
+                if (!currentVariant) return;
+                setBuyNowError(null);
+                if (!accessToken) {
+                  navigate('/login');
+                  return;
+                }
+                try {
+                  const session = await createCheckoutSession.mutateAsync({
+                    source: 'BUY_NOW',
+                    items: [{ variantId: currentVariant.id, quantity: 1 }],
+                  });
+                  navigate(`/checkout/${session.id}`);
+                } catch (err: any) {
+                  const message =
+                    err?.response?.data ||
+                    err?.message ||
+                    'Không thể tạo phiên mua ngay.';
+                  setBuyNowError(typeof message === 'string' ? message : 'Không thể tạo phiên mua ngay.');
+                }
+              }}
+            >
+              <Zap className="w-5 h-5 mr-2" />
+              <span>{createCheckoutSession.isPending ? 'Đang xử lý...' : 'Mua ngay'}</span>
+            </Button>
+          </div>
 
           {/* Trust badges */}
           <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100 text-center text-xs text-slate-600">
