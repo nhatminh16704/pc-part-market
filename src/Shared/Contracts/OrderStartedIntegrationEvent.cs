@@ -1,3 +1,5 @@
 namespace eShop.Contracts;
 
-public record OrderStartedIntegrationEvent(string UserId) : IntegrationEvent;
+public record OrderStartedIntegrationEvent(
+    string UserId,
+    IReadOnlyCollection<Guid>? VariantIds = null) : IntegrationEvent;

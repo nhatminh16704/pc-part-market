@@ -50,6 +50,16 @@ internal static class Extensions
         // Register the command validators for the validator behavior (validators based on FluentValidation library)
         services.AddValidatorsFromAssemblyContaining<CancelOrderCommandValidator>();
 
+        builder.AddRedisClient("redis");
+
+        services.AddSingleton<ICheckoutSessionRepository, RedisCheckoutSessionRepository>();
+
+        services.AddGrpcClient<eShop.Catalog.API.Grpc.Catalog.CatalogClient>(client =>
+        {
+            client.Address = new("http://_grpc.catalog-api");
+        });
+        services.AddScoped<ICatalogApiClient, CatalogGrpcClient>();
+
         services.AddScoped<IOrderQueries, OrderQueries>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IRequestManager, RequestManager>();

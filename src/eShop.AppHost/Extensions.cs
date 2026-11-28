@@ -210,6 +210,7 @@ internal static class Extensions
             // Ordering API routes
             yarp.AddRoute("/api/v1/orders/{*any}", orderingCluster);
             yarp.AddRoute("/api/orders/{*any}", orderingCluster);
+            yarp.AddRoute("/api/v1/checkout-sessions/{*any}", orderingCluster);
 
             // Identity API routes
             yarp.AddRoute("/identity/{*any}", identityCluster)

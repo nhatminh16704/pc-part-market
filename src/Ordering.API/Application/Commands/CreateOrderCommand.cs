@@ -42,6 +42,12 @@ public class CreateOrderCommand : IRequest<bool>
     public string? Description { get; private set; }
 
     [DataMember]
+    public bool ClearBasket { get; private set; } = true;
+
+    [DataMember]
+    public IReadOnlyCollection<Guid>? OrderedVariantIds { get; private set; }
+
+    [DataMember]
     public IEnumerable<OrderItemDTO> OrderItems => _orderItems;
 
     public CreateOrderCommand()
@@ -60,7 +66,9 @@ public class CreateOrderCommand : IRequest<bool>
         string streetAddress,
         string? postalCode,
         PaymentMethod paymentMethod,
-        string? description = null)
+        string? description = null,
+        bool clearBasket = true,
+        IReadOnlyCollection<Guid>? orderedVariantIds = null)
     {
         _orderItems = basketItems.ToOrderItemsDTO().ToList();
         CustomerId = customerId;
@@ -73,5 +81,7 @@ public class CreateOrderCommand : IRequest<bool>
         PostalCode = postalCode;
         PaymentMethod = paymentMethod;
         Description = description;
+        ClearBasket = clearBasket;
+        OrderedVariantIds = orderedVariantIds;
     }
 }

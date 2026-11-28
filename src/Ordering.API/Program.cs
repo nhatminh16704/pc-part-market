@@ -21,5 +21,10 @@ var orders = app.NewVersionedApi("Orders");
 orders.MapOrdersApiV1()
       .RequireAuthorization();
 
+var checkoutSessions = app.NewVersionedApi("CheckoutSessions");
+
+checkoutSessions.MapCheckoutSessionsApiV1()
+                .RequireAuthorization();
+
 app.UseDefaultOpenApi();
 app.Run();

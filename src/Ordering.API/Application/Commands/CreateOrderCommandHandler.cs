@@ -20,8 +20,13 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, boo
 
     public async Task<bool> Handle(CreateOrderCommand message, CancellationToken cancellationToken)
     {
-        var orderStartedIntegrationEvent = new OrderStartedIntegrationEvent(message.CustomerId.ToString());
-        await _orderingIntegrationEventService.AddAndSaveEventAsync(orderStartedIntegrationEvent);
+        if (message.ClearBasket)
+        {
+            var orderStartedIntegrationEvent = new OrderStartedIntegrationEvent(
+                message.CustomerId.ToString(),
+                message.OrderedVariantIds);
+            await _orderingIntegrationEventService.AddAndSaveEventAsync(orderStartedIntegrationEvent);
+        }
 
         var address = new Address(
             message.ReceiverName,

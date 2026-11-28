@@ -56,8 +56,10 @@ var basketApi = builder.AddProject<Projects.Basket_API>("basket-api")
     .WithEnvironment("Identity__Url", identityEndpoint);
 
 var orderingApi = builder.AddProject<Projects.Ordering_API>("ordering-api")
+    .WithReference(redis)
     .WithReference(rabbitMq).WaitFor(rabbitMq)
     .WithReference(orderDb).WaitFor(orderDb)
+    .WithReference(catalogApi)
     .WithHttpHealthCheck("/health")
     .WithEnvironment("Identity__Url", identityEndpoint);
 
