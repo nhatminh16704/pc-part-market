@@ -27,6 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared\Common\eShop.Shared.Common.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Common\eShop.BuildingBlocks.Common.csproj" />
   </ItemGroup>
 </Project>

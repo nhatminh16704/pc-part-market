@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 
-namespace eShop.Shared.Common;
+namespace eShop.BuildingBlocks.Common;
 
 public class ApiResponse<T>
 {

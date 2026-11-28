@@ -2,13 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <RootNamespace>eShop.Shared.Common</RootNamespace>
+    <RootNamespace>eShop.BuildingBlocks.Migration</RootNamespace>
     <Nullable>enable</Nullable>
     <IsPublishable>false</IsPublishable>
   </PropertyGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
   </ItemGroup>
 
 </Project>

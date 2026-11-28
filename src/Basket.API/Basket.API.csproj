@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\eShop.ServiceDefaults\eShop.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\Shared\Messaging\eShop.Shared.Messaging.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Messaging\eShop.BuildingBlocks.Messaging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

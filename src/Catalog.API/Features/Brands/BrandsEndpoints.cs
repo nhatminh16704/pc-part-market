@@ -1,6 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
-using eShop.Shared.Common;
+using eShop.BuildingBlocks.Common;
 using eShop.Catalog.API.Common.Validation;
 using Microsoft.Extensions.Caching.Hybrid;
 using eShop.Catalog.API.Common;

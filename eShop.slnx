@@ -16,11 +16,11 @@
     <Project Path="src/WebhookClient/WebhookClient.csproj" />
     <Project Path="src/Webhooks.API/Webhooks.API.csproj" />
   </Folder>
-  <Folder Name="/src/Shared/">
-    <Project Path="src/Shared/Common/eShop.Shared.Common.csproj" />
-    <Project Path="src/Shared/Contracts/Contracts.csproj" />
-    <Project Path="src/Shared/Messaging/eShop.Shared.Messaging.csproj" />
-    <Project Path="src/Shared/Migration/eShop.Shared.Migration.csproj" />
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/Common/eShop.BuildingBlocks.Common.csproj" />
+    <Project Path="src/BuildingBlocks/Contracts/Contracts.csproj" />
+    <Project Path="src/BuildingBlocks/Messaging/eShop.BuildingBlocks.Messaging.csproj" />
+    <Project Path="src/BuildingBlocks/Migration/eShop.BuildingBlocks.Migration.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Basket.UnitTests/Basket.UnitTests.csproj" />

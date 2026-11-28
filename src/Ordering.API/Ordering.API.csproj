@@ -15,8 +15,8 @@
     <ProjectReference Include="..\eShop.ServiceDefaults\eShop.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
     <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
-    <ProjectReference Include="..\Shared\Migration\eShop.Shared.Migration.csproj" />
-    <ProjectReference Include="..\Shared\Messaging\eShop.Shared.Messaging.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Migration\eShop.BuildingBlocks.Migration.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Messaging\eShop.BuildingBlocks.Messaging.csproj" />
   </ItemGroup>
 
   <ItemGroup>
