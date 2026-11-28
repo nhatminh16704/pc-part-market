@@ -6,7 +6,7 @@
     <MicrosoftExtensionsVersion>10.4.0</MicrosoftExtensionsVersion>
     <AspireVersion>13.2.0</AspireVersion>
     <AspireUnstablePackagesVersion>13.2.0-preview.1.26170.3</AspireUnstablePackagesVersion>
-    <GrpcVersion>2.76.0</GrpcVersion>
+    <GrpcVersion>2.85.0</GrpcVersion>
     <ApiVersioningVersion>10.0.0-preview.2</ApiVersioningVersion>
     <MassTransitVersion>8.3.6</MassTransitVersion>
   </PropertyGroup>
@@ -80,12 +80,12 @@
     <PackageVersion Include="Grpc.AspNetCore.Web" Version="$(GrpcVersion)" />
     <PackageVersion Include="Grpc.Net.ClientFactory" Version="$(GrpcVersion)" />
     <PackageVersion Include="Grpc.Net.Client.Web" Version="$(GrpcVersion)" />
-    <PackageVersion Include="Grpc.Tools" Version="2.78.0" PrivateAssets="All" />
+    <PackageVersion Include="Grpc.Tools" Version="2.85.0" PrivateAssets="All" />
     <!-- Miscellaneous -->
     <PackageVersion Include="Dapper" Version="2.1.35" />
     <PackageVersion Include="FluentValidation" Version="12.0.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
-    <PackageVersion Include="Google.Protobuf" Version="3.33.5" />
+    <PackageVersion Include="Google.Protobuf" Version="3.36.2" />
     <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="3.0.71" />
     <PackageVersion Include="System.Reflection.TypeExtensions" Version="4.7.0" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.1" />
